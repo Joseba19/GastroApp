@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+</head>
+<body>
+
+<h1>Panel Admin</h1>
+
+<button onclick="logout()">Cerrar sesión</button>
+
+<h2>Añadir receta</h2>
+
+<input id="nombre" placeholder="Nombre receta">
+<input id="tiempo" placeholder="Tiempo">
+<button onclick="addReceta()">Guardar</button>
+
+<h2>Recetas</h2>
+<ul id="lista">
+    {% for r in recetas %}
+        <li>{{ r.nombre }} - {{ r.tiempo }}</li>
+    {% endfor %}
+</ul>
+
+<script>
+function logout() {
+    window.location.href = "/logout";
+}
+
+function addReceta() {
+    const nombre = document.getElementById('nombre').value;
+    const tiempo = document.getElementById('tiempo').value;
+
+    fetch('/add-receta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, tiempo })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+    window.location.href = "/admin";
+}
+    });
+}
+</script>
+
+</body>
+</html>
