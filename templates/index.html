@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>Gestión Recetas</title>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo"><img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt=""></div>
+        <nav>
+            <a href="#" class="active">📊 Dashboard</a>
+            <a href="#">📋 Recetas</a>
+            <a href="#">🧂 Ingredientes</a>
+            <a href="#">🍽️ Menús</a>
+            <a href="#">👤 Empleados</a>
+            <a href="#">🗂️ Categorías</a>
+            <a href="#">⚠️ Alérgenos</a>
+            <a href="#">🥗 Información nutricional</a>
+            <a href="#">📄 Contratos</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#">↩️ Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- RECETAS TABLE -->
+        <div class="card">
+            <div class="section-header">
+                <div>
+                    <h2>Recetas</h2>
+                    <p>Gestiona todas las recetas</p>
+                </div>
+                <button class="btn-primary">+ Nueva receta</button>
+            </div>
+            <div class="filters">
+                <input type="text" placeholder="Buscar receta...">
+                <select>
+                    <option>Todas las categorías</option>
+                    {% for categoria in categorias %}
+                        <option value="{{ categoria }}">{{ categoria }}</option>
+                    {% endfor %}
+                </select>
+                <select>
+                    <option>Todas las dificultades</option>
+                </select>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Dificultad</th>
+                        <th>Tiempo total</th>
+                        <th>Activo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ensalada César</td>
+                        <td>Ensaladas</td>
+                        <td><span class="badge badge-facil">Fácil</span></td>
+                        <td>15 min</td>
+                        <td><span class="icon-check">✔</span></td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn-sm btn-view">👁</button>
+                                <button class="btn-sm btn-edit">✏️</button>
+                                <button class="btn-sm btn-del">🗑</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Salmón al horno</td>
+                        <td>Pescados</td>
+                        <td><span class="badge badge-media">Media</span></td>
+                        <td>30 min</td>
+                        <td><span class="icon-check">✔</span></td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn-sm btn-view">👁</button>
+                                <button class="btn-sm btn-edit">✏️</button>
+                                <button class="btn-sm btn-del">🗑</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Lasaña boloñesa</td>
+                        <td>Pastas</td>
+                        <td><span class="badge badge-dificil">Difícil</span></td>
+                        <td>1 h 20 min</td>
+                        <td><span class="icon-check">✔</span></td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn-sm btn-view">👁</button>
+                                <button class="btn-sm btn-edit">✏️</button>
+                                <button class="btn-sm btn-del">🗑</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Crema de calabaza</td>
+                        <td>Sopas</td>
+                        <td><span class="badge badge-facil">Fácil</span></td>
+                        <td>25 min</td>
+                        <td><span class="icon-check">✔</span></td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn-sm btn-view">👁</button>
+                                <button class="btn-sm btn-edit">✏️</button>
+                                <button class="btn-sm btn-del">🗑</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Pollo al curry</td>
+                        <td>Carnes</td>
+                        <td><span class="badge badge-media">Media</span></td>
+                        <td>40 min</td>
+                        <td><span class="icon-cross">✖</span></td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn-sm btn-view">👁</button>
+                                <button class="btn-sm btn-edit">✏️</button>
+                                <button class="btn-sm btn-del">🗑</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination">
+                <span>Mostrando 1 a 5 de 25 recetas</span>
+                <div class="pages">
+                    <button>‹</button>
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <button>4</button>
+                    <button>5</button>
+                    <button>›</button>
+                    <button>»</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DETAIL PANEL -->
+        <div class="card">
+            <div class="breadcrumb">
+                <a href="#">Recetas</a> › Ensalada César
+            </div>
+            <div class="detail-header">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <h2>Ensalada César</h2>
+                    <span class="badge badge-activo">Activa</span>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn-sm btn-edit" style="padding:7px 14px;">✏️ Editar</button>
+                    <button class="btn-sm btn-del" style="padding:7px 14px;">🗑 Eliminar</button>
+                </div>
+            </div>
+            <div class="detail-meta">
+                <span>🗂️ Categoría: Ensaladas</span>
+                <span>⚡ Dificultad: Fácil</span>
+                <span>⏱️ Tiempo prep.: 15 min</span>
+                <span>🍳 Tiempo cocción: 0 min</span>
+                <span>⏰ Tiempo total: 15 min</span>
+            </div>
+            <div class="detail-tabs">
+                <button class="active">Información general</button>
+                <button>Ingredientes</button>
+                <button>Información nutricional</button>
+                <button>Alérgenos</button>
+            </div>
+            <div class="detail-body">
+                <div class="detail-text">
+                    <h3>Descripción</h3>
+                    <p>Clásica ensalada César con lechuga fresca, crutones de pan, queso parmesano y salsa César casera.</p>
+                    <h3>Instrucciones</h3>
+                    <ol>
+                        <li>Lavar y cortar la lechuga.</li>
+                        <li>Preparar la salsa César.</li>
+                        <li>Mezclar todos los ingredientes.</li>
+                        <li>Añadir los crutones y el queso parmesano.</li>
+                        <li>Servir inmediatamente.</li>
+                    </ol>
+                    <div class="detail-stats">
+                        <div class="stat-box">
+                            <div class="label">Raciones</div>
+                            <div class="value">2</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">Tiempo preparación</div>
+                            <div class="value">15 min</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">Tiempo cocción</div>
+                            <div class="value">0 min</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">Dificultad</div>
+                            <div class="value" style="font-size:14px;">
+                                <span class="badge badge-facil">Fácil</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-img-placeholder">🥗 Foto receta</div>
+            </div>
+        </div>
+
+        <!-- BOTTOM GRID -->
+        <div class="bottom-grid">
+
+            <!-- Ingredientes -->
+            <div class="card mini-card">
+                <h3>Ingredientes <button>+</button></h3>
+                <table class="mini-table">
+                    <thead>
+                        <tr>
+                            <th>Ingrediente</th>
+                            <th>Calorías (100g)</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Lechuga romana</td>
+                            <td>17.0</td>
+                            <td><button class="btn-sm btn-edit">✏️</button></td>
+                        </tr>
+                        <tr>
+                            <td>Pan</td>
+                            <td>265.0</td>
+                            <td><button class="btn-sm btn-edit">✏️</button></td>
+                        </tr>
+                        <tr>
+                            <td>Queso parmesano</td>
+                            <td>431.0</td>
+                            <td><button class="btn-sm btn-edit">✏️</button></td>
+                        </tr>
+                        <tr>
+                            <td>Aceite de oliva</td>
+                            <td>884.0</td>
+                            <td><button class="btn-sm btn-edit">✏️</button></td>
+                        </tr>
+                        <tr>
+                            <td>Ajo</td>
+                            <td>149.0</td>
+                            <td><button class="btn-sm btn-edit">✏️</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <a href="#" class="see-all">Ver todos</a>
+            </div>
+
+            <!-- Alérgenos -->
+            <div class="card mini-card">
+                <h3>Alérgenos <button>+</button></h3>
+                <table class="mini-table">
+                    <thead>
+                        <tr>
+                            <th>Alérgeno</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>🌾 Gluten</td>
+                            <td>Cereales que contienen gluten</td>
+                        </tr>
+                        <tr>
+                            <td>🥛 Lácteos</td>
+                            <td>Leche y derivados</td>
+                        </tr>
+                        <tr>
+                            <td>🥚 Huevos</td>
+                            <td>Huevos y productos a base de huevo</td>
+                        </tr>
+                        <tr>
+                            <td>🥜 Frutos secos</td>
+                            <td>Frutos secos y derivados</td>
+                        </tr>
+                        <tr>
+                            <td>🌱 Soja</td>
+                            <td>Soja y productos a base de soja</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <a href="#" class="see-all">Ver todos</a>
+            </div>
+
+            <!-- Menús -->
+            <div class="card mini-card">
+                <h3>Menús <button>+</button></h3>
+                <table class="mini-table">
+                    <thead>
+                        <tr>
+                            <th>Menú</th>
+                            <th>Tipo</th>
+                            <th>Recetas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Menú del día</td>
+                            <td>Diario</td>
+                            <td>5</td>
+                        </tr>
+                        <tr>
+                            <td>Menú semanal</td>
+                            <td>Semanal</td>
+                            <td>20</td>
+                        </tr>
+                        <tr>
+                            <td>Menú vegetariano</td>
+                            <td>Especial</td>
+                            <td>12</td>
+                        </tr>
+                        <tr>
+                            <td>Menú infantil</td>
+                            <td>Especial</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>Menú temporada</td>
+                            <td>Especial</td>
+                            <td>15</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <a href="#" class="see-all">Ver todos</a>
+            </div>
+
+            <!-- Empleados -->
+            <div class="card mini-card">
+                <h3>Empleados <button>+</button></h3>
+                <table class="mini-table">
+                    <thead>
+                        <tr>
+                            <th>Empleado</th>
+                            <th>Puesto</th>
+                            <th>Activo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="employee-row">
+                                    <span class="avatar-placeholder">MG</span> María García
+                                </div>
+                            </td>
+                            <td>Chef</td>
+                            <td><span class="icon-check">✔</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="employee-row">
+                                    <span class="avatar-placeholder">JP</span> Juan Pérez
+                                </div>
+                            </td>
+                            <td>Sous Chef</td>
+                            <td><span class="icon-check">✔</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="employee-row">
+                                    <span class="avatar-placeholder">LL</span> Laura López
+                                </div>
+                            </td>
+                            <td>Cocinero</td>
+                            <td><span class="icon-check">✔</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="employee-row">
+                                    <span class="avatar-placeholder">CR</span> Carlos Ruiz
+                                </div>
+                            </td>
+                            <td>Ayudante</td>
+                            <td><span class="icon-cross">✖</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="employee-row">
+                                    <span class="avatar-placeholder">AM</span> Ana Martínez
+                                </div>
+                            </td>
+                            <td>Camarera</td>
+                            <td><span class="icon-check">✔</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <a href="#" class="see-all">Ver todos</a>
+            </div>
+
+        </div>
+
+        <footer>© 2024 Gestión de Recetas - Todos los derechos reservados</footer>
+
+    </div>
+
+</body>
+</html>
