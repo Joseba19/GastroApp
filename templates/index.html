@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Web de Recetas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <nav>
+            <button class="menu-hamburguesa">&#9776;</button>
+
+            <input type="text" placeholder="Buscador" class="buscador">
+        </nav>
+    </header>
+
+    <!-- HERO CARRUSEL -->
+        <section class="hero">
+        <button class="hero-btn izquierda" onclick="moverHero(-1)">&#8249;</button>
+ 
+        <div class="hero-pista-wrapper">
+            <div class="hero-pista" id="heroPista">
+ 
+                <div class="hero-slide">
+                    <img src="{{ url_for('static', filename='img/hero1.jpg') }}" alt="Slide 1">
+                </div>
+ 
+                <div class="hero-slide">
+                    <img src="{{ url_for('static', filename='img/hero2.jpg') }}" alt="Slide 2">
+                </div>
+ 
+                <div class="hero-slide">
+                    <img src="{{ url_for('static', filename='img/hero3.jpg') }}" alt="Slide 3">
+                </div>
+ 
+            </div>
+        </div>
+ 
+        <button class="hero-btn derecha" onclick="moverHero(1)">&#8250;</button>
+ 
+        <div class="hero-puntos">
+            <span class="punto activo" onclick="irHero(0)"></span>
+            <span class="punto" onclick="irHero(1)"></span>
+            <span class="punto" onclick="irHero(2)"></span>
+        </div>
+    </section>
+
+    <main>
+
+        <!-- TARJETAS DE RECETAS -->
+        <section class="recetas">
+            <article class="receta">
+                <p>Receta</p>
+            </article>
+            <article class="receta">
+                <p>Receta</p>
+            </article>
+            <article class="receta">
+                <p>Receta</p>
+            </article>
+        </section>
+
+    </main>
+
+    <script>
+        let indiceActual = 0;
+        const total = 3;
+ 
+        function actualizarHero() {
+            const pista = document.getElementById('heroPista');
+            pista.style.transform = `translateX(-${indiceActual * 100}%)`;
+ 
+            document.querySelectorAll('.punto').forEach((p, i) => {
+                p.classList.toggle('activo', i === indiceActual);
+            });
+        }
+ 
+        function moverHero(direccion) {
+            indiceActual = (indiceActual + direccion + total) % total;
+            actualizarHero();
+        }
+ 
+        function irHero(indice) {
+            indiceActual = indice;
+            actualizarHero();
+        }
+ 
+        // Avance automático cada 4 segundos
+        setInterval(() => moverHero(1), 4000);
+    </script>
+
+</body>
+</html>
