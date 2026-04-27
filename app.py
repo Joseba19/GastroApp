@@ -1,20 +1,20 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from db import categoriaReceta, infoReceta
 
 app = Flask(__name__)
 
 @app.route('/')
 def inicio():
-    # Llamar a la función del archivo db.py
-    categorias = categoriaReceta()
-    categorias = [categoria[0] for categoria in categorias]     # Convertir de [(nombre1,), (nombre2,)] a una lista simple
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
 
-    recetas = infoReceta()
-    for dato in recetas:
-        print(dato[0])
-    
-    # Pasar los datos al template
-    return render_template('index.html', categorias=categorias, recetas=recetas, var=0)
+    categorias = categoriaReceta()
+    categorias = [categoria[0] for categoria in categorias]
+
+    recetas, total = infoReceta(page, per_page)
+
+    total_pages = (total + per_page - 1) // per_page
+    return render_template('index.html', categorias=categorias, recetas=recetas, page=page, total_pages=total_pages)
 
 if __name__ == '__main__':
     app.run(debug=True)
