@@ -10,37 +10,32 @@
 
     <!-- NAVBAR -->
     <header>
-        <nav>
+        <nav class="navbar">
             <button class="menu-hamburguesa">&#9776;</button>
-
-            <input type="text" placeholder="Buscador" class="buscador">
+            <input type="text" placeholder="Buscar recetas..." class="buscador" id="buscador">
         </nav>
     </header>
 
     <!-- HERO CARRUSEL -->
-        <section class="hero">
+    <section class="hero">
         <button class="hero-btn izquierda" onclick="moverHero(-1)">&#8249;</button>
- 
+
         <div class="hero-pista-wrapper">
             <div class="hero-pista" id="heroPista">
- 
                 <div class="hero-slide">
                     <img src="{{ url_for('static', filename='img/hero1.jpg') }}" alt="Slide 1">
                 </div>
- 
                 <div class="hero-slide">
                     <img src="{{ url_for('static', filename='img/hero2.jpg') }}" alt="Slide 2">
                 </div>
- 
                 <div class="hero-slide">
                     <img src="{{ url_for('static', filename='img/hero3.jpg') }}" alt="Slide 3">
                 </div>
- 
             </div>
         </div>
- 
+
         <button class="hero-btn derecha" onclick="moverHero(1)">&#8250;</button>
- 
+
         <div class="hero-puntos">
             <span class="punto activo" onclick="irHero(0)"></span>
             <span class="punto" onclick="irHero(1)"></span>
@@ -50,46 +45,104 @@
 
     <main>
 
-        <!-- TARJETAS DE RECETAS -->
-        <section class="recetas">
-            <article class="receta">
-                <p>Receta</p>
-            </article>
-            <article class="receta">
-                <p>Receta</p>
-            </article>
-            <article class="receta">
-                <p>Receta</p>
-            </article>
+        <!-- FILTROS por categoría -->
+        <section class="filtros">
+            <button class="carrusel-btn" onclick="moverFiltros(-1)">&#8249;</button>
+            <div class="carrusel-pista-wrapper">
+                <div class="carrusel-pista" id="filtrosPista">
+                    <button class="filtro activo" data-cat="Todas" onclick="filtrar(this)">Todas</button>
+                    {% set categorias = [] %}
+                    {% for receta in recetas %}
+                        {% for cat in receta.categorias %}
+                            {% if cat not in categorias %}
+                                {% set _ = categorias.append(cat) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    {% for cat in categorias %}
+                    <button class="filtro" data-cat="{{ cat }}" onclick="filtrar(this)">{{ cat }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            <button class="carrusel-btn" onclick="moverFiltros(1)">&#8250;</button>
+        </section>
+
+        <!-- GRID DE RECETAS -->
+        <section class="recetas" id="gridRecetas">
+            {% for receta in recetas %}
+            <a  class="receta"
+                href="{{ url_for('receta', id_receta=receta.id) }}"
+                data-cats="{{ receta.categorias | join(',') }}">
+
+                <div class="receta-imagen">
+                    <img src="{{ url_for('static', filename=receta.imagen) }}"
+                         alt="{{ receta.nombre }}"
+                         onerror="this.parentElement.classList.add('sin-imagen')">
+                </div>
+
+                <div class="receta-info">
+                    <h3 class="receta-nombre">{{ receta.nombre }}</h3>
+                    <p class="receta-desc">{{ receta.descripcion }}</p>
+                    <div class="receta-meta">
+                        <span class="meta-item">&#9201; {{ receta.tiempo }} min</span>
+                        <span class="meta-item dificultad dificultad-{{ receta.dificultad | lower | replace('á','a') | replace('é','e') | replace('í','i') }}">
+                            {{ receta.dificultad }}
+                        </span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
         </section>
 
     </main>
 
     <script>
+        /* ── HERO ── */
         let indiceActual = 0;
         const total = 3;
- 
+
         function actualizarHero() {
-            const pista = document.getElementById('heroPista');
-            pista.style.transform = `translateX(-${indiceActual * 100}%)`;
- 
-            document.querySelectorAll('.punto').forEach((p, i) => {
-                p.classList.toggle('activo', i === indiceActual);
+            document.getElementById('heroPista').style.transform = `translateX(-${indiceActual * 100}%)`;
+            document.querySelectorAll('.punto').forEach((p, i) =>
+                p.classList.toggle('activo', i === indiceActual));
+        }
+        function moverHero(d) { indiceActual = (indiceActual + d + total) % total; actualizarHero(); }
+        function irHero(i)    { indiceActual = i; actualizarHero(); }
+        setInterval(() => moverHero(1), 4000);
+
+        /* ── FILTROS CARRUSEL ── */
+        let offsetFiltros = 0;
+        function moverFiltros(d) {
+            const wrapper = document.querySelector('.carrusel-pista-wrapper');
+            const pista   = document.getElementById('filtrosPista');
+            const max     = Math.max(0, pista.scrollWidth - wrapper.clientWidth);
+            offsetFiltros = Math.max(0, Math.min(offsetFiltros + d * 150, max));
+            pista.style.transform = `translateX(-${offsetFiltros}px)`;
+        }
+
+        /* ── FILTRAR RECETAS ── */
+        function filtrar(btn) {
+            document.querySelectorAll('.filtro').forEach(b => b.classList.remove('activo'));
+            btn.classList.add('activo');
+            const cat = btn.dataset.cat;
+            document.querySelectorAll('.receta').forEach(card => {
+                const cats = card.dataset.cats.split(',');
+                card.style.display = (cat === 'Todas' || cats.includes(cat)) ? '' : 'none';
             });
         }
- 
-        function moverHero(direccion) {
-            indiceActual = (indiceActual + direccion + total) % total;
-            actualizarHero();
-        }
- 
-        function irHero(indice) {
-            indiceActual = indice;
-            actualizarHero();
-        }
- 
-        // Avance automático cada 4 segundos
-        setInterval(() => moverHero(1), 4000);
+
+        /* ── BUSCADOR ── */
+        document.getElementById('buscador').addEventListener('input', function() {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('.receta').forEach(card => {
+                const nombre = card.querySelector('.receta-nombre').textContent.toLowerCase();
+                card.style.display = nombre.includes(q) ? '' : 'none';
+            });
+            // resetea filtro activo si se escribe
+            if (q) {
+                document.querySelectorAll('.filtro').forEach(b => b.classList.remove('activo'));
+            }
+        });
     </script>
 
 </body>

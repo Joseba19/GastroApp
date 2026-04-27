@@ -1,0 +1,159 @@
+[
+  {
+    "id": "tortilla-patatas",
+    "nombre": "Tortilla de Patatas",
+    "descripcion": "La clásica tortilla española, jugosa por dentro y dorada por fuera.",
+    "imagen": "img/tortilla.jpg",
+    "tiempo": 40,
+    "dificultad": "Media",
+    "categorias": ["Española", "Vegetariana"],
+    "ingredientes": [
+      { "cantidad": "500g", "nombre": "patatas" },
+      { "cantidad": "4", "nombre": "huevos" },
+      { "cantidad": "1", "nombre": "cebolla mediana" },
+      { "cantidad": "150ml", "nombre": "aceite de oliva" },
+      { "cantidad": "1 cdta", "nombre": "sal" }
+    ],
+    "pasos": [
+      "Pela y corta las patatas en láminas finas. Pela y pica la cebolla en juliana.",
+      "Calienta el aceite en una sartén a fuego medio. Añade las patatas y la cebolla con una pizca de sal. Cocina durante 20-25 minutos removiendo con frecuencia hasta que estén tiernas pero sin dorar.",
+      "Escurre bien las patatas y la cebolla del aceite. Reserva el aceite.",
+      "Bate los huevos en un bol grande con sal. Añade las patatas escurridas y mezcla bien. Deja reposar 5 minutos.",
+      "Calienta 2 cucharadas del aceite reservado en la sartén a fuego medio-alto. Vierte la mezcla y cuaja la base durante 3-4 minutos.",
+      "Con la ayuda de un plato, dale la vuelta a la tortilla y cocina el otro lado 2-3 minutos más. Debe quedar jugosa en el centro."
+    ]
+  },
+  {
+    "id": "gazpacho",
+    "nombre": "Gazpacho Andaluz",
+    "descripcion": "Sopa fría de tomate refrescante, perfecta para el verano.",
+    "imagen": "img/gazpacho.jpg",
+    "tiempo": 15,
+    "dificultad": "Fácil",
+    "categorias": ["Española", "Vegana", "Sin gluten"],
+    "ingredientes": [
+      { "cantidad": "1kg", "nombre": "tomates maduros" },
+      { "cantidad": "1", "nombre": "pepino" },
+      { "cantidad": "1", "nombre": "pimiento verde" },
+      { "cantidad": "1 diente", "nombre": "ajo" },
+      { "cantidad": "50ml", "nombre": "aceite de oliva virgen extra" },
+      { "cantidad": "2 cdas", "nombre": "vinagre de jerez" },
+      { "cantidad": "1 cdta", "nombre": "sal" }
+    ],
+    "pasos": [
+      "Lava y trocea los tomates, el pepino pelado, el pimiento (sin semillas) y el ajo.",
+      "Introduce todos los vegetales en la batidora. Tritura a máxima potencia durante 2 minutos hasta obtener una mezcla homogénea.",
+      "Añade el aceite de oliva, el vinagre y la sal. Tritura 1 minuto más.",
+      "Pasa la mezcla por un colador fino presionando con una cuchara para obtener una textura suave.",
+      "Prueba y ajusta de sal y vinagre. Refrigera al menos 2 horas antes de servir bien frío."
+    ]
+  },
+  {
+    "id": "paella-verduras",
+    "nombre": "Paella de Verduras",
+    "descripcion": "Paella colorida y nutritiva cargada de verduras de temporada.",
+    "imagen": "img/paella.jpg",
+    "tiempo": 50,
+    "dificultad": "Media",
+    "categorias": ["Española", "Vegana", "Sin gluten"],
+    "ingredientes": [
+      { "cantidad": "300g", "nombre": "arroz bomba" },
+      { "cantidad": "1", "nombre": "pimiento rojo" },
+      { "cantidad": "1", "nombre": "pimiento verde" },
+      { "cantidad": "150g", "nombre": "judías verdes" },
+      { "cantidad": "1", "nombre": "alcachofa" },
+      { "cantidad": "2 dientes", "nombre": "ajo" },
+      { "cantidad": "1 cdta", "nombre": "pimentón dulce" },
+      { "cantidad": "0.5 cdta", "nombre": "azafrán" },
+      { "cantidad": "750ml", "nombre": "caldo de verduras" },
+      { "cantidad": "60ml", "nombre": "aceite de oliva" },
+      { "cantidad": "1 cdta", "nombre": "sal" }
+    ],
+    "pasos": [
+      "Prepara y trocea todas las verduras. Calienta el caldo en un cazo y añade el azafrán para que se infusione.",
+      "Calienta el aceite en la paellera a fuego medio. Sofríe los pimientos y las judías durante 5 minutos.",
+      "Añade el ajo picado y la alcachofa. Cocina 3 minutos más. Incorpora el pimentón y rehoga 30 segundos.",
+      "Añade el arroz y mezcla bien con el sofrito durante 2 minutos para que se selle.",
+      "Vierte el caldo caliente con azafrán. Reparte uniformemente el arroz y las verduras. Sube el fuego para que hierva fuerte 5 minutos.",
+      "Baja a fuego medio-bajo y cocina 15-18 minutos sin remover. Deja reposar 5 minutos tapado antes de servir."
+    ]
+  },
+  {
+    "id": "croquetas-jamon",
+    "nombre": "Croquetas de Jamón",
+    "descripcion": "Croquetas caseras crujientes por fuera y con una bechamel cremosa por dentro.",
+    "imagen": "img/croquetas.jpg",
+    "tiempo": 90,
+    "dificultad": "Difícil",
+    "categorias": ["Española", "Aperitivo"],
+    "ingredientes": [
+      { "cantidad": "150g", "nombre": "jamón serrano en taquitos" },
+      { "cantidad": "80g", "nombre": "mantequilla" },
+      { "cantidad": "100g", "nombre": "harina" },
+      { "cantidad": "750ml", "nombre": "leche entera caliente" },
+      { "cantidad": "2", "nombre": "huevos" },
+      { "cantidad": "100g", "nombre": "pan rallado" },
+      { "cantidad": "1 pizca", "nombre": "nuez moscada" },
+      { "cantidad": "1 cdta", "nombre": "sal" },
+      { "cantidad": "400ml", "nombre": "aceite para freír" }
+    ],
+    "pasos": [
+      "Derrite la mantequilla en un cazo a fuego medio. Añade el jamón y sofríe 2 minutos.",
+      "Añade la harina de golpe y mezcla con energía durante 2-3 minutos hasta obtener una pasta (roux) homogénea.",
+      "Incorpora la leche caliente poco a poco sin dejar de remover con unas varillas. Cocina a fuego medio-bajo removiendo constantemente durante 10-12 minutos hasta que la bechamel espese y se despegue de las paredes.",
+      "Salpimienta y añade nuez moscada. Vierte la masa en una bandeja, tapa con film a piel y refrigera al menos 3 horas (mejor de un día para otro).",
+      "Forma las croquetas con dos cucharas o con las manos enharinadas. Pásalas por huevo batido y luego por pan rallado.",
+      "Fríe en aceite abundante a 180°C durante 2-3 minutos hasta que estén doradas. Escurre sobre papel absorbente."
+    ]
+  },
+  {
+    "id": "ensalada-aguacate",
+    "nombre": "Ensalada de Aguacate y Tomate",
+    "descripcion": "Ensalada fresca y saludable con aguacate cremoso y tomates cherry.",
+    "imagen": "img/ensalada.jpg",
+    "tiempo": 10,
+    "dificultad": "Fácil",
+    "categorias": ["Vegana", "Sin gluten", "Ensaladas"],
+    "ingredientes": [
+      { "cantidad": "2", "nombre": "aguacates maduros" },
+      { "cantidad": "200g", "nombre": "tomates cherry" },
+      { "cantidad": "1/2", "nombre": "cebolla morada" },
+      { "cantidad": "1 manojo", "nombre": "cilantro fresco" },
+      { "cantidad": "1", "nombre": "lima (zumo)" },
+      { "cantidad": "2 cdas", "nombre": "aceite de oliva" },
+      { "cantidad": "1 cdta", "nombre": "sal" }
+    ],
+    "pasos": [
+      "Corta los aguacates por la mitad, extrae el hueso y pélalos. Córtalos en trozos medianos.",
+      "Lava y corta los tomates cherry por la mitad. Pica la cebolla morada en brunoise fina.",
+      "Mezcla en un bol el aguacate, los tomates y la cebolla con suavidad para no deshacer el aguacate.",
+      "Aliña con el zumo de lima, el aceite de oliva y la sal. Añade el cilantro picado y mezcla.",
+      "Sirve inmediatamente para que el aguacate no oxide."
+    ]
+  },
+  {
+    "id": "arroz-leche",
+    "nombre": "Arroz con Leche",
+    "descripcion": "El postre tradicional español, cremoso y aromático con canela y limón.",
+    "imagen": "img/arroz-leche.jpg",
+    "tiempo": 60,
+    "dificultad": "Fácil",
+    "categorias": ["Postre", "Vegetariana"],
+    "ingredientes": [
+      { "cantidad": "150g", "nombre": "arroz redondo" },
+      { "cantidad": "1L", "nombre": "leche entera" },
+      { "cantidad": "150g", "nombre": "azúcar" },
+      { "cantidad": "1", "nombre": "rama de canela" },
+      { "cantidad": "1", "nombre": "piel de limón (sin parte blanca)" },
+      { "cantidad": "1 pizca", "nombre": "sal" },
+      { "cantidad": "1 cdta", "nombre": "canela molida (para decorar)" }
+    ],
+    "pasos": [
+      "En un cazo, pon la leche con la rama de canela y la piel de limón. Calienta a fuego medio hasta que hierva. Retira del fuego y deja infusionar 10 minutos.",
+      "Retira la canela y la piel de limón. Añade el arroz y la sal a la leche infusionada.",
+      "Cocina a fuego bajo removiendo frecuentemente durante 35-40 minutos hasta que el arroz esté tierno y la mezcla espese.",
+      "Añade el azúcar y cocina 5 minutos más removiendo constantemente.",
+      "Sirve en cuencos individuales y decora con canela molida. Puede tomarse caliente o frío."
+    ]
+  }
+]

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ receta.nombre }} – Mi Web de Recetas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <nav class="navbar">
+            <button class="menu-hamburguesa">&#9776;</button>
+            <input type="text" placeholder="Buscar recetas..." class="buscador">
+        </nav>
+    </header>
+
+    <main class="detalle-main">
+
+        <!-- CABECERA DE LA RECETA -->
+        <section class="detalle-hero">
+            <div class="detalle-imagen-wrap">
+                <img src="{{ url_for('static', filename=receta.imagen) }}"
+                     alt="{{ receta.nombre }}"
+                     class="detalle-imagen"
+                     onerror="this.src=''">
+            </div>
+            <div class="detalle-header">
+                <a href="{{ url_for('inicio') }}" class="volver">&#8592; Volver</a>
+                <h1 class="detalle-titulo">{{ receta.nombre }}</h1>
+                <p class="detalle-desc">{{ receta.descripcion }}</p>
+
+                <div class="detalle-badges">
+                    {% for cat in receta.categorias %}
+                    <span class="badge">{{ cat }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="detalle-stats">
+                    <div class="stat">
+                        <span class="stat-icono">&#9201;</span>
+                        <span class="stat-valor">{{ receta.tiempo }} min</span>
+                        <span class="stat-label">Tiempo</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icono">&#127859;</span>
+                        <span class="stat-valor">{{ receta.ingredientes | length }}</span>
+                        <span class="stat-label">Ingredientes</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icono">&#128203;</span>
+                        <span class="stat-valor">{{ receta.pasos | length }}</span>
+                        <span class="stat-label">Pasos</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icono">&#11088;</span>
+                        <span class="stat-valor dificultad-{{ receta.dificultad | lower | replace('á','a') | replace('é','e') | replace('í','i') }}">
+                            {{ receta.dificultad }}
+                        </span>
+                        <span class="stat-label">Dificultad</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTENIDO: INGREDIENTES + PASOS -->
+        <section class="detalle-contenido">
+
+            <!-- INGREDIENTES -->
+            <div class="ingredientes-card">
+                <h2>Ingredientes</h2>
+                <ul class="ingredientes-lista">
+                    {% for ing in receta.ingredientes %}
+                    <li class="ingrediente">
+                        <label class="ingrediente-check">
+                            <input type="checkbox">
+                            <span class="checkmark"></span>
+                            <span class="ing-cantidad">{{ ing.cantidad }}</span>
+                            <span class="ing-nombre">{{ ing.nombre }}</span>
+                        </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- PASOS -->
+            <div class="pasos-lista">
+                <h2>Preparación</h2>
+                {% for paso in receta.pasos %}
+                <div class="paso" data-paso="{{ loop.index }}">
+                    <div class="paso-numero">{{ loop.index }}</div>
+                    <div class="paso-texto">{{ paso }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        /* Marcar/desmarcar ingredientes */
+        document.querySelectorAll('.ingrediente-check input').forEach(cb => {
+            cb.addEventListener('change', function() {
+                this.closest('.ingrediente').classList.toggle('tachado', this.checked);
+            });
+        });
+    </script>
+
+</body>
+</html>
