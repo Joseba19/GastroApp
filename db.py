@@ -23,12 +23,28 @@ def conexionDB():
         if conexion and conexion.is_connected():
             conexion.close()
 
-
 def categoriaReceta():
-    """Obtiene todas las categorías usando context manager"""
+    """Obtiene todas las categorías de recetas usando context manager"""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
         cursor.execute("SELECT nombre FROM categoria_receta")
-        resultados = cursor.fetchall()
+        categorias = cursor.fetchall()
         cursor.close()
-        return resultados
+        return categorias
+
+def infoReceta():
+    """Obtiene id, nombre, categoria, tiempo y estado de cada receta usando context manager"""
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("SELECT r.id_receta, r.nombre, c.nombre AS nombre_categoria, r.dificultad, r.tiempo_preparacion, r.activo FROM receta r LEFT JOIN categoria_receta c ON r.id_categoria = c.id_categoria;")
+        info = cursor.fetchall()
+        cursor.close()
+
+        for dato in info:
+            print(dato[1])
+
+        return info
+
+if __name__ == "__main__":
+    conexionDB()
+    infoReceta()

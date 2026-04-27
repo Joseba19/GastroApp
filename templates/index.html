@@ -50,6 +50,9 @@
                 </select>
                 <select>
                     <option>Todas las dificultades</option>
+                    <option>Facil</option>
+                    <option>Media</option>
+                    <option>Dificl</option>
                 </select>
             </div>
             <table>
@@ -64,76 +67,34 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for dato in recetas %}
                     <tr>
-                        <td>Ensalada César</td>
-                        <td>Ensaladas</td>
-                        <td><span class="badge badge-facil">Fácil</span></td>
-                        <td>15 min</td>
-                        <td><span class="icon-check">✔</span></td>
+                        <td>{{ dato[1] }}</td>
+                        <td>{{ dato[2] }}</td>
+                        <td><span class="badge badge-{{ dato[3] }}">
+                            {% if dato[3] == "facil" %}
+                                Fácil
+                            {% elif dato[3] == "medio" %}
+                                Media
+                            {% else %}
+                                Difícil
+                            {% endif %}
+                        </span></td>
+                        <td>{{ dato[4] }} min</td>
+                        {% if dato[5] == 1 %}
+                            <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/check.png') }}" alt="" width="25px" height="25px"></span></td>
+                        {% else %}
+                            <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/cruz.png') }}" alt="" width="25px" height="25px"></span></td>
+                        {% endif %}
                         <td>
                             <div class="actions">
-                                <button class="btn-sm btn-view">👁</button>
-                                <button class="btn-sm btn-edit">✏️</button>
-                                <button class="btn-sm btn-del">🗑</button>
+                                <button class="btn-sm btn-view"><img src="{{ url_for('static', filename='img/icons/ojo.png') }}" alt="" width="16px" height="16px"></button>
+                                <button class="btn-sm btn-edit"><img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt="" width="16px" height="16px"></button>
+                                <button class="btn-sm btn-del"><img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="" width="16px" height="16px"></button>
                             </div>
                         </td>
                     </tr>
-                    <tr>
-                        <td>Salmón al horno</td>
-                        <td>Pescados</td>
-                        <td><span class="badge badge-media">Media</span></td>
-                        <td>30 min</td>
-                        <td><span class="icon-check">✔</span></td>
-                        <td>
-                            <div class="actions">
-                                <button class="btn-sm btn-view">👁</button>
-                                <button class="btn-sm btn-edit">✏️</button>
-                                <button class="btn-sm btn-del">🗑</button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Lasaña boloñesa</td>
-                        <td>Pastas</td>
-                        <td><span class="badge badge-dificil">Difícil</span></td>
-                        <td>1 h 20 min</td>
-                        <td><span class="icon-check">✔</span></td>
-                        <td>
-                            <div class="actions">
-                                <button class="btn-sm btn-view">👁</button>
-                                <button class="btn-sm btn-edit">✏️</button>
-                                <button class="btn-sm btn-del">🗑</button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Crema de calabaza</td>
-                        <td>Sopas</td>
-                        <td><span class="badge badge-facil">Fácil</span></td>
-                        <td>25 min</td>
-                        <td><span class="icon-check">✔</span></td>
-                        <td>
-                            <div class="actions">
-                                <button class="btn-sm btn-view">👁</button>
-                                <button class="btn-sm btn-edit">✏️</button>
-                                <button class="btn-sm btn-del">🗑</button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Pollo al curry</td>
-                        <td>Carnes</td>
-                        <td><span class="badge badge-media">Media</span></td>
-                        <td>40 min</td>
-                        <td><span class="icon-cross">✖</span></td>
-                        <td>
-                            <div class="actions">
-                                <button class="btn-sm btn-view">👁</button>
-                                <button class="btn-sm btn-edit">✏️</button>
-                                <button class="btn-sm btn-del">🗑</button>
-                            </div>
-                        </td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             <div class="pagination">
