@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
     <title>Gestión Recetas</title>
 </head>
+
 <body>
 
     <!-- SIDEBAR -->
@@ -38,23 +40,38 @@
                     <h2>Recetas</h2>
                     <p>Gestiona todas las recetas</p>
                 </div>
-                <button class="btn-primary">+ Nueva receta</button>
+                <a href="{{ url_for('nueva_receta') }}" class="btn-primary"
+                    style="text-decoration: none; display: inline-block;">+ Nueva receta</a>
             </div>
+            <!-- Filtros para las tablas -->
             <div class="filters">
-                <input type="text" placeholder="Buscar receta...">
-                <select>
-                    <option>Todas las categorías</option>
-                    {% for categoria in categorias %}
-                        <option value="{{ categoria }}">{{ categoria }}</option>
-                    {% endfor %}
-                </select>
-                <select>
-                    <option>Todas las dificultades</option>
-                    <option>Facil</option>
-                    <option>Media</option>
-                    <option>Dificl</option>
-                </select>
+                <form method="GET" action="/" id="filterForm">
+                    <input type="text" name="busqueda" placeholder="Buscar receta..."
+                        value="{{ request.args.get('busqueda', '') }}">
+
+                    <select name="categoria" onchange="this.form.submit()">
+                        <option value="">Todas las categorías</option>
+                        {% for categoria in categorias %}
+                        <option value="{{ categoria }}" {% if categoria_actual==categoria %}selected{% endif %}>
+                            {{ categoria }}
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                    <select name="dificultad" onchange="this.form.submit()">
+                        <option value="">Todas las dificultades</option>
+                        <option value="facil" {% if dificultad_actual=='facil' %}selected{% endif %}>Fácil</option>
+                        <option value="medio" {% if dificultad_actual=='medio' %}selected{% endif %}>Media</option>
+                        <option value="dificil" {% if dificultad_actual=='dificil' %}selected{% endif %}>Difícil
+                        </option>
+                    </select>
+
+                    {% if categoria_actual or dificultad_actual %}
+                    <a href="/" class="btn-sm">Limpiar filtros</a>
+                    {% endif %}
+                </form>
             </div>
+
             <table>
                 <thead>
                     <tr>
@@ -72,25 +89,33 @@
                         <td>{{ dato[1] }}</td>
                         <td>{{ dato[2] }}</td>
                         <td><span class="badge badge-{{ dato[3] }}">
-                            {% if dato[3] == "facil" %}
+                                {% if dato[3] == "facil" %}
                                 Fácil
-                            {% elif dato[3] == "medio" %}
+                                {% elif dato[3] == "medio" %}
                                 Media
-                            {% else %}
+                                {% else %}
                                 Difícil
-                            {% endif %}
-                        </span></td>
+                                {% endif %}
+                            </span></td>
                         <td>{{ dato[4] }} min</td>
                         {% if dato[5] == 1 %}
-                            <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/check.png') }}" alt="" width="25px" height="25px"></span></td>
+                        <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/check.png') }}"
+                                    alt="" width="25px" height="25px"></span></td>
                         {% else %}
-                            <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/cruz.png') }}" alt="" width="25px" height="25px"></span></td>
+                        <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/cruz.png') }}"
+                                    alt="" width="25px" height="25px"></span></td>
                         {% endif %}
                         <td>
                             <div class="actions">
-                                <button class="btn-sm btn-view"><img src="{{ url_for('static', filename='img/icons/ojo.png') }}" alt="" width="16px" height="16px"></button>
-                                <button class="btn-sm btn-edit"><img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt="" width="16px" height="16px"></button>
-                                <button class="btn-sm btn-del"><img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="" width="16px" height="16px"></button>
+                                <button class="btn-sm btn-view"><img
+                                        src="{{ url_for('static', filename='img/icons/ojo.png') }}" alt="" width="16px"
+                                        height="16px"></button>
+                                <button class="btn-sm btn-edit"><img
+                                        src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""
+                                        width="16px" height="16px"></button>
+                                <button class="btn-sm btn-del"><img
+                                        src="{{ url_for('static', filename='img/icons/basura.png') }}" alt=""
+                                        width="16px" height="16px"></button>
                             </div>
                         </td>
                     </tr>
@@ -98,30 +123,29 @@
                 </tbody>
             </table>
             <div class="pagination">
-    <span>Página {{ page }} de {{ total_pages }}</span>
+                <span>Página {{ page }} de {{ total_pages }}</span>
+                <div class="pages">
+                    {% if page > 1 %}
+                    <a
+                        href="?page={{ page - 1 }}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if dificultad_actual %}&dificultad={{ dificultad_actual }}{% endif %}">
+                        <button>‹</button>
+                    </a>
+                    {% endif %}
 
-    <div class="pages">
-        {% if page > 1 %}
-            <a href="?page={{ page - 1 }}">
-                <button>‹</button>
-            </a>
-        {% endif %}
+                    {% for p in range(1, total_pages + 1) %}
+                    <a
+                        href="?page={{ p }}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if dificultad_actual %}&dificultad={{ dificultad_actual }}{% endif %}">
+                        <button class="{% if p == page %}active{% endif %}">{{ p }}</button>
+                    </a>
+                    {% endfor %}
 
-        {% for p in range(1, total_pages + 1) %}
-            <a href="?page={{ p }}">
-                <button class="{% if p == page %}active{% endif %}">
-                    {{ p }}
-                </button>
-            </a>
-        {% endfor %}
-
-        {% if page < total_pages %}
-            <a href="?page={{ page + 1 }}">
-                <button>›</button>
-            </a>
-        {% endif %}
-    </div>
-</div>
+                    {% if page < total_pages %} <a
+                        href="?page={{ page + 1 }}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if dificultad_actual %}&dificultad={{ dificultad_actual }}{% endif %}">
+                        <button>›</button>
+                        </a>
+                        {% endif %}
+                </div>
+            </div>
         </div>
 
         <!-- DETAIL PANEL -->
@@ -155,7 +179,8 @@
             <div class="detail-body">
                 <div class="detail-text">
                     <h3>Descripción</h3>
-                    <p>Clásica ensalada César con lechuga fresca, crutones de pan, queso parmesano y salsa César casera.</p>
+                    <p>Clásica ensalada César con lechuga fresca, crutones de pan, queso parmesano y salsa César casera.
+                    </p>
                     <h3>Instrucciones</h3>
                     <ol>
                         <li>Lavar y cortar la lechuga.</li>
@@ -379,6 +404,6 @@
         <footer>© 2024 Gestión de Recetas - Todos los derechos reservados</footer>
 
     </div>
-
 </body>
+
 </html>
