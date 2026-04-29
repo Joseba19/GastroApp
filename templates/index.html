@@ -15,18 +15,25 @@
     <div class="sidebar">
         <div class="sidebar-logo"><img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt=""></div>
         <nav>
-            <a href="#" class="active">📊 Dashboard</a>
-            <a href="#">📋 Recetas</a>
-            <a href="#">🧂 Ingredientes</a>
-            <a href="#">🍽️ Menús</a>
-            <a href="#">👤 Empleados</a>
-            <a href="#">🗂️ Categorías</a>
-            <a href="#">⚠️ Alérgenos</a>
-            <a href="#">🥗 Información nutricional</a>
-            <a href="#">📄 Contratos</a>
+            <a href="#" class="active"><img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt=""
+                    width="20px" height="20px"> Dashboard</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px"
+                    height="20px"> Recetas</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px"
+                    height="20px"> Ingredientes</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px"
+                    height="20px"> Menús</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px"
+                    height="20px"> Alérgenos</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/tabla.png') }}" alt="" width="20px"
+                    height="20px"> Información nutricional</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px"
+                    height="20px"> Empleados</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/archivo.png') }}" alt="" width="20px"
+                    height="20px"> Contratos</a>
         </nav>
         <div class="sidebar-footer">
-            <a href="#">↩️ Cerrar sesión</a>
+            <a href="#">Cerrar sesión</a>
         </div>
     </div>
 
@@ -99,15 +106,26 @@
                         <td>{{ dato[4] }} min</td>
                         <td>
                             <div class="actions">
-                                <button class="btn-sm btn-view"><img
-                                        src="{{ url_for('static', filename='img/icons/ojo.png') }}" alt="" width="16px"
-                                        height="16px"></button>
-                                <button class="btn-sm btn-edit"><img
-                                        src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""
-                                        width="16px" height="16px"></button>
-                                <button class="btn-sm btn-del"><img
-                                        src="{{ url_for('static', filename='img/icons/basura.png') }}" alt=""
-                                        width="16px" height="16px"></button>
+                                <form action="{{ url_for('ver_receta', id_receta=dato[0]) }}" method="GET">
+                                    <button class="btn-sm btn-view"><img
+                                            src="{{ url_for('static', filename='img/icons/ojo.png') }}" alt=""
+                                            width="16px" height="16px"></button>
+                                </form>
+
+                                <form action="{{ url_for('editar_receta', id_receta=dato[0]) }}" method="POST">
+                                    <button class="btn-sm btn-view"><img
+                                            src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""
+                                            width="16px" height="16px"></button>
+                                </form>
+
+                                <form action="{{ url_for('eliminar_receta', id_receta=dato[0]) }}" method="POST"
+                                    onsubmit="return confirm('¿Seguro que quieres eliminar esta receta?')">
+                                    <button type="submit" class="btn-sm btn-del">
+                                        <img src="{{ url_for('static', filename='img/icons/basura.png') }}"
+                                            alt="Eliminar" width="16px" height="16px">
+                                    </button>
+                                </form>
+
                             </div>
                         </td>
                     </tr>
@@ -140,7 +158,7 @@
             </div>
         </div>
 
-        <!-- DETAIL PANEL -->
+        <!-- Panel Detallado -->
         <div class="card">
             <div class="breadcrumb">
                 <a href="#">Recetas</a> › Ensalada César
@@ -151,8 +169,12 @@
                     <span class="badge badge-activo">Activa</span>
                 </div>
                 <div style="display:flex;gap:8px;">
-                    <button class="btn-sm btn-edit" style="padding:7px 14px;">✏️ Editar</button>
-                    <button class="btn-sm btn-del" style="padding:7px 14px;">🗑 Eliminar</button>
+                    <button class="btn-sm btn-edit" style="padding:7px 14px;"><img
+                            src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt="" width="16px"
+                            height="16px"></button>
+                    <button class="btn-sm btn-del" style="padding:7px 14px;"><img
+                            src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="Eliminar" width="16px"
+                            height="16px"></button>
                 </div>
             </div>
             <div class="detail-meta">

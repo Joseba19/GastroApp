@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from db import categoriaReceta, infoRecetaFiltrada, nombreIngredientes, guardarReceta
+from db import categoriaReceta, infoRecetaFiltrada, nombreIngredientes, guardarReceta, eliminarReceta
 
 app = Flask(__name__)
 
@@ -63,6 +63,34 @@ def nueva_receta():
         return redirect(url_for("inicio"))
 
     return render_template('nuevaReceta.html', categorias=categorias, ingredientes=ingredientes)
+
+@app.route('/eliminar-receta/<int:id_receta>', methods=["POST"])
+def eliminar_receta(id_receta):
+    eliminarReceta(id_receta)
+    return redirect(url_for("inicio"))
+
+@app.route('/ver-receta/<int:id_receta>', methods=["GET"])
+def ver_receta(id_receta):
+    # Aquí irá la función de db.py que traiga los detalles de la receta
+    receta = obtenerReceta(id_receta)  # pendiente de crear en db.py
+    return render_template('verReceta.html', receta=receta)
+
+@app.route('/editar-receta/<int:id_receta>', methods=["GET", "POST"])
+def editar_receta(id_receta):
+    categorias = categoriaReceta()
+    ingredientes = nombreIngredientes()
+    receta = obtenerReceta(id_receta)  # pendiente de crear en db.py
+
+    if request.method == "POST":
+        nombre = request.form.get("nombre")
+        categoria = request.form.get("categoria")
+        # ... resto de campos igual que en nueva_receta
+        
+        # actualizarReceta(id_receta, nombre, categoria, ...)  # pendiente de crear en db.py
+        return redirect(url_for("inicio"))
+
+    return render_template('editarReceta.html', receta=receta, 
+                           categorias=categorias, ingredientes=ingredientes)
 
 if __name__ == '__main__':
     app.run(debug=True)

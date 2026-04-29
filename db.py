@@ -4,7 +4,7 @@ from mysql.connector import Error
 from contextlib import contextmanager
 
 DB_CONFIG = {
-    'host': 'localhost',
+    'host': 'nas.latorreg.es',
     'user': 'root',
     'password': '7365',
     'database': 'GastroLab'
@@ -161,6 +161,19 @@ def guardarReceta(nombre, id_categoria, dificultad, raciones, tiempo_preparacion
             cursor.execute(query4, valores4)
             conexion.commit()
             
+        cursor.close()
+
+def eliminarReceta(id_receta):
+    """Elimina una receta y sus datos relacionados"""
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        
+        # Eliminar primero los datos dependientes (foreign keys)
+        cursor.execute("DELETE FROM Pasos_Receta WHERE id_receta = %s", (id_receta,))
+        cursor.execute("DELETE FROM Recetas_Ingredientes WHERE id_receta = %s", (id_receta,))
+        cursor.execute("DELETE FROM Recetas WHERE id_receta = %s", (id_receta,))
+        
+        conexion.commit()
         cursor.close()
 
 if __name__ == "__main__":
