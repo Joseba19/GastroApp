@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from db import categoriaReceta, infoRecetaFiltrada, nombreIngredientes
+from db import categoriaReceta, infoRecetaFiltrada, nombreIngredientes, guardarReceta
 
 app = Flask(__name__)
 
@@ -13,7 +13,7 @@ def inicio():
     dificultad = request.args.get('dificultad')
     
     categorias = categoriaReceta()
-    categorias = [categoria[0] for categoria in categorias]
+    categorias = [cat[1] for cat in categorias]  # [1] = nombre, y renombrado a cat
     
     # Usar función con filtros
     recetas, total = infoRecetaFiltrada(page, per_page, categoria, dificultad)
@@ -33,7 +33,6 @@ from flask import redirect, url_for
 @app.route('/nueva-receta', methods=["GET", "POST"])
 def nueva_receta():
     categorias = categoriaReceta()
-    categorias = [categoria[0] for categoria in categorias]
 
     ingredientes = nombreIngredientes()
 
@@ -46,21 +45,21 @@ def nueva_receta():
         tiempo_prep = request.form.get("tiempo_preparacion")
         tiempo_coccion = request.form.get("tiempo_coccion")
         descripcion = request.form.get("descripcion")
-        activo = request.form.get("activo")
         listaIngredientes = request.form.getlist("ingredientes_ids[]")
+        listaCantidades = request.form.getlist("cantidades[]")
+        listaNotas = request.form.getlist("notas_ing[]")
         listaPasos = request.form.getlist("notas_pasos[]")
 
-        print(listaIngredientes)
-
-        # Checkbox → si no viene, es False
-        activo = 1 if activo else 0
+        print(categoria)
+        print(tiempo_coccion)
+        print(tiempo_prep)
 
         # Guardar en la base de datos
-        # (esto lo tienes que implementar tú en db.py)
-        #guardar_receta(nombre, categoria, dificultad, raciones,
-        #               tiempo_prep, tiempo_coccion, descripcion, activo)
-
-        # Redirigir (MUY importante)
+        guardarReceta(nombre, categoria, dificultad, raciones,
+                       tiempo_prep, tiempo_coccion, descripcion, 
+                       listaIngredientes, listaCantidades, listaNotas, listaPasos)
+        
+        # Redirigir
         return redirect(url_for("inicio"))
 
     return render_template('nuevaReceta.html', categorias=categorias, ingredientes=ingredientes)

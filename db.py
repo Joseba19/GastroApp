@@ -1,9 +1,10 @@
 import mysql.connector
+from datetime import datetime, date
 from mysql.connector import Error
 from contextlib import contextmanager
 
 DB_CONFIG = {
-    'host': 'nas.latorreg.es',
+    'host': 'localhost',
     'user': 'root',
     'password': '7365',
     'database': 'GastroLab'
@@ -27,7 +28,7 @@ def categoriaReceta():
     """Obtiene todas las categorías de recetas usando context manager"""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
-        cursor.execute("SELECT nombre FROM Categorias_Receta")
+        cursor.execute("SELECT id_categoria, nombre FROM Categorias_Receta")
         categorias = cursor.fetchall()
         cursor.close()
         return categorias
@@ -36,36 +37,10 @@ def nombreIngredientes():
     """Obtiene todos los ingredientes usando context manager"""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
-        cursor.execute("SELECT id_ingrediente, nombre FROM Ingredientes")
+        cursor.execute("SELECT id_ingrediente, nombre FROM Ingredientes ORDER BY nombre ASC")
         ingredientes = cursor.fetchall()
         cursor.close()
-        return ingredientes
-
-def infoReceta(page, per_page):
-    """Obtiene recetas paginadas"""
-    offset = (page - 1) * per_page
-
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-
-        query = """
-        SELECT r.id_receta, r.nombre, c.nombre AS nombre_categoria,
-               r.dificultad, r.tiempo_preparacion, r.activo
-        FROM Recetas r
-        LEFT JOIN Categorias_Receta c ON r.id_categoria = c.id_categoria
-        LIMIT %s OFFSET %s;
-        """
-
-        cursor.execute(query, (per_page, offset))
-        recetas = cursor.fetchall()
-
-        #contar total de recetas
-        cursor.execute("SELECT COUNT(*) FROM Recetas;")
-        total = cursor.fetchone()[0]
-
-        cursor.close()
-
-        return recetas, total
+    return ingredientes
 
 def infoRecetaFiltrada(page, per_page, categoria=None, dificultad=None):
     """Obtiene recetas paginadas con filtros opcionales"""
@@ -77,7 +52,7 @@ def infoRecetaFiltrada(page, per_page, categoria=None, dificultad=None):
         # Construir query dinámica
         query = """
         SELECT r.id_receta, r.nombre, c.nombre AS nombre_categoria,
-               r.dificultad, r.tiempo_preparacion, r.activo
+               r.dificultad, r.tiempo_preparacion
         FROM Recetas r
         LEFT JOIN Categorias_Receta c ON r.id_categoria = c.id_categoria
         WHERE 1=1
@@ -123,8 +98,9 @@ def infoRecetaFiltrada(page, per_page, categoria=None, dificultad=None):
         cursor.close()
         return recetas, total
 
-def crearReceta(nombre, id_categoria, dificultad, tiempo_preparacion, 
-                tiempo_coccion, raciones, descripcion, instrucciones, activo):
+def guardarReceta(nombre, id_categoria, dificultad, raciones, tiempo_preparacion, 
+                tiempo_coccion, descripcion, listaIngredientes, 
+                listaCantidades, listaNotas, listaPasos):
     """Inserta una nueva receta en la base de datos"""
     
     with conexionDB() as conexion:
@@ -133,19 +109,61 @@ def crearReceta(nombre, id_categoria, dificultad, tiempo_preparacion,
         query = """
         INSERT INTO Recetas 
         (nombre, id_categoria, dificultad, tiempo_preparacion, 
-         tiempo_coccion, raciones, descripcion, instrucciones, activo)
+         tiempo_coccion, raciones, descripcion, id_creador, fecha_creacion)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         
         valores = (nombre, id_categoria, dificultad, tiempo_preparacion, 
-                  tiempo_coccion, raciones, descripcion, instrucciones, activo)
+                  tiempo_coccion, raciones, descripcion, 1, date.today())
         
         cursor.execute(query, valores)
-        conexion.commit()  # IMPORTANTE: Guardar los cambios
+        conexion.commit()  # Guardar los cambios
+                
+        query2 = """
+        SELECT MAX(id_receta) FROM Recetas
+        """
         
+        cursor.execute(query2)
+        ultimaReceta = cursor.fetchone()[0]
+        
+        contadorI = 0
+        for i in listaIngredientes:
+            
+            query3 = """
+            INSERT INTO Recetas_Ingredientes 
+            (id_receta, id_ingrediente, cantidad, unidad, notas)
+            VALUES (%s, %s, %s, %s, %s)
+            """
+            
+            if listaNotas == []:
+                valores3 = (ultimaReceta, i, listaCantidades[contadorI], "g", None)
+            elif listaNotas[contadorI] == '':
+                valores3 = (ultimaReceta, i, listaCantidades[contadorI], "g", None)
+            else:
+                valores3 = (ultimaReceta, i, listaCantidades[contadorI], "g", listaNotas[contadorI])
+            
+            contadorI += 1
+            cursor.execute(query3, valores3)
+            conexion.commit()
+        
+        contadorP = 0
+        for p in listaPasos:
+            contadorP += 1
+            
+            query4 = """
+            INSERT INTO Pasos_Receta
+            (id_receta, numero_paso, descripcion)
+            VALUES (%s, %s, %s)
+            """
+            
+            valores4 = (ultimaReceta, contadorP, p)
+            
+            cursor.execute(query4, valores4)
+            conexion.commit()
+            
         cursor.close()
-        return cursor.lastrowid  # Devuelve el ID de la nueva receta
 
 if __name__ == "__main__":
     conexionDB()
-    infoReceta()
+    guardarReceta("Tortilla", 2, "facil", 10, 5, 2, "Tortilla Francesa",
+                  [12, 48], [50, 30], [], ["Batir huevos", "cocinar en la sarten"])

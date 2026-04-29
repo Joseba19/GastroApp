@@ -79,7 +79,6 @@
                         <th>Categoría</th>
                         <th>Dificultad</th>
                         <th>Tiempo total</th>
-                        <th>Activo</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -98,13 +97,6 @@
                                 {% endif %}
                             </span></td>
                         <td>{{ dato[4] }} min</td>
-                        {% if dato[5] == 1 %}
-                        <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/check.png') }}"
-                                    alt="" width="25px" height="25px"></span></td>
-                        {% else %}
-                        <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/cruz.png') }}"
-                                    alt="" width="25px" height="25px"></span></td>
-                        {% endif %}
                         <td>
                             <div class="actions">
                                 <button class="btn-sm btn-view"><img

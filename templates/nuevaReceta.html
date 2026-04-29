@@ -52,8 +52,8 @@
                             <label for="categoria">Categoría *</label>
                             <select id="categoria" name="categoria" required>
                                 <option value="">Selecciona una categoría</option>
-                                {% for categoria in categorias %}
-                                <option value="{{ loop.index }}">{{ categoria }}</option>
+                                {% for c in categorias %}
+                                <option value="{{ c[0] }}">{{ c[1] }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -71,19 +71,19 @@
 
                         <div class="form-group">
                             <label for="raciones">Raciones</label>
-                            <input type="number" id="raciones" name="raciones" value="4" min="1">
+                            <input type="number" id="raciones" name="raciones" min="1" required>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="tiempo_preparacion">Tiempo preparación (min)</label>
-                            <input type="number" id="tiempo_preparacion" name="tiempo_preparacion" value="15" min="0">
+                            <input type="number" id="tiempo_preparacion" name="tiempo_preparacion" min="0" required>
                         </div>
 
                         <div class="form-group">
                             <label for="tiempo_coccion">Tiempo cocción (min)</label>
-                            <input type="number" id="tiempo_coccion" name="tiempo_coccion" placeholder="0" min="0">
+                            <input type="number" id="tiempo_coccion" name="tiempo_coccion" placeholder="0" min="0" required>
                         </div>
                     </div>
 
@@ -91,13 +91,6 @@
                         <label for="descripcion">Descripción</label>
                         <textarea id="descripcion" name="descripcion"
                             placeholder="Breve descripción de la receta..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="activo" name="activo" value="1" checked>
-                            <label for="activo">Receta activa</label>
-                        </div>
                     </div>
                 </div>
             </div>
