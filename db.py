@@ -100,7 +100,7 @@ def infoRecetaFiltrada(page, per_page, categoria=None, dificultad=None):
 
 def guardarReceta(nombre, id_categoria, dificultad, raciones, tiempo_preparacion, 
                 tiempo_coccion, descripcion, listaIngredientes, 
-                listaCantidades, listaNotas, listaPasos):
+                listaCantidades, listaUnidades, listaNotas, listaPasos):
     """Inserta una nueva receta en la base de datos"""
     
     with conexionDB() as conexion:
@@ -136,11 +136,11 @@ def guardarReceta(nombre, id_categoria, dificultad, raciones, tiempo_preparacion
             """
             
             if listaNotas == []:
-                valores3 = (ultimaReceta, i, listaCantidades[contadorI], "g", None)
+                valores3 = (ultimaReceta, i, listaCantidades[contadorI], listaUnidades[contadorI], None)
             elif listaNotas[contadorI] == '':
-                valores3 = (ultimaReceta, i, listaCantidades[contadorI], "g", None)
+                valores3 = (ultimaReceta, i, listaCantidades[contadorI], listaUnidades[contadorI], None)
             else:
-                valores3 = (ultimaReceta, i, listaCantidades[contadorI], "g", listaNotas[contadorI])
+                valores3 = (ultimaReceta, i, listaCantidades[contadorI], listaUnidades[contadorI], listaNotas[contadorI])
             
             contadorI += 1
             cursor.execute(query3, valores3)
@@ -176,7 +176,28 @@ def eliminarReceta(id_receta):
         conexion.commit()
         cursor.close()
 
+def obtenerReceta(id_receta):
+    """Obtiene toda la informacion de una receta"""
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM Recetas WHERE id_receta = %s", (id_receta,))
+        datosReceta = cursor.fetchone()
+        cursor.close()
+        return datosReceta
+
+def obtenerPasos(id_receta):
+    """Obtiene todos los pasos de una receta"""
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("SELECT numero_paso, descripcion FROM Pasos_Receta WHERE id_receta = %s", (id_receta,))
+        pasosReceta = cursor.fetchall()
+        cursor.close()
+        return pasosReceta
+
 if __name__ == "__main__":
-    conexionDB()
-    guardarReceta("Tortilla", 2, "facil", 10, 5, 2, "Tortilla Francesa",
-                  [12, 48], [50, 30], [], ["Batir huevos", "cocinar en la sarten"])
+    guardarReceta("Tortilla de Patata", 1, "facil", 2, 20, 15, "Tortilla de Patatas al estilo tradicional",
+                  [12, 27], [6, 2], ["unidad", "unidad"], ["", "Cortada en laminas finas"], 
+                  ["Pelar, cortar y poner la patata a pochar", 
+                    "Batir los huevos", "Retirar la patata y mezclarla con los huevos",
+                    "Reposar la mezcla 3 minutos y ponerla al punto de sal", 
+                    "Poner la mezcla en una sarten y cocinarla minuto y medio por lado"])

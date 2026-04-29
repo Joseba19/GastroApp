@@ -15,15 +15,22 @@
     <div class="sidebar">
         <div class="sidebar-logo"><img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt=""></div>
         <nav>
-            <a href="#" class="active">📊 Dashboard</a>
-            <a href="#">📋 Recetas</a>
-            <a href="#">🧂 Ingredientes</a>
-            <a href="#">🍽️ Menús</a>
-            <a href="#">👤 Empleados</a>
-            <a href="#">🗂️ Categorías</a>
-            <a href="#">⚠️ Alérgenos</a>
-            <a href="#">🥗 Información nutricional</a>
-            <a href="#">📄 Contratos</a>
+            <a href="#" class="active"><img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt=""
+                    width="20px" height="20px"> Dashboard</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px"
+                    height="20px"> Recetas</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px"
+                    height="20px"> Ingredientes</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px"
+                    height="20px"> Menús</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px"
+                    height="20px"> Alérgenos</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/tabla.png') }}" alt="" width="20px"
+                    height="20px"> Información nutricional</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px"
+                    height="20px"> Empleados</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/archivo.png') }}" alt="" width="20px"
+                    height="20px"> Contratos</a>
         </nav>
         <div class="sidebar-footer">
             <a href="#">Cerrar sesión</a>
@@ -249,9 +256,22 @@
                             ${generarOpciones()}
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Cantidad (g)</label>
+                    <div class="form-group" style="flex: 0 0 120px; min-width: 100px;">
+                        <label>Cantidad</label>
                         <input type="number" class="cantidad-input" name="cantidades[]" placeholder="0" min="1">
+                    </div>
+                    <div class="form-group" style="flex: 0 0 140px; min-width: 110px;">
+                        <label>Unidad</label>
+                        <select class="unidad-select" name="unidades[]">
+                            <option value="g">Gramos (g)</option>
+                            <option value="kg">Kilogramos (kg)</option>
+                            <option value="ml">Mililitros (ml)</option>
+                            <option value="l">Litros (l)</option>
+                            <option value="unidad">Unidad</option>
+                            <option value="cucharada">Cucharada</option>
+                            <option value="cucharadita">Cucharadita</option>
+                            <option value="taza">Taza</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group">

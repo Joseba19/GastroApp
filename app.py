@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from db import categoriaReceta, infoRecetaFiltrada, nombreIngredientes, guardarReceta, eliminarReceta
+from db import categoriaReceta, infoRecetaFiltrada, nombreIngredientes, guardarReceta, eliminarReceta, obtenerReceta, obtenerPasos
 
 app = Flask(__name__)
 
@@ -8,17 +8,22 @@ def inicio():
     page = request.args.get('page', 1, type=int)
     per_page = 10
     
-    # Obtener filtros de los parámetros URL
     categoria = request.args.get('categoria')
     dificultad = request.args.get('dificultad')
+    receta_id = request.args.get('receta_id', type=int)  # ← AÑADIR
     
     categorias = categoriaReceta()
-    categorias = [cat[1] for cat in categorias]  # [1] = nombre, y renombrado a cat
+    categorias = [cat[1] for cat in categorias]
     
-    # Usar función con filtros
     recetas, total = infoRecetaFiltrada(page, per_page, categoria, dificultad)
-    
     total_pages = (total + per_page - 1) // per_page
+    
+    # Cargar receta detallada si se pidió  ← AÑADIR
+    receta_detalle = None
+    pasosReceta = None
+    if receta_id:
+        receta_detalle = obtenerReceta(receta_id)
+        pasosReceta = obtenerPasos(receta_id)
     
     return render_template('index.html', 
                          categorias=categorias, 
@@ -26,7 +31,9 @@ def inicio():
                          page=page, 
                          total_pages=total_pages,
                          categoria_actual=categoria,
-                         dificultad_actual=dificultad)
+                         dificultad_actual=dificultad,
+                         receta_detalle=receta_detalle,
+                         pasosReceta=pasosReceta)
     
 from flask import redirect, url_for
 
@@ -47,17 +54,14 @@ def nueva_receta():
         descripcion = request.form.get("descripcion")
         listaIngredientes = request.form.getlist("ingredientes_ids[]")
         listaCantidades = request.form.getlist("cantidades[]")
+        listaUnidades = request.form.getlist("unidades[]")
         listaNotas = request.form.getlist("notas_ing[]")
         listaPasos = request.form.getlist("notas_pasos[]")
-
-        print(categoria)
-        print(tiempo_coccion)
-        print(tiempo_prep)
 
         # Guardar en la base de datos
         guardarReceta(nombre, categoria, dificultad, raciones,
                        tiempo_prep, tiempo_coccion, descripcion, 
-                       listaIngredientes, listaCantidades, listaNotas, listaPasos)
+                       listaIngredientes, listaCantidades, listaUnidades, listaNotas, listaPasos)
         
         # Redirigir
         return redirect(url_for("inicio"))
@@ -71,9 +75,11 @@ def eliminar_receta(id_receta):
 
 @app.route('/ver-receta/<int:id_receta>', methods=["GET"])
 def ver_receta(id_receta):
-    # Aquí irá la función de db.py que traiga los detalles de la receta
-    receta = obtenerReceta(id_receta)  # pendiente de crear en db.py
-    return render_template('verReceta.html', receta=receta)
+    receta = obtenerReceta(id_receta)
+    if receta is None:
+        return "Receta no encontrada", 404
+    # Redirigir a inicio pasando el id como parámetro
+    return redirect(url_for('inicio', receta_id=id_receta))
 
 @app.route('/editar-receta/<int:id_receta>', methods=["GET", "POST"])
 def editar_receta(id_receta):
