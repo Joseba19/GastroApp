@@ -1,0 +1,610 @@
+/* =====================
+   VARIABLES
+   ===================== */
+:root {
+    --crema:       #DAD7CD;
+    --sage:        #A3B18A;
+    --verde-medio: #588157;
+    --verde-oscuro:#3A5A40;
+    --verde-bosque:#344E41;
+
+    --fuente: Georgia, serif;
+}
+
+/* =====================
+   RESET BÁSICO
+   ===================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--crema);
+    color: var(--verde-bosque);
+    font-family: var(--fuente);
+}
+
+/* =====================
+   NAVBAR
+   ===================== */
+header {
+    background-color: var(--verde-bosque);
+    padding: 0.25rem 0.75rem 0.75rem;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.menu-hamburguesa {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--crema);
+    font-size: 1.5rem;
+}
+
+.buscador {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 1.5rem;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 999px;
+    background-color: var(--crema);
+    color: var(--verde-bosque);
+    font-family: var(--fuente);
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.buscador::placeholder {
+    color: var(--sage);
+}
+
+/* =====================
+   HERO - CARRUSEL
+   ===================== */
+.hero {
+    position: relative;
+    width: 100%;
+    height: 400px;          /* altura fija para las imágenes */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+ 
+.hero-pista-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+ 
+.hero-pista {
+    display: flex;
+    height: 100%;
+    transition: transform 0.5s ease;
+}
+ 
+.hero-slide {
+    min-width: 100%;
+    height: 100%;
+    overflow: hidden;       /* recorta la imagen si es más grande */
+}
+ 
+.hero-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;      /* cubre el área sin deformar */
+    object-position: center;
+    display: block;
+    opacity: 0.9;
+}
+ 
+/* Botones de flecha */
+.hero-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: none;
+    border: none;
+    color: var(--crema);
+    font-size: 3rem;
+    cursor: pointer;
+    padding: 0 0.75rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);  /* legible sobre cualquier imagen */
+}
+ 
+.hero-btn:hover  { opacity: 1; }
+.hero-btn.izquierda { left: 0; }
+.hero-btn.derecha   { right: 0; }
+ 
+/* Puntos indicadores */
+.hero-puntos {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10;
+}
+ 
+.punto {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--sage);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+ 
+.punto.activo {
+    background-color: var(--crema);
+}
+
+/* =====================
+   MAIN
+   ===================== */
+main {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* =====================
+   FILTROS - CARRUSEL
+   ===================== */
+.filtros {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.carrusel-btn {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--verde-oscuro);
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.carrusel-pista-wrapper {
+    flex: 1;
+    overflow: hidden;
+}
+
+.carrusel-pista {
+    display: flex;
+    gap: 0.75rem;
+    transition: transform 0.3s ease;
+    width: max-content;
+}
+
+.filtro {
+    flex-shrink: 0;
+    padding: 0.45rem 1.25rem;
+    cursor: pointer;
+    white-space: nowrap;
+    border-radius: 999px;
+    border: 2px solid var(--verde-medio);
+    background-color: transparent;
+    color: var(--verde-oscuro);
+    font-family: var(--fuente);
+    font-size: 0.9rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.filtro:hover,
+.filtro.activo {
+    background-color: var(--verde-medio);
+    color: var(--crema);
+    border-color: var(--verde-medio);
+}
+
+/* =====================
+   RECETAS - GRID
+   ===================== */
+.recetas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 5px;
+}
+
+.receta {
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--sage);
+    color: var(--verde-bosque);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: background-color 0.2s, transform 0.2s;
+    cursor: pointer;
+}
+
+.receta:hover {
+    background-color: var(--verde-medio);
+    color: var(--crema);
+    transform: translateY(-4px);
+}
+
+/* =====================
+   RESPONSIVE
+   ===================== */
+@media (max-width: 768px) {
+    .recetas {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .recetas {
+        grid-template-columns: 1fr;
+    }
+}
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-links a {
+    color: var(--crema);
+    text-decoration: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.nav-links a:hover {
+    color: var(--sage);
+}
+
+/* CENTRAR BUSCADOR */
+.buscador {
+    margin: 0 auto;
+}
+/* PANEL LOGIN DESLIZANTE */
+.login-panel {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 260px;
+    height: 100%;
+    background-color: var(--verde-bosque);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: left 0.3s ease;
+    z-index: 200;
+}
+
+/* cuando está abierto */
+.login-panel.open {
+    left: 0;
+}
+
+.login-panel h3 {
+    color: var(--crema);
+}
+
+.login-panel input {
+    padding: 0.6rem;
+    border: none;
+    border-radius: 5px;
+}
+
+.login-panel button {
+    padding: 0.6rem;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--sage);
+    color: var(--verde-bosque);
+    cursor: pointer;
+}
+.nav-links a.active {
+    background-color: var(--verde-medio);
+    color: var(--crema);
+    border-radius: 20px;
+    padding: 6px 12px;
+}
+.page {
+    animation: fade 0.3s ease;
+}
+
+@keyframes fade {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.login-panel {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background: var(--verde-oscuro);
+    padding: 20px;
+    transition: left 0.3s ease;
+}
+
+.login-panel.open {
+    left: 0;
+}
+.login-error {
+    color: #ff6b6b;
+    background: rgba(255,0,0,0.1);
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    display: none;
+}
+/* LOGIN PANEL */
+.login-panel {
+    position: fixed;
+    top: 60px;
+    left: 10px;
+    width: 250px;
+    background: var(--crema);
+    padding: 15px;
+    border-radius: 10px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.login-panel.open {
+    display: flex;
+}
+
+.login-panel input {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid var(--sage);
+}
+
+.login-panel button {
+    background: var(--verde-medio);
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#login-error {
+    color: red;
+    display: none;
+    font-size: 0.85rem;
+}
+
+/* NAV LINKS BONITOS */
+.nav-links a {
+    margin-left: 15px;
+    cursor: pointer;
+    color: var(--crema);
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--sage);
+}
+
+/* ADMIN PANEL */
+.admin-panel {
+    display: none;
+    padding: 20px;
+}
+
+.admin-receta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.admin-receta input {
+    padding: 5px;
+}
+
+.admin-receta button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+/* ADMIN COMO TARJETAS */
+.admin-card {
+    position: relative;
+}
+
+/* CAPA ENCIMA */
+.admin-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0,0,0,0.6);
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    opacity: 0;
+    transition: 0.3s;
+    border-radius: 8px;
+}
+
+/* SOLO SE VE AL PASAR EL RATÓN */
+.admin-card:hover .admin-overlay {
+    opacity: 1;
+}
+
+.admin-overlay input {
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+}
+
+.admin-botones button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.admin-botones button:first-child {
+    background: #588157;
+    color: white;
+}
+
+.admin-botones button:last-child {
+    background: #c1121f;
+    color: white;
+}
+.recetas {
+    display: grid;
+}
+.receta {
+    background-color: var(--sage);
+}
+.receta-card {
+    background: white;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 200px;
+    display: inline-block;
+    vertical-align: top;
+}
+.recetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+/* CARD */
+.receta-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+}
+
+.receta-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.25);
+}
+
+/* IMG */
+.receta-img {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+}
+
+.receta-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.receta-card:hover img {
+    transform: scale(1.1);
+}
+
+/* INFO */
+.receta-info {
+    padding: 12px;
+}
+
+.receta-info h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.receta-info p {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #666;
+}
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 15px;
+    padding: 20px;
+    position: relative;
+}
+
+.modal-content img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.modal-info {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
