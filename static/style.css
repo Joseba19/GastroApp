@@ -603,112 +603,191 @@ footer {
 
 /* MODAL MEJORADO */
 .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(11, 37, 69, 0.6); /* #0B2545 con opacidad */
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(4px);
-    animation: fadeIn 0.2s ease;
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(11, 37, 69, 0.6);
+  /* #0B2545 con opacidad */
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .modal.active {
-    display: flex;
+  display: flex;
 }
 
 .modal-content {
-    background: #FFFFFF;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 580px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(11, 37, 69, 0.25);
-    animation: slideUp 0.25s ease;
+  background: #FFFFFF;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(11, 37, 69, 0.25);
+  animation: slideUp 0.25s ease;
 }
 
 @keyframes slideUp {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal-header {
-    background: #134074;
-    color: #EEF4ED;
-    padding: 16px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 8px 8px 0 0;
+  background: #134074;
+  color: #EEF4ED;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
 }
 
 .modal-header h2 {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0;
-    color: #EEF4ED;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #EEF4ED;
 }
 
 .modal-close {
-    font-size: 24px;
-    font-weight: 700;
-    color: #EEF4ED;
-    cursor: pointer;
-    line-height: 1;
-    transition: color 0.2s;
+  font-size: 24px;
+  font-weight: 700;
+  color: #EEF4ED;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
 }
 
 .modal-close:hover {
-    color: #8DA9C4;
+  color: #8DA9C4;
 }
 
 .modal-body {
-    padding: 20px;
-    background: #F5F8F3;
-    border-radius: 0 0 8px 8px;
+  padding: 20px;
+  background: #F5F8F3;
+  border-radius: 0 0 8px 8px;
 }
 
 .modal-body .form-group {
-    margin-bottom: 16px;
+  margin-bottom: 16px;
 }
 
 .modal-body .form-row {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 0;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
 }
 
 .modal-body .form-row .form-group {
-    flex: 1;
-    min-width: 160px;
+  flex: 1;
+  min-width: 160px;
 }
 
 .modal-body h3.detail-text {
-    margin-top: 12px;
-    margin-bottom: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #0B2545;
-    border-bottom: 1px solid #8DA9C4;
-    padding-bottom: 6px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0B2545;
+  border-bottom: 1px solid #8DA9C4;
+  padding-bottom: 6px;
 }
 
 .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid #8DA9C4;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #8DA9C4;
+}
+
+/* Para las pestañas y contenido dinámico */
+.tab-btn {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  border-bottom: 2px solid #134074;
+  color: #134074;
+  font-weight: 600;
+  margin-bottom: -2px;
+}
+
+.tab-content {
+  width: 100%;
+  animation: fadeContent 0.25s ease;
+}
+
+@keyframes fadeContent {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos para la tabla nutricional */
+.nutricion-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.nutricion-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #8DA9C4;
+}
+
+.nutricion-table td:first-child {
+  font-weight: 600;
+  width: 40%;
+  color: #134074;
+}
+
+/* Estilos para los badges de alérgenos */
+.alergenos-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.alergeno-badge {
+  display: inline-block;
+  background: #134074;
+  color: #EEF4ED;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
 }

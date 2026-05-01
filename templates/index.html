@@ -171,8 +171,8 @@
                                 src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt="" width="16px"
                                 height="16px"></button>
                         <button class="btn-sm btn-del" style="padding:7px 14px;"><img
-                                src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="Eliminar" width="16px"
-                                height="16px"></button>
+                                src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="Eliminar"
+                                width="16px" height="16px"></button>
                         <span class="modal-close" onclick="cerrarModalDetalle()">&times;</span>
                     </div>
                 </div>
@@ -187,25 +187,87 @@
                         <span><b>Tiempo prep.</b>: {{receta_detalle[3]}} min</span>
                         <span><b>Tiempo cocción</b>: {{receta_detalle[4]}} min</span>
                     </div>
+                    <!-- Pestañas con IDs para identificar cada botón -->
                     <div class="detail-tabs">
-                        <button class="active">Información general</button>
-                        <button>Ingredientes</button>
-                        <button>Información nutricional</button>
-                        <button>Alérgenos</button>
+                        <button class="tab-btn active" data-tab="general">Información general</button>
+                        <button class="tab-btn" data-tab="ingredientes">Ingredientes</button>
+                        <button class="tab-btn" data-tab="nutricional">Información nutricional</button>
+                        <button class="tab-btn" data-tab="alergenos">Alérgenos</button>
                     </div>
-                    <div class="detail-body">
-                        <div class="detail-text">
-                            <h3>Descripción</h3>
-                            <p>{{receta_detalle[2]}}</p>
-                            <h3>Instrucciones</h3>
-                            <ol>
-                                {% for p in pasosReceta %}
+                    <!-- Contenedor del contenido dinámico -->
+                    <div class="detail-body" id="detail-body-container">
+                        <!-- Contenido por defecto -->
+                        <div id="content-general" class="tab-content active">
+                            <div class="detail-text">
+                                <h3>Descripción</h3>
+                                <p>{{receta_detalle[2]}}</p>
+                                <h3>Instrucciones</h3>
+                                <ol>
+                                    {% for p in pasosReceta %}
                                     <li>{{p[1]}}</li>
-                                {% endfor %}
-                            </ol>
-                            
+                                    {% endfor %}
+                                </ol>
+                            </div>
                         </div>
-                        <div class="detail-img-placeholder">Foto receta</div>
+
+                        <!-- Contenido para Ingredientes -->
+                        <div id="content-ingredientes" class="tab-content" style="display:none;">
+                            <div class="detail-text">
+                                <h3>Ingredientes</h3>
+                                {% for ingrediente in ingredientesReceta %}
+                                <p>{{ingrediente[2]}} - {{ingrediente[3]}} {{ingrediente[4]}}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Contenido para Información Nutricional -->
+                        <div id="content-nutricional" class="tab-content" style="display:none;">
+                            <div class="detail-text">
+                                <h3>Información Nutricional (por ración)</h3>
+                                <table class="nutricion-table">
+                                    <tr>
+                                        <td>Calorías:</td>
+                                        <td>{{nutriReceta[0]}} kcal</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Proteínas:</td>
+                                        <td>{{nutriReceta[1]}} g</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Carbohidratos:</td>
+                                        <td>{{nutriReceta[2]}} g</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Grasas:</td>
+                                        <td>{{nutriReceta[3]}} g</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Fibra:</td>
+                                        <td>{{nutriReceta[4]}} g</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sodio:</td>
+                                        <td>{{nutriReceta[5]}} mg</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Contenido para Alérgenos -->
+                        <div id="content-alergenos" class="tab-content" style="display:none;">
+                            <div class="detail-text">
+                                <h3>Alérgenos</h3>
+                                <div class="alergenos-list">
+                                    {% if alergenoReceta != None%}
+                                        {% for alergeno in alergenoReceta %}
+                                        <span class="alergeno-badge">{{alergeno}}</span>
+                                        {% endfor %}
+                                    {% else%}
+                                        <p>Esta receta no contiene alergenos</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -214,7 +276,7 @@
             function cerrarModalDetalle() {
                 document.getElementById('modal-detalle').classList.remove('active');
             }
-            document.getElementById('modal-detalle').addEventListener('click', function(e) {
+            document.getElementById('modal-detalle').addEventListener('click', function (e) {
                 if (e.target === this) cerrarModalDetalle();
             });
         </script>
@@ -238,27 +300,37 @@
                         <tr>
                             <td>Lechuga romana</td>
                             <td>17.0</td>
-                            <td><button class="btn-sm btn-edit"><img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""width="16px" height="16px"></button></td>
+                            <td><button class="btn-sm btn-edit"><img
+                                        src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""
+                                        width="16px" height="16px"></button></td>
                         </tr>
                         <tr>
                             <td>Pan</td>
                             <td>265.0</td>
-                            <td><button class="btn-sm btn-edit"><img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""width="16px" height="16px"></button></td>
+                            <td><button class="btn-sm btn-edit"><img
+                                        src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""
+                                        width="16px" height="16px"></button></td>
                         </tr>
                         <tr>
                             <td>Queso parmesano</td>
                             <td>431.0</td>
-                            <td><button class="btn-sm btn-edit"><img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""width="16px" height="16px"></button></td>
+                            <td><button class="btn-sm btn-edit"><img
+                                        src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""
+                                        width="16px" height="16px"></button></td>
                         </tr>
                         <tr>
                             <td>Aceite de oliva</td>
                             <td>884.0</td>
-                            <td><button class="btn-sm btn-edit"><img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""width="16px" height="16px"></button></td>
+                            <td><button class="btn-sm btn-edit"><img
+                                        src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""
+                                        width="16px" height="16px"></button></td>
                         </tr>
                         <tr>
                             <td>Ajo</td>
                             <td>149.0</td>
-                            <td><button class="btn-sm btn-edit"><img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""width="16px" height="16px"></button></td>
+                            <td><button class="btn-sm btn-edit"><img
+                                        src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""
+                                        width="16px" height="16px"></button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -362,7 +434,9 @@
                                 </div>
                             </td>
                             <td>Chef</td>
-                            <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/check.png') }}" alt=""width="22px" height="22px"></span></td>
+                            <td><span class="icon-check"><img
+                                        src="{{ url_for('static', filename='img/icons/check.png') }}" alt=""
+                                        width="22px" height="22px"></span></td>
                         </tr>
                         <tr>
                             <td>
@@ -371,7 +445,9 @@
                                 </div>
                             </td>
                             <td>Sous Chef</td>
-                            <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/check.png') }}" alt=""width="22px" height="22px"></span></td>
+                            <td><span class="icon-check"><img
+                                        src="{{ url_for('static', filename='img/icons/check.png') }}" alt=""
+                                        width="22px" height="22px"></span></td>
                         </tr>
                         <tr>
                             <td>
@@ -380,7 +456,9 @@
                                 </div>
                             </td>
                             <td>Cocinero</td>
-                            <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/check.png') }}" alt=""width="22px" height="22px"></span></td>
+                            <td><span class="icon-check"><img
+                                        src="{{ url_for('static', filename='img/icons/check.png') }}" alt=""
+                                        width="22px" height="22px"></span></td>
                         </tr>
                         <tr>
                             <td>
@@ -389,7 +467,9 @@
                                 </div>
                             </td>
                             <td>Ayudante</td>
-                            <td><span class="icon-cross"><img src="{{ url_for('static', filename='img/icons/cruz.png') }}" alt=""width="22px" height="22px"></span></td>
+                            <td><span class="icon-cross"><img
+                                        src="{{ url_for('static', filename='img/icons/cruz.png') }}" alt="" width="22px"
+                                        height="22px"></span></td>
                         </tr>
                         <tr>
                             <td>
@@ -398,7 +478,9 @@
                                 </div>
                             </td>
                             <td>Camarera</td>
-                            <td><span class="icon-check"><img src="{{ url_for('static', filename='img/icons/check.png') }}" alt=""width="22px" height="22px"></span></td>
+                            <td><span class="icon-check"><img
+                                        src="{{ url_for('static', filename='img/icons/check.png') }}" alt=""
+                                        width="22px" height="22px"></span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -408,6 +490,48 @@
         </div>
 
         <footer>© 2024 Gestión de Recetas - Todos los derechos reservados</footer>
+
+        <script>
+            function cerrarModalDetalle() {
+                document.getElementById('modal-detalle').classList.remove('active');
+            }
+
+            // Función para cambiar entre pestañas
+            function cambiarPestana(tabId) {
+                const contenidos = document.querySelectorAll('.tab-content');
+                contenidos.forEach(content => {
+                    content.style.display = 'none';
+                });
+
+                const botones = document.querySelectorAll('.tab-btn');
+                botones.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                const contenidoActivo = document.getElementById(`content-${tabId}`);
+                if (contenidoActivo) {
+                    contenidoActivo.style.display = 'block';
+                }
+
+                const botonActivo = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+                if (botonActivo) {
+                    botonActivo.classList.add('active');
+                }
+            }
+
+            // Inicializar cuando el DOM esté listo
+            document.addEventListener('DOMContentLoaded', function () {
+                const tabs = document.querySelectorAll('.tab-btn');
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', function () {
+                        cambiarPestana(this.getAttribute('data-tab'));
+                    });
+                });
+
+                // Mostrar pestaña general por defecto
+                cambiarPestana('general');
+            });
+        </script>
 
     </div>
 </body>

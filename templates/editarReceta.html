@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>Gestión Recetas</title>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo"><img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt=""></div>
+        <nav>
+            <a href="#" class="active"><img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt=""
+                    width="20px" height="20px"> Dashboard</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px"
+                    height="20px"> Recetas</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px"
+                    height="20px"> Ingredientes</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px"
+                    height="20px"> Menús</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px"
+                    height="20px"> Alérgenos</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/tabla.png') }}" alt="" width="20px"
+                    height="20px"> Información nutricional</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px"
+                    height="20px"> Empleados</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/archivo.png') }}" alt="" width="20px"
+                    height="20px"> Contratos</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#">Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+        <form method="POST" action="">
+            <div class="card">
+                <div class="section-header">
+                    <div>
+                        <h2>Editar Receta</h2>
+                        <p>Cambia el formulario para editar la receta</p> <br>
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombre">Nombre de la receta *</label>
+                            <input type="text" id="nombre" name="nombre" value="{{receta[1]}}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="categoria">Categoría *</label>
+                            <select id="categoria" name="categoria" required>
+                                {% for c in categorias%}
+                                    {% if receta[7] == c[0] %}
+                                    <option value="{{c[0]}}">{{c[1]}}</option>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for c in categorias%}
+                                    <option value="{{ c[0] }}">{{ c[1] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dificultad">Dificultad *</label>
+                            <select id="dificultad" name="dificultad" required>
+                                {% if receta[6] == "facil"%}
+                                    <option value="facil">Fácil</option>
+                                    <option value="medio">Media</option>
+                                    <option value="dificil">Difícil</option>
+                                {% elif receta[6] == "medio" %}
+                                    <option value="medio">Media</option>
+                                    <option value="facil">Fácil</option>
+                                    <option value="dificil">Difícil</option>
+                                {% else %}
+                                    <option value="dificil">Difícil</option>
+                                    <option value="facil">Fácil</option>
+                                    <option value="medio">Media</option>
+                                {% endif %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="raciones">Raciones</label>
+                            <input type="number" id="raciones" name="raciones" value="{{receta[5]}}" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tiempo_preparacion">Tiempo preparación (min)</label>
+                            <input type="number" id="tiempo_preparacion" name="tiempo_preparacion" value="{{receta[3]}}"
+                                min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tiempo_coccion">Tiempo cocción (min)</label>
+                            <input type="number" id="tiempo_coccion" name="tiempo_coccion" value="{{receta[4]}}" min="0"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea id="descripcion" name="descripcion">{{receta[2]}}</textarea>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="card">
+                <div class="section-header">
+                    <div>
+                        <h2>Ingredientes y Pasos</h2>
+                        <p>Añade los ingredientes que lleva la receta y los pasos para realizarla</p> <br>
+                    </div>
+                </div>
+
+                <!-- Ingredientes -->
+                <h2>Ingredientes</h2> <br>
+                <div id="ingredientes-container">
+                    {% for i in ingredientes %}
+                    <div class="card-2">
+                        <div class="ingrediente-item">
+                            <h3>Ingrediente</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>‎</label>
+                                    <select class="ingrediente-select" name="ingredientes_ids[]" required>
+                                        <option value="{{ i[1] }}">{{ i[2] }}</option>
+                                        {% for l in loopIngredientes %}
+                                        <option value="{{ l[0] }}">{{ l[1] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex: 0 0 120px; min-width: 100px;">
+                                    <label>Cantidad</label>
+                                    <input type="number" class="cantidad-input" name="cantidades[]" value="{{i[3]}}"
+                                        min="1">
+                                </div>
+                                <div class="form-group" style="flex: 0 0 140px; min-width: 110px;">
+                                    <label>Unidad</label>
+                                    <select class="unidad-select" name="unidades[]">
+                                        <option value="{{i[4]}}">{{i[4]}}</option>
+                                        <option value="g">Gramos (g)</option>
+                                        <option value="kg">Kilogramos (kg)</option>
+                                        <option value="ml">Mililitros (ml)</option>
+                                        <option value="l">Litros (l)</option>
+                                        <option value="unidad">Unidad</option>
+                                        <option value="cucharada">Cucharada</option>
+                                        <option value="cucharadita">Cucharadita</option>
+                                        <option value="taza">Taza</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Notas</label>
+                                {% if i[5] == None %}
+                                <input type="text" class="notas-input" name="notas_ing[]" placeholder="No hay notas">
+                                {% else %}
+                                <input type="text" class="notas-input" name="notas_ing[]" value="{{i[5]}}">
+                                {% endif %}
+                            </div>
+                            <br>
+                            <div>
+                                <a class="btn-secondary" onclick="abrirModalIngrediente()">+ Añadir ingrediente
+                                    manualmente</a>
+                                <button type="button" class="btn-primary" onclick="eliminarIngrediente(this)">Eliminar
+                                    ingrediente</button>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn-primary" onclick="agregarIngrediente()">
+                    + Añadir Ingrediente
+                </button> <br> <br> <br>
+
+                <!-- Pasos -->
+                <h2>Pasos</h2> <br>
+                <div id="pasos-container">
+                    {% for p in pasos %}
+                    <div class="card-2">
+                        <div class="ingrediente-item">
+                            <h3>Paso {{p[0]}}</h3>
+                            <div class="form-group"> <br>
+                                <input type="text" class="notas-input" name="notas_pasos[]" value="{{p[1]}}">
+                            </div>
+                            <br>
+                            <button type="button" class="btn-secondary" onclick="eliminarPaso(this)">Eliminar
+                                paso</button>
+                        </div>
+                    </div>
+                    <br>
+                    {% endfor %}
+                </div><br>
+                <button type="button" class="btn-primary" onclick="agregarPaso()">
+                    + Añadir Paso
+                </button>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('inicio') }}" class="btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn-primary">Guardar receta</button>
+                </div>
+        </form>
+    </div>
+
+    <!-- Modal para nuevo ingrediente -->
+    <div id="modal-ingrediente" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nuevo Ingrediente</h2>
+                <span class="modal-close" onclick="cerrarModalIngrediente()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="form-nuevo-ingrediente">
+                    <div class="form-group">
+                        <label for="ing_nombre">Nombre *</label>
+                        <input type="text" id="ing_nombre" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ing_unidad">Unidad de medida *</label>
+                        <select id="ing_unidad" required>
+                            <option value="g">Gramos (g)</option>
+                            <option value="ml">Mililitros (ml)</option>
+                            <option value="unidad">Unidad</option>
+                            <option value="cucharada">Cucharada</option>
+                            <option value="cucharadita">Cucharadita</option>
+                            <option value="taza">Taza</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ing_categoria">Categoría</label>
+                        <input type="text" id="ing_categoria" placeholder="Ej: verduras, carnes, lácteos...">
+                    </div>
+
+                    <h3 class="detail-text">Información Nutricional (por 100g/ml)</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ing_calorias">Calorías (kcal)</label>
+                            <input type="number" id="ing_calorias" step="0.01" min="0" value="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ing_proteinas">Proteínas (g)</label>
+                            <input type="number" id="ing_proteinas" step="0.01" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ing_carbohidratos">Carbohidratos (g)</label>
+                            <input type="number" id="ing_carbohidratos" step="0.01" min="0" value="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ing_grasas">Grasas (g)</label>
+                            <input type="number" id="ing_grasas" step="0.01" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ing_fibra">Fibra (g)</label>
+                            <input type="number" id="ing_fibra" step="0.01" min="0" value="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ing_sodio">Sodio (mg)</label>
+                            <input type="number" id="ing_sodio" step="0.01" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="cerrarModalIngrediente()">Cancelar</button>
+                        <button type="button" class="btn-primary" onclick="guardarNuevoIngrediente()">
+                            Guardar Ingrediente
+                        </button>
+                    </div>
+            </div>
+        </div>
+    </div>
+    </form>
+    </div>
+    <script>
+        const ingredientesData = {{ ingredientes | tojson }};
+
+        function generarOpciones() {
+            return ingredientesData.map(i =>
+                `<option value="${i[0]}">${i[1]}</option>`
+            ).join('');
+        }
+
+        function abrirModalIngrediente() {
+            document.getElementById('modal-ingrediente').classList.add('active');
+        }
+
+        function cerrarModalIngrediente() {
+            document.getElementById('modal-ingrediente').classList.remove('active');
+        }
+
+        // Cerrar al hacer clic fuera del contenido
+        document.getElementById('modal-ingrediente').onclick = function (event) {
+            if (event.target === this) {
+                cerrarModalIngrediente();
+            }
+        }
+
+        let contadorIngredientes = 0;
+
+        function agregarIngrediente() {
+            contadorIngredientes++;
+            const container = document.getElementById('ingredientes-container');
+
+            container.insertAdjacentHTML('beforeend', `
+        <div class="card-2">
+            <div class="ingrediente-item">
+                <h3>Ingrediente ${contadorIngredientes}</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>‎</label>
+                        <select class="ingrediente-select" name="ingredientes_ids[]" required>
+                            ${generarOpciones()}
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 0 0 120px; min-width: 100px;">
+                        <label>Cantidad</label>
+                        <input type="number" class="cantidad-input" name="cantidades[]" placeholder="0" min="1">
+                    </div>
+                    <div class="form-group" style="flex: 0 0 140px; min-width: 110px;">
+                        <label>Unidad</label>
+                        <select class="unidad-select" name="unidades[]">
+                            <option value="g">Gramos (g)</option>
+                            <option value="kg">Kilogramos (kg)</option>
+                            <option value="ml">Mililitros (ml)</option>
+                            <option value="l">Litros (l)</option>
+                            <option value="unidad">Unidad</option>
+                            <option value="cucharada">Cucharada</option>
+                            <option value="cucharadita">Cucharadita</option>
+                            <option value="taza">Taza</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notas</label>
+                    <input type="text" class="notas-input" name="notas_ing[]" placeholder="Notas adicionales">
+                </div>
+                <br>
+                <div>   
+                    <a class="btn-secondary" onclick="abrirModalIngrediente()">+ Añadir ingrediente manualmente</a>
+                    <button type="button" class="btn-primary" onclick="eliminarIngrediente(this)">Eliminar ingrediente</button>
+                </div>
+            </div>
+        </div>
+        <br>
+    `);
+        }
+
+        function eliminarIngrediente(boton) {
+            const ingredienteCard = boton.closest('.card-2');
+            if (ingredienteCard) {
+                ingredienteCard.remove();
+                contadorIngredientes--;
+                renumerarIngredientes(); // Opcional: renumerar después de eliminar
+            }
+        }
+
+        // Opcional: renumerar ingredientes para que los números sean consecutivos
+        function renumerarIngredientes() {
+            const ingredientes = document.querySelectorAll('#ingredientes-container .card-2');
+            ingredientes.forEach((ingrediente, index) => {
+                const titulo = ingrediente.querySelector('h3');
+                if (titulo) {
+                    titulo.textContent = `Ingrediente ${index + 1}`;
+                }
+            });
+            contadorIngredientes = ingredientes.length;
+        }
+
+        let contadorPasos = 0;
+
+        function agregarPaso() {
+            contadorPasos++;
+            const container = document.getElementById('pasos-container');
+
+            container.insertAdjacentHTML('beforeend', `
+        <div class="card-2">
+            <div class="ingrediente-item">
+                <h3>Paso ${contadorPasos}</h3>
+                <div class="form-group"> <br>
+                    <input type="text" class="notas-input" name="notas_pasos[]" placeholder="Describe el paso ${contadorPasos}...">
+                </div>
+                <br>
+                <button type="button" class="btn-secondary" onclick="eliminarPaso(this)">Eliminar paso</button>
+            </div>
+        </div>
+        <br>
+    `);
+        }
+
+        function eliminarPaso(boton) {
+            const pasoCard = boton.closest('.card-2');
+            if (pasoCard) {
+                pasoCard.remove();
+                contadorPasos--;
+                renumerarPasos(); // Opcional: renumerar después de eliminar
+            }
+        }
+
+        function renumerarPasos() {
+            const pasos = document.querySelectorAll('#pasos-container .card-2');
+            pasos.forEach((paso, index) => {
+                const titulo = paso.querySelector('h3');
+                if (titulo) {
+                    titulo.textContent = `Paso ${index + 1}`;
+                }
+            });
+            contadorPasos = pasos.length;
+        }
+    </script>
+</body>
+
+</html>

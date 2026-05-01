@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from db import categoriaReceta, infoRecetaFiltrada, nombreIngredientes, guardarReceta, eliminarReceta, obtenerReceta, obtenerPasos
+from db import categoriasBD, infoRecetaFiltrada, nombreIngredientes, guardarReceta, eliminarReceta, obtenerReceta, obtenerPasos, obtenerIngredientes, infoNutriReceta, alergenosReceta
 
 app = Flask(__name__)
 
@@ -12,34 +12,43 @@ def inicio():
     dificultad = request.args.get('dificultad')
     receta_id = request.args.get('receta_id', type=int)  # ← AÑADIR
     
-    categorias = categoriaReceta()
+    categorias = categoriasBD()
     categorias = [cat[1] for cat in categorias]
     
     recetas, total = infoRecetaFiltrada(page, per_page, categoria, dificultad)
     total_pages = (total + per_page - 1) // per_page
     
-    # Cargar receta detallada si se pidió  ← AÑADIR
+    # Cargar receta detallada si se pidió
     receta_detalle = None
     pasosReceta = None
+    ingredientesReceta = None
+    nutriReceta = None
+    alergenoReceta = None
     if receta_id:
         receta_detalle = obtenerReceta(receta_id)
         pasosReceta = obtenerPasos(receta_id)
+        ingredientesReceta = obtenerIngredientes(receta_id)
+        nutriReceta = infoNutriReceta(receta_id)
+        alergenoReceta = alergenosReceta(receta_id)
     
-    return render_template('index.html', 
+    return render_template('index.html',
                          categorias=categorias, 
                          recetas=recetas, 
-                         page=page, 
+                         page=page,
                          total_pages=total_pages,
                          categoria_actual=categoria,
                          dificultad_actual=dificultad,
                          receta_detalle=receta_detalle,
-                         pasosReceta=pasosReceta)
+                         pasosReceta=pasosReceta,
+                         ingredientesReceta=ingredientesReceta,
+                         nutriReceta = nutriReceta, 
+                         alergenoReceta = alergenoReceta)
     
 from flask import redirect, url_for
 
 @app.route('/nueva-receta', methods=["GET", "POST"])
 def nueva_receta():
-    categorias = categoriaReceta()
+    categorias = categoriasBD()
 
     ingredientes = nombreIngredientes()
 
@@ -78,25 +87,25 @@ def ver_receta(id_receta):
     receta = obtenerReceta(id_receta)
     if receta is None:
         return "Receta no encontrada", 404
-    # Redirigir a inicio pasando el id como parámetro
     return redirect(url_for('inicio', receta_id=id_receta))
 
 @app.route('/editar-receta/<int:id_receta>', methods=["GET", "POST"])
 def editar_receta(id_receta):
-    categorias = categoriaReceta()
-    ingredientes = nombreIngredientes()
-    receta = obtenerReceta(id_receta)  # pendiente de crear en db.py
-
-    if request.method == "POST":
-        nombre = request.form.get("nombre")
-        categoria = request.form.get("categoria")
-        # ... resto de campos igual que en nueva_receta
-        
-        # actualizarReceta(id_receta, nombre, categoria, ...)  # pendiente de crear en db.py
-        return redirect(url_for("inicio"))
-
+    print(f"ID recibido: {id_receta}, tipo: {type(id_receta)}")
+    
+    categorias = categoriasBD()
+    ingredientes = obtenerIngredientes(id_receta)
+    loopIngredientes = nombreIngredientes()
+    receta = obtenerReceta(id_receta)
+    pasos = obtenerPasos(id_receta)
+    
+    print(f"Receta: {receta}")
+    print(f"Ingredientes: {ingredientes}")
+    print(f"Pasos: {pasos}")
+    
     return render_template('editarReceta.html', receta=receta, 
-                           categorias=categorias, ingredientes=ingredientes)
+                           categorias=categorias, ingredientes=ingredientes, 
+                           loopIngredientes=loopIngredientes, pasos=pasos)
 
 if __name__ == '__main__':
     app.run(debug=True)
