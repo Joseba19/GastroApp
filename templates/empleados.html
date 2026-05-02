@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>Empleados - GastroLab</title>
+    <style>
+        .empleado-avatar-lg {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #134074;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #EEF4ED;
+            flex-shrink: 0;
+        }
+
+        .empleado-info {
+            flex: 1;
+        }
+
+        .empleado-info strong {
+            display: block;
+            font-size: 14px;
+            color: #0B2545;
+        }
+
+        .empleado-info span {
+            font-size: 12px;
+            color: #13315C;
+        }
+
+        .badge-chef       { background: #dbeafe; color: #1e40af; }
+        .badge-sous-chef  { background: #ede9fe; color: #5b21b6; }
+        .badge-cocinero   { background: #d1fae5; color: #065f46; }
+        .badge-ayudante   { background: #fef9c3; color: #92400e; }
+        .badge-camarero   { background: #fce7f3; color: #9d174d; }
+        .badge-gerente    { background: #fee2e2; color: #991b1b; }
+
+        .stat-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 0;
+        }
+
+        .turno-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .turno-mañana  { background: #fef9c3; color: #92400e; }
+        .turno-tarde   { background: #dbeafe; color: #1e40af; }
+        .turno-noche   { background: #1e1b4b; color: #c7d2fe; }
+        .turno-partido { background: #f3e8ff; color: #6b21a8; }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo"><img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt=""></div>
+        <nav>
+            <a href="{{ url_for('inicio') }}"><img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20px" height="20px"> Dashboard</a>
+            <a href="{{ url_for('inicio') }}"><img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px" height="20px"> Recetas</a>
+            <a href="{{ url_for('ingredientes') }}"><img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px" height="20px"> Ingredientes</a>
+            <a href="{{ url_for('menus') }}"><img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px"> Menús</a>
+            <a href="{{ url_for('alergenos') }}"><img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px" height="20px"> Alérgenos</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/tabla.png') }}" alt="" width="20px" height="20px"> Información nutricional</a>
+            <a href="{{ url_for('empleados') }}" class="active"><img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px" height="20px"> Empleados</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/archivo.png') }}" alt="" width="20px" height="20px"> Contratos</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#">Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- BREADCRUMB -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('inicio') }}">Dashboard</a> › Empleados
+        </div>
+
+        <!-- RESUMEN -->
+        <div class="card">
+            <div class="section-header">
+                <div>
+                    <h2>Empleados</h2>
+                    <p>Gestiona el equipo del restaurante</p>
+                </div>
+                <button class="btn-primary" onclick="abrirModalEmpleado()">+ Nuevo empleado</button>
+            </div>
+            <div class="stat-row" style="margin-top:16px;">
+                <div class="stat-box">
+                    <div class="label">Total empleados</div>
+                    <div class="value">{{ total_empleados }}</div>
+                    <div style="font-size:11px; color:#13315C;">en plantilla</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Activos hoy</div>
+                    <div class="value">{{ empleados_activos }}</div>
+                    <div style="font-size:11px; color:#13315C;">de guardia</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Cocina</div>
+                    <div class="value">{{ empleados_cocina }}</div>
+                    <div style="font-size:11px; color:#13315C;">en brigada</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Sala</div>
+                    <div class="value">{{ empleados_sala }}</div>
+                    <div style="font-size:11px; color:#13315C;">en servicio</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA EMPLEADOS -->
+        <div class="card">
+            <div class="section-header">
+                <div>
+                    <h2>Listado de empleados</h2>
+                    <p>Todos los miembros del equipo</p>
+                </div>
+            </div>
+
+            <div class="filters">
+                <form method="GET" action="{{ url_for('empleados') }}">
+                    <input type="text" name="busqueda" placeholder="Buscar empleado..."
+                        value="{{ request.args.get('busqueda', '') }}">
+
+                    <select name="puesto" onchange="this.form.submit()">
+                        <option value="">Todos los puestos</option>
+                        <option value="Chef"      {% if puesto_actual == 'Chef' %}selected{% endif %}>Chef</option>
+                        <option value="Sous Chef" {% if puesto_actual == 'Sous Chef' %}selected{% endif %}>Sous Chef</option>
+                        <option value="Cocinero"  {% if puesto_actual == 'Cocinero' %}selected{% endif %}>Cocinero</option>
+                        <option value="Ayudante"  {% if puesto_actual == 'Ayudante' %}selected{% endif %}>Ayudante</option>
+                        <option value="Camarero"  {% if puesto_actual == 'Camarero' %}selected{% endif %}>Camarero</option>
+                        <option value="Gerente"   {% if puesto_actual == 'Gerente' %}selected{% endif %}>Gerente</option>
+                    </select>
+
+                    <select name="turno" onchange="this.form.submit()">
+                        <option value="">Todos los turnos</option>
+                        <option value="mañana"  {% if turno_actual == 'mañana' %}selected{% endif %}>Mañana</option>
+                        <option value="tarde"   {% if turno_actual == 'tarde' %}selected{% endif %}>Tarde</option>
+                        <option value="noche"   {% if turno_actual == 'noche' %}selected{% endif %}>Noche</option>
+                        <option value="partido" {% if turno_actual == 'partido' %}selected{% endif %}>Partido</option>
+                    </select>
+
+                    <select name="activo" onchange="this.form.submit()">
+                        <option value="">Todos los estados</option>
+                        <option value="1" {% if activo_actual == '1' %}selected{% endif %}>Activos</option>
+                        <option value="0" {% if activo_actual == '0' %}selected{% endif %}>Inactivos</option>
+                    </select>
+
+                    {% if puesto_actual or turno_actual or activo_actual %}
+                    <a href="{{ url_for('empleados') }}" class="btn-sm">Limpiar filtros</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>Puesto</th>
+                        <th>Turno</th>
+                        <th>Teléfono</th>
+                        <th>Fecha alta</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in empleados %}
+                    <tr>
+                        <td>
+                            <div class="employee-row">
+                                <span class="avatar-placeholder">
+                                    {{ emp[1][0] }}{{ emp[2][0] if emp[2] else '' }}
+                                </span>
+                                {{ emp[1] }} {{ emp[2] }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ emp[3]|lower|replace(' ', '-') }}">{{ emp[3] }}</span>
+                        </td>
+                        <td>
+                            <span class="turno-badge turno-{{ emp[4] }}">{{ emp[4]|capitalize if emp[4] else '—' }}</span>
+                        </td>
+                        <td style="font-size:12px; color:#13315C;">{{ emp[5] if emp[5] else '—' }}</td>
+                        <td style="font-size:12px; color:#13315C;">{{ emp[6] if emp[6] else '—' }}</td>
+                        <td>
+                            {% if emp[7] %}
+                            <span class="icon-check"><img src="{{ url_for('static', filename='img/icons/check.png') }}" alt="" width="22px" height="22px"></span>
+                            {% else %}
+                            <span class="icon-cross"><img src="{{ url_for('static', filename='img/icons/cruz.png') }}" alt="" width="22px" height="22px"></span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <form action="{{ url_for('ver_empleado', id_empleado=emp[0]) }}" method="GET">
+                                    <button class="btn-sm btn-view">
+                                        <img src="{{ url_for('static', filename='img/icons/ojo.png') }}" alt="" width="16px" height="16px">
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('editar_empleado', id_empleado=emp[0]) }}" method="GET">
+                                    <button class="btn-sm btn-edit">
+                                        <img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt="" width="16px" height="16px">
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('eliminar_empleado', id_empleado=emp[0]) }}" method="POST"
+                                    onsubmit="return confirm('¿Seguro que quieres eliminar este empleado?')">
+                                    <button type="submit" class="btn-sm btn-del">
+                                        <img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="Eliminar" width="16px" height="16px">
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align:center; color:#13315C; padding:20px;">No se encontraron empleados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <span>Página {{ page }} de {{ total_pages }}</span>
+                <div class="pages">
+                    {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if turno_actual %}&turno={{ turno_actual }}{% endif %}">
+                        <button>‹</button>
+                    </a>
+                    {% endif %}
+                    {% for p in range(1, total_pages + 1) %}
+                    <a href="?page={{ p }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if turno_actual %}&turno={{ turno_actual }}{% endif %}">
+                        <button class="{% if p == page %}active{% endif %}">{{ p }}</button>
+                    </a>
+                    {% endfor %}
+                    {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if turno_actual %}&turno={{ turno_actual }}{% endif %}">
+                        <button>›</button>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- DETALLE EMPLEADO -->
+        {% if empleado_detalle %}
+        <div id="modal-detalle-emp" class="modal active">
+            <div class="modal-content" style="max-width:620px;">
+                <div class="modal-header">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div class="empleado-avatar-lg">{{ empleado_detalle[1][0] }}{{ empleado_detalle[2][0] if empleado_detalle[2] else '' }}</div>
+                        <div>
+                            <h2 style="margin-bottom:2px;">{{ empleado_detalle[1] }} {{ empleado_detalle[2] }}</h2>
+                            <span style="font-size:13px; color:#8DA9C4;">{{ empleado_detalle[3] }}</span>
+                        </div>
+                    </div>
+                    <span class="modal-close" onclick="cerrarModalDetalle()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <table class="nutricion-table">
+                        <tr>
+                            <td>Puesto</td>
+                            <td><span class="badge badge-{{ empleado_detalle[3]|lower|replace(' ', '-') }}">{{ empleado_detalle[3] }}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Turno</td>
+                            <td><span class="turno-badge turno-{{ empleado_detalle[4] }}">{{ empleado_detalle[4]|capitalize if empleado_detalle[4] else '—' }}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Teléfono</td>
+                            <td>{{ empleado_detalle[5] if empleado_detalle[5] else '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Email</td>
+                            <td>{{ empleado_detalle[6] if empleado_detalle[6] else '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Fecha de alta</td>
+                            <td>{{ empleado_detalle[7] if empleado_detalle[7] else '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Salario</td>
+                            <td>{{ '%.2f'|format(empleado_detalle[8]) }} €/mes</td>
+                        </tr>
+                        <tr>
+                            <td>Estado</td>
+                            <td>
+                                {% if empleado_detalle[9] %}
+                                <span class="badge" style="background:#d1fae5; color:#065f46;">Activo</span>
+                                {% else %}
+                                <span class="badge" style="background:#fee2e2; color:#991b1b;">Inactivo</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+
+                    {% if empleado_detalle[10] %}
+                    <div style="margin-top:14px;">
+                        <h3 style="font-size:14px; font-weight:700; margin-bottom:8px; border-bottom:1px solid #8DA9C4; padding-bottom:6px;">
+                            Notas
+                        </h3>
+                        <p style="font-size:13px; color:#13315C; line-height:1.5;">{{ empleado_detalle[10] }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="modal-actions">
+                        <button class="btn-secondary" onclick="cerrarModalDetalle()">Cerrar</button>
+                        <a href="{{ url_for('editar_empleado', id_empleado=empleado_detalle[0]) }}" class="btn-primary"
+                            style="text-decoration:none; display:inline-flex; align-items:center;">
+                            Editar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- MODAL NUEVO EMPLEADO -->
+        <div id="modal-empleado" class="modal">
+            <div class="modal-content" style="max-width:640px;">
+                <div class="modal-header">
+                    <h2>Nuevo Empleado</h2>
+                    <span class="modal-close" onclick="cerrarModalEmpleado()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('empleados') }}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emp_nombre">Nombre *</label>
+                                <input type="text" id="emp_nombre" name="nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="emp_apellidos">Apellidos</label>
+                                <input type="text" id="emp_apellidos" name="apellidos">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emp_puesto">Puesto *</label>
+                                <select id="emp_puesto" name="puesto" required>
+                                    <option value="">Selecciona un puesto</option>
+                                    <option value="Chef">Chef</option>
+                                    <option value="Sous Chef">Sous Chef</option>
+                                    <option value="Cocinero">Cocinero</option>
+                                    <option value="Ayudante">Ayudante de cocina</option>
+                                    <option value="Camarero">Camarero/a</option>
+                                    <option value="Gerente">Gerente</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="emp_turno">Turno</label>
+                                <select id="emp_turno" name="turno">
+                                    <option value="mañana">Mañana</option>
+                                    <option value="tarde">Tarde</option>
+                                    <option value="noche">Noche</option>
+                                    <option value="partido">Partido</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emp_telefono">Teléfono</label>
+                                <input type="tel" id="emp_telefono" name="telefono" placeholder="Ej: 612345678">
+                            </div>
+                            <div class="form-group">
+                                <label for="emp_email">Email</label>
+                                <input type="email" id="emp_email" name="email" placeholder="nombre@email.com">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emp_fecha_alta">Fecha de alta</label>
+                                <input type="date" id="emp_fecha_alta" name="fecha_alta">
+                            </div>
+                            <div class="form-group">
+                                <label for="emp_salario">Salario mensual (€)</label>
+                                <input type="number" id="emp_salario" name="salario" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emp_notas">Notas</label>
+                            <textarea id="emp_notas" name="notas" placeholder="Observaciones, habilidades especiales..."></textarea>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="emp_activo" name="activo" value="1" checked>
+                            <label for="emp_activo">Empleado activo</label>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="cerrarModalEmpleado()">Cancelar</button>
+                            <button type="submit" class="btn-primary">Guardar Empleado</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <footer>© 2024 Gestión de Recetas - Todos los derechos reservados</footer>
+    </div>
+
+    <script>
+        function abrirModalEmpleado() {
+            document.getElementById('modal-empleado').classList.add('active');
+        }
+
+        function cerrarModalEmpleado() {
+            document.getElementById('modal-empleado').classList.remove('active');
+        }
+
+        function cerrarModalDetalle() {
+            const modal = document.getElementById('modal-detalle-emp');
+            if (modal) modal.classList.remove('active');
+        }
+
+        document.getElementById('modal-empleado').onclick = function (event) {
+            if (event.target === this) cerrarModalEmpleado();
+        }
+    </script>
+
+</body>
+</html>

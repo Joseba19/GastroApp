@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>Alérgenos - GastroLab</title>
+    <style>
+        .alergeno-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            border: 1px solid #8DA9C4;
+            border-radius: 6px;
+            background: #F5F8F3;
+            margin-bottom: 8px;
+        }
+
+        .alergeno-icon {
+            width: 38px;
+            height: 38px;
+            background: #134074;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #EEF4ED;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .alergeno-info {
+            flex: 1;
+        }
+
+        .alergeno-info strong {
+            display: block;
+            font-size: 14px;
+            color: #0B2545;
+        }
+
+        .alergeno-info span {
+            font-size: 12px;
+            color: #13315C;
+        }
+
+        .alergeno-recetas {
+            font-size: 12px;
+            color: #134074;
+            font-weight: 600;
+        }
+
+        .semaforo {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+
+        .semaforo-alto { background: #dc2626; }
+        .semaforo-medio { background: #d97706; }
+        .semaforo-bajo { background: #16a34a; }
+
+        .resumen-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo"><img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt=""></div>
+        <nav>
+            <a href="{{ url_for('inicio') }}"><img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20px" height="20px"> Dashboard</a>
+            <a href="{{ url_for('inicio') }}"><img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px" height="20px"> Recetas</a>
+            <a href="{{ url_for('ingredientes') }}"><img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px" height="20px"> Ingredientes</a>
+            <a href="{{ url_for('menus') }}"><img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px"> Menús</a>
+            <a href="{{ url_for('alergenos') }}" class="active"><img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px" height="20px"> Alérgenos</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/tabla.png') }}" alt="" width="20px" height="20px"> Información nutricional</a>
+            <a href="{{ url_for('empleados') }}"><img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px" height="20px"> Empleados</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/archivo.png') }}" alt="" width="20px" height="20px"> Contratos</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#">Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- BREADCRUMB -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('inicio') }}">Dashboard</a> › Alérgenos
+        </div>
+
+        <!-- RESUMEN TARJETAS -->
+        <div class="card">
+            <div class="section-header">
+                <div>
+                    <h2>Resumen de Alérgenos</h2>
+                    <p>Presencia de alérgenos en el catálogo de recetas</p>
+                </div>
+                <button class="btn-primary" onclick="abrirModalAlergeno()">+ Nuevo alérgeno</button>
+            </div>
+            <div class="resumen-grid" style="margin-top:16px;">
+                {% for alergeno in resumen_alergenos %}
+                <div class="stat-box">
+                    <div class="label">{{ alergeno[0] }}</div>
+                    <div class="value">{{ alergeno[1] }}</div>
+                    <div style="font-size:11px; color:#13315C;">recetas afectadas</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- TABLA ALÉRGENOS POR RECETA -->
+        <div class="card">
+            <div class="section-header">
+                <div>
+                    <h2>Alérgenos por Receta</h2>
+                    <p>Detalle de alérgenos presentes en cada receta</p>
+                </div>
+            </div>
+
+            <div class="filters">
+                <form method="GET" action="{{ url_for('alergenos') }}">
+                    <input type="text" name="busqueda" placeholder="Buscar receta..."
+                        value="{{ request.args.get('busqueda', '') }}">
+
+                    <select name="alergeno" onchange="this.form.submit()">
+                        <option value="">Todos los alérgenos</option>
+                        {% for a in lista_alergenos %}
+                        <option value="{{ a }}" {% if alergeno_actual == a %}selected{% endif %}>{{ a }}</option>
+                        {% endfor %}
+                    </select>
+
+                    {% if alergeno_actual %}
+                    <a href="{{ url_for('alergenos') }}" class="btn-sm">Limpiar filtros</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Receta</th>
+                        <th>Categoría</th>
+                        <th>Alérgenos presentes</th>
+                        <th>Nivel de riesgo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for receta in recetas_alergenos %}
+                    <tr>
+                        <td>{{ receta[1] }}</td>
+                        <td>{{ receta[2] if receta[2] else '—' }}</td>
+                        <td>
+                            <div class="alergenos-list" style="margin-top:0; gap:6px;">
+                                {% if receta[3] %}
+                                    {% for a in receta[3].split(',') %}
+                                    <span class="alergeno-badge" style="padding:3px 10px; font-size:11px;">{{ a.strip() }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span style="color:#13315C;">Sin alérgenos</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {% set num = receta[3].split(',')|length if receta[3] else 0 %}
+                            {% if num >= 4 %}
+                            <span><span class="semaforo semaforo-alto"></span>Alto</span>
+                            {% elif num >= 2 %}
+                            <span><span class="semaforo semaforo-medio"></span>Medio</span>
+                            {% else %}
+                            <span><span class="semaforo semaforo-bajo"></span>Bajo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <form action="{{ url_for('ver_receta', id_receta=receta[0]) }}" method="GET">
+                                    <button class="btn-sm btn-view">
+                                        <img src="{{ url_for('static', filename='img/icons/ojo.png') }}" alt="" width="16px" height="16px">
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#13315C; padding:20px;">No se encontraron recetas.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <span>Página {{ page }} de {{ total_pages }}</span>
+                <div class="pages">
+                    {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}{% if alergeno_actual %}&alergeno={{ alergeno_actual }}{% endif %}">
+                        <button>‹</button>
+                    </a>
+                    {% endif %}
+                    {% for p in range(1, total_pages + 1) %}
+                    <a href="?page={{ p }}{% if alergeno_actual %}&alergeno={{ alergeno_actual }}{% endif %}">
+                        <button class="{% if p == page %}active{% endif %}">{{ p }}</button>
+                    </a>
+                    {% endfor %}
+                    {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}{% if alergeno_actual %}&alergeno={{ alergeno_actual }}{% endif %}">
+                        <button>›</button>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- CATÁLOGO DE ALÉRGENOS OFICIALES -->
+        <div class="card">
+            <div class="section-header">
+                <div>
+                    <h2>Catálogo de Alérgenos</h2>
+                    <p>Los 14 alérgenos de declaración obligatoria según el Reglamento UE 1169/2011</p>
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:12px;">
+                {% set alergenos_ue = [
+                    ('Gluten', 'Cereales que contienen gluten: trigo, centeno, cebada, avena...'),
+                    ('Crustáceos', 'Cangrejos, gambas, langostas, langostinos...'),
+                    ('Huevo', 'Huevos y productos derivados del huevo'),
+                    ('Pescado', 'Pescados y productos a base de pescado'),
+                    ('Cacahuetes', 'Cacahuetes y productos a base de cacahuete'),
+                    ('Soja', 'Soja y productos a base de soja'),
+                    ('Lácteos', 'Leche y sus derivados, incluida la lactosa'),
+                    ('Frutos de cáscara', 'Almendras, avellanas, nueces, anacardos, pistachos...'),
+                    ('Apio', 'Apio y productos derivados'),
+                    ('Mostaza', 'Mostaza y productos derivados'),
+                    ('Sésamo', 'Granos de sésamo y productos a base de sésamo'),
+                    ('Dióxido de azufre', 'Sulfitos en concentraciones superiores a 10 mg/kg'),
+                    ('Altramuces', 'Altramuces y productos a base de altramuces'),
+                    ('Moluscos', 'Mejillones, almejas, ostras, calamares...')
+                ] %}
+                {% for nombre, descripcion in alergenos_ue %}
+                <div class="alergeno-card">
+                    <div class="alergeno-icon">{{ nombre[0] }}</div>
+                    <div class="alergeno-info">
+                        <strong>{{ nombre }}</strong>
+                        <span>{{ descripcion }}</span>
+                    </div>
+                    {% set count = recetas_alergenos | selectattr('3') | list | length %}
+                    <div class="alergeno-recetas">
+                        {% for item in resumen_alergenos %}
+                            {% if item[0] == nombre %}
+                            {{ item[1] }} recetas
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- MODAL NUEVO ALÉRGENO (para ingredientes) -->
+        <div id="modal-alergeno" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Asignar Alérgeno</h2>
+                    <span class="modal-close" onclick="cerrarModalAlergeno()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('alergenos') }}">
+                        <div class="form-group">
+                            <label for="ingrediente_sel">Ingrediente *</label>
+                            <select id="ingrediente_sel" name="id_ingrediente" required>
+                                <option value="">Selecciona un ingrediente</option>
+                                {% for ing in todos_ingredientes %}
+                                <option value="{{ ing[0] }}">{{ ing[1] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="alergeno_sel">Alérgeno *</label>
+                            <select id="alergeno_sel" name="alergeno" required>
+                                <option value="">Selecciona un alérgeno</option>
+                                <option value="Gluten">Gluten</option>
+                                <option value="Crustáceos">Crustáceos</option>
+                                <option value="Huevo">Huevo</option>
+                                <option value="Pescado">Pescado</option>
+                                <option value="Cacahuetes">Cacahuetes</option>
+                                <option value="Soja">Soja</option>
+                                <option value="Lácteos">Lácteos</option>
+                                <option value="Frutos de cáscara">Frutos de cáscara</option>
+                                <option value="Apio">Apio</option>
+                                <option value="Mostaza">Mostaza</option>
+                                <option value="Sésamo">Sésamo</option>
+                                <option value="Dióxido de azufre">Dióxido de azufre</option>
+                                <option value="Altramuces">Altramuces</option>
+                                <option value="Moluscos">Moluscos</option>
+                            </select>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="cerrarModalAlergeno()">Cancelar</button>
+                            <button type="submit" class="btn-primary">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <footer>© 2024 Gestión de Recetas - Todos los derechos reservados</footer>
+    </div>
+
+    <script>
+        function abrirModalAlergeno() {
+            document.getElementById('modal-alergeno').classList.add('active');
+        }
+
+        function cerrarModalAlergeno() {
+            document.getElementById('modal-alergeno').classList.remove('active');
+        }
+
+        document.getElementById('modal-alergeno').onclick = function (event) {
+            if (event.target === this) cerrarModalAlergeno();
+        }
+    </script>
+
+</body>
+</html>

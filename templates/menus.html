@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>Menús - GastroLab</title>
+    <style>
+        .menu-receta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border: 1px solid #8DA9C4;
+            border-radius: 4px;
+            background: #EEF4ED;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .menu-receta-row span {
+            flex: 1;
+            color: #0B2545;
+        }
+
+        .menu-receta-row .badge {
+            margin-right: 8px;
+        }
+
+        .badge-diario   { background: #dbeafe; color: #1e40af; }
+        .badge-semanal  { background: #ede9fe; color: #5b21b6; }
+        .badge-especial { background: #fce7f3; color: #9d174d; }
+        .badge-temporal { background: #fef9c3; color: #92400e; }
+
+        .menu-detalle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .receta-drag-handle {
+            cursor: grab;
+            color: #8DA9C4;
+            font-size: 16px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo"><img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt=""></div>
+        <nav>
+            <a href="{{ url_for('inicio') }}"><img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20px" height="20px"> Dashboard</a>
+            <a href="{{ url_for('inicio') }}"><img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px" height="20px"> Recetas</a>
+            <a href="{{ url_for('ingredientes') }}"><img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px" height="20px"> Ingredientes</a>
+            <a href="{{ url_for('menus') }}" class="active"><img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px"> Menús</a>
+            <a href="{{ url_for('alergenos') }}"><img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px" height="20px"> Alérgenos</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/tabla.png') }}" alt="" width="20px" height="20px"> Información nutricional</a>
+            <a href="{{ url_for('empleados') }}"><img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px" height="20px"> Empleados</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/archivo.png') }}" alt="" width="20px" height="20px"> Contratos</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#">Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- BREADCRUMB -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('inicio') }}">Dashboard</a> › Menús
+        </div>
+
+        <!-- TABLA MENÚS -->
+        <div class="card">
+            <div class="section-header">
+                <div>
+                    <h2>Menús</h2>
+                    <p>Gestiona los menús del restaurante</p>
+                </div>
+                <button class="btn-primary" onclick="abrirModalMenu()">+ Nuevo menú</button>
+            </div>
+
+            <div class="filters">
+                <form method="GET" action="{{ url_for('menus') }}">
+                    <input type="text" name="busqueda" placeholder="Buscar menú..."
+                        value="{{ request.args.get('busqueda', '') }}">
+
+                    <select name="tipo" onchange="this.form.submit()">
+                        <option value="">Todos los tipos</option>
+                        <option value="diario"   {% if tipo_actual == 'diario' %}selected{% endif %}>Diario</option>
+                        <option value="semanal"  {% if tipo_actual == 'semanal' %}selected{% endif %}>Semanal</option>
+                        <option value="especial" {% if tipo_actual == 'especial' %}selected{% endif %}>Especial</option>
+                        <option value="temporal" {% if tipo_actual == 'temporal' %}selected{% endif %}>Temporal</option>
+                    </select>
+
+                    <select name="activo" onchange="this.form.submit()">
+                        <option value="">Todos los estados</option>
+                        <option value="1" {% if activo_actual == '1' %}selected{% endif %}>Activos</option>
+                        <option value="0" {% if activo_actual == '0' %}selected{% endif %}>Inactivos</option>
+                    </select>
+
+                    {% if tipo_actual or activo_actual %}
+                    <a href="{{ url_for('menus') }}" class="btn-sm">Limpiar filtros</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre del menú</th>
+                        <th>Tipo</th>
+                        <th>Nº Recetas</th>
+                        <th>Precio</th>
+                        <th>Vigencia</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for menu in menus %}
+                    <tr>
+                        <td><strong>{{ menu[1] }}</strong></td>
+                        <td>
+                            <span class="badge badge-{{ menu[2] }}">
+                                {{ menu[2]|capitalize }}
+                            </span>
+                        </td>
+                        <td>{{ menu[3] }}</td>
+                        <td>{{ '%.2f'|format(menu[4]) }} €</td>
+                        <td style="font-size:12px; color:#13315C;">
+                            {% if menu[5] and menu[6] %}
+                            {{ menu[5] }} → {{ menu[6] }}
+                            {% else %}
+                            Sin fecha límite
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if menu[7] %}
+                            <span class="badge" style="background:#d1fae5; color:#065f46;">Activo</span>
+                            {% else %}
+                            <span class="badge" style="background:#fee2e2; color:#991b1b;">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <form action="{{ url_for('ver_menu', id_menu=menu[0]) }}" method="GET">
+                                    <button class="btn-sm btn-view">
+                                        <img src="{{ url_for('static', filename='img/icons/ojo.png') }}" alt="" width="16px" height="16px">
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('editar_menu', id_menu=menu[0]) }}" method="GET">
+                                    <button class="btn-sm btn-edit">
+                                        <img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt="" width="16px" height="16px">
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('eliminar_menu', id_menu=menu[0]) }}" method="POST"
+                                    onsubmit="return confirm('¿Seguro que quieres eliminar este menú?')">
+                                    <button type="submit" class="btn-sm btn-del">
+                                        <img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="Eliminar" width="16px" height="16px">
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align:center; color:#13315C; padding:20px;">No se encontraron menús.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <span>Página {{ page }} de {{ total_pages }}</span>
+                <div class="pages">
+                    {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}{% if tipo_actual %}&tipo={{ tipo_actual }}{% endif %}">
+                        <button>‹</button>
+                    </a>
+                    {% endif %}
+                    {% for p in range(1, total_pages + 1) %}
+                    <a href="?page={{ p }}{% if tipo_actual %}&tipo={{ tipo_actual }}{% endif %}">
+                        <button class="{% if p == page %}active{% endif %}">{{ p }}</button>
+                    </a>
+                    {% endfor %}
+                    {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}{% if tipo_actual %}&tipo={{ tipo_actual }}{% endif %}">
+                        <button>›</button>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- DETALLE MENÚ -->
+        {% if menu_detalle %}
+        <div id="modal-detalle-menu" class="modal active">
+            <div class="modal-content" style="max-width:720px;">
+                <div class="modal-header">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <h2>{{ menu_detalle[1] }}</h2>
+                        <span class="badge badge-{{ menu_detalle[2] }}">{{ menu_detalle[2]|capitalize }}</span>
+                    </div>
+                    <span class="modal-close" onclick="cerrarModalDetalle()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="detail-meta">
+                        <span>🍽️ {{ recetas_menu|length }} recetas</span>
+                        <span>💶 {{ '%.2f'|format(menu_detalle[4]) }} €</span>
+                        {% if menu_detalle[5] and menu_detalle[6] %}
+                        <span>📅 {{ menu_detalle[5] }} → {{ menu_detalle[6] }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if menu_detalle[8] %}
+                    <p style="color:#13315C; font-size:13px; margin-bottom:14px;">{{ menu_detalle[8] }}</p>
+                    {% endif %}
+
+                    <h3 style="font-size:14px; font-weight:700; margin-bottom:10px; border-bottom:1px solid #8DA9C4; padding-bottom:6px;">
+                        Recetas incluidas
+                    </h3>
+
+                    {% for receta in recetas_menu %}
+                    <div class="menu-receta-row">
+                        <span>{{ loop.index }}. {{ receta[1] }}</span>
+                        <span class="badge badge-{{ receta[2] }}" style="margin-right:8px;">{{ receta[2] if receta[2] else '' }}</span>
+                        <span style="color:#13315C; font-size:12px;">{{ receta[3] }} min</span>
+                    </div>
+                    {% else %}
+                    <p style="color:#13315C; font-size:13px;">Este menú no tiene recetas asignadas.</p>
+                    {% endfor %}
+
+                    <div class="modal-actions">
+                        <button class="btn-secondary" onclick="cerrarModalDetalle()">Cerrar</button>
+                        <a href="{{ url_for('editar_menu', id_menu=menu_detalle[0]) }}" class="btn-primary"
+                            style="text-decoration:none; display:inline-flex; align-items:center;">
+                            Editar menú
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- MODAL NUEVO MENÚ -->
+        <div id="modal-menu" class="modal">
+            <div class="modal-content" style="max-width:680px;">
+                <div class="modal-header">
+                    <h2>Nuevo Menú</h2>
+                    <span class="modal-close" onclick="cerrarModalMenu()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('menus') }}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="menu_nombre">Nombre del menú *</label>
+                                <input type="text" id="menu_nombre" name="nombre" required placeholder="Ej: Menú del día">
+                            </div>
+                            <div class="form-group">
+                                <label for="menu_tipo">Tipo *</label>
+                                <select id="menu_tipo" name="tipo" required>
+                                    <option value="diario">Diario</option>
+                                    <option value="semanal">Semanal</option>
+                                    <option value="especial">Especial</option>
+                                    <option value="temporal">Temporal</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="menu_precio">Precio (€)</label>
+                                <input type="number" id="menu_precio" name="precio" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="form-group">
+                                <label>Estado</label>
+                                <div class="checkbox-group" style="margin-top:10px;">
+                                    <input type="checkbox" id="menu_activo" name="activo" value="1" checked>
+                                    <label for="menu_activo">Menú activo</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="menu_fecha_inicio">Fecha inicio</label>
+                                <input type="date" id="menu_fecha_inicio" name="fecha_inicio">
+                            </div>
+                            <div class="form-group">
+                                <label for="menu_fecha_fin">Fecha fin</label>
+                                <input type="date" id="menu_fecha_fin" name="fecha_fin">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="menu_descripcion">Descripción</label>
+                            <textarea id="menu_descripcion" name="descripcion" placeholder="Descripción del menú..."></textarea>
+                        </div>
+
+                        <h3 style="font-size:14px; font-weight:600; margin:14px 0 10px; border-bottom:1px solid #8DA9C4; padding-bottom:6px; color:#0B2545;">
+                            Recetas del menú
+                        </h3>
+
+                        <div id="recetas-menu-container"></div>
+
+                        <button type="button" class="btn-primary" onclick="agregarRecetaMenu()" style="margin-bottom:12px;">
+                            + Añadir receta
+                        </button>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="cerrarModalMenu()">Cancelar</button>
+                            <button type="submit" class="btn-primary">Guardar Menú</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <footer>© 2024 Gestión de Recetas - Todos los derechos reservados</footer>
+    </div>
+
+    <script>
+        const todasRecetas = JSON.parse('{{ todas_recetas | tojson | safe }}');
+
+        function generarOpcionesRecetas() {
+            return todasRecetas.map(r => `<option value="${r[0]}">${r[1]}</option>`).join('');
+        }
+
+        function abrirModalMenu() {
+            document.getElementById('modal-menu').classList.add('active');
+        }
+
+        function cerrarModalMenu() {
+            document.getElementById('modal-menu').classList.remove('active');
+        }
+
+        function cerrarModalDetalle() {
+            const modal = document.getElementById('modal-detalle-menu');
+            if (modal) modal.classList.remove('active');
+        }
+
+        document.getElementById('modal-menu').onclick = function (event) {
+            if (event.target === this) cerrarModalMenu();
+        }
+
+        let contadorRecetasMenu = 0;
+
+        function agregarRecetaMenu() {
+            contadorRecetasMenu++;
+            const container = document.getElementById('recetas-menu-container');
+            container.insertAdjacentHTML('beforeend', `
+                <div class="card-2" style="margin-bottom:8px;">
+                    <div class="form-row" style="align-items:center; margin-bottom:0;">
+                        <div class="form-group" style="flex:3;">
+                            <label>Receta ${contadorRecetasMenu}</label>
+                            <select name="recetas_ids[]" required>
+                                <option value="">Selecciona una receta</option>
+                                ${generarOpcionesRecetas()}
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>Plato</label>
+                            <select name="tipo_plato[]">
+                                <option value="primero">Primero</option>
+                                <option value="segundo">Segundo</option>
+                                <option value="postre">Postre</option>
+                                <option value="entrante">Entrante</option>
+                            </select>
+                        </div>
+                        <div style="padding-top:22px; flex-shrink:0;">
+                            <button type="button" class="btn-sm btn-del" onclick="this.closest('.card-2').remove()">
+                                <img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="" width="14px" height="14px">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+    </script>
+
+</body>
+</html>

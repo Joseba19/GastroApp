@@ -210,7 +210,7 @@
 
                 <div class="form-actions">
                     <a href="{{ url_for('inicio') }}" class="btn-secondary">Cancelar</a>
-                    <button type="submit" class="btn-primary">Guardar receta</button>
+                    <button type="submit" class="btn-primary">Actualizar receta</button>
                 </div>
         </form>
     </div>
@@ -223,15 +223,15 @@
                 <span class="modal-close" onclick="cerrarModalIngrediente()">&times;</span>
             </div>
             <div class="modal-body">
-                <form id="form-nuevo-ingrediente">
+                <form id="form-nuevo-ingrediente" method="POST">
                     <div class="form-group">
                         <label for="ing_nombre">Nombre *</label>
-                        <input type="text" id="ing_nombre" required>
+                        <input type="text" id="ing_nombre" name="nombreIng" required>
                     </div>
 
                     <div class="form-group">
                         <label for="ing_unidad">Unidad de medida *</label>
-                        <select id="ing_unidad" required>
+                        <select id="ing_unidad" name="unidad" required>
                             <option value="g">Gramos (g)</option>
                             <option value="ml">Mililitros (ml)</option>
                             <option value="unidad">Unidad</option>
@@ -243,7 +243,7 @@
 
                     <div class="form-group">
                         <label for="ing_categoria">Categoría</label>
-                        <input type="text" id="ing_categoria" placeholder="Ej: verduras, carnes, lácteos...">
+                        <input type="text" id="ing_categoria" name="categoria" placeholder="Ej: verduras, carnes, lácteos...">
                     </div>
 
                     <h3 class="detail-text">Información Nutricional (por 100g/ml)</h3>
@@ -251,52 +251,52 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="ing_calorias">Calorías (kcal)</label>
-                            <input type="number" id="ing_calorias" step="0.01" min="0" value="0">
+                            <input type="number" id="ing_calorias" name="calorias" step="0.01" min="0" placeholder="0">
                         </div>
 
                         <div class="form-group">
                             <label for="ing_proteinas">Proteínas (g)</label>
-                            <input type="number" id="ing_proteinas" step="0.01" min="0" value="0">
+                            <input type="number" id="ing_proteinas" name="proteinas" step="0.01" min="0" placeholder="0">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="ing_carbohidratos">Carbohidratos (g)</label>
-                            <input type="number" id="ing_carbohidratos" step="0.01" min="0" value="0">
+                            <input type="number" id="ing_carbohidratos" name="carbohidratos" step="0.01" min="0" placeholder="0">
                         </div>
 
                         <div class="form-group">
                             <label for="ing_grasas">Grasas (g)</label>
-                            <input type="number" id="ing_grasas" step="0.01" min="0" value="0">
+                            <input type="number" id="ing_grasas" name="grasas" step="0.01" min="0" placeholder="0">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="ing_fibra">Fibra (g)</label>
-                            <input type="number" id="ing_fibra" step="0.01" min="0" value="0">
+                            <input type="number" id="ing_fibra" name="fibra" step="0.01" min="0" placeholder="0">
                         </div>
 
                         <div class="form-group">
                             <label for="ing_sodio">Sodio (mg)</label>
-                            <input type="number" id="ing_sodio" step="0.01" min="0" value="0">
+                            <input type="number" id="ing_sodio" name="sodio" step="0.01" min="0" placeholder="0">
                         </div>
                     </div>
 
                     <div class="modal-actions">
                         <button type="button" class="btn-secondary" onclick="cerrarModalIngrediente()">Cancelar</button>
-                        <button type="button" class="btn-primary" onclick="guardarNuevoIngrediente()">
+                        <button type="submit" class="btn-primary">
                             Guardar Ingrediente
                         </button>
                     </div>
+                </form>
             </div>
         </div>
     </div>
-    </form>
-    </div>
+
     <script>
-        const ingredientesData = {{ ingredientes | tojson }};
+        const ingredientesData = JSON.parse('{{ ingredientes | tojson | safe }}');
 
         function generarOpciones() {
             return ingredientesData.map(i =>

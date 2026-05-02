@@ -112,7 +112,7 @@
                                             width="16px" height="16px"></button>
                                 </form>
 
-                                <form action="{{ url_for('editar_receta', id_receta=dato[0]) }}" method="POST">
+                                <form action="{{ url_for('editar_receta', id_receta=dato[0]) }}" method="GET">
                                     <button class="btn-sm btn-view"><img
                                             src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""
                                             width="16px" height="16px"></button>
@@ -259,11 +259,11 @@
                                 <h3>Alérgenos</h3>
                                 <div class="alergenos-list">
                                     {% if alergenoReceta != None%}
-                                        {% for alergeno in alergenoReceta %}
-                                        <span class="alergeno-badge">{{alergeno}}</span>
-                                        {% endfor %}
+                                    {% for alergeno in alergenoReceta %}
+                                    <span class="alergeno-badge">{{alergeno}}</span>
+                                    {% endfor %}
                                     {% else%}
-                                        <p>Esta receta no contiene alergenos</p>
+                                    <p>Esta receta no contiene alergenos</p>
                                     {% endif %}
                                 </div>
                             </div>
@@ -287,7 +287,7 @@
 
             <!-- Ingredientes -->
             <div class="card mini-card">
-                <h3>Ingredientes <button>+</button></h3>
+                <h3>Ingredientes <button type="button" onclick="abrirModalIngrediente()">+</button></h3>
                 <table class="mini-table">
                     <thead>
                         <tr>
@@ -335,6 +335,94 @@
                     </tbody>
                 </table>
                 <a href="#" class="see-all">Ver todos</a>
+            </div>
+
+            <!-- Modal para nuevo ingrediente -->
+            <div id="modal-ingrediente" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Nuevo Ingrediente</h2>
+                        <span class="modal-close" onclick="cerrarModalIngrediente()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-nuevo-ingrediente" method="POST">
+                            <div class="form-group">
+                                <label for="ing_nombre">Nombre *</label>
+                                <input type="text" id="ing_nombre" name="nombreIng" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ing_unidad">Unidad de medida *</label>
+                                <select id="ing_unidad" name="unidad" required>
+                                    <option value="g">Gramos (g)</option>
+                                    <option value="ml">Mililitros (ml)</option>
+                                    <option value="unidad">Unidad</option>
+                                    <option value="cucharada">Cucharada</option>
+                                    <option value="cucharadita">Cucharadita</option>
+                                    <option value="taza">Taza</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ing_categoria">Categoría</label>
+                                <input type="text" id="ing_categoria" name="categoria"
+                                    placeholder="Ej: verduras, carnes, lácteos...">
+                            </div>
+
+                            <h3 class="detail-text">Información Nutricional (por 100g/ml)</h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="ing_calorias">Calorías (kcal)</label>
+                                    <input type="number" id="ing_calorias" name="calorias" step="0.01" min="0"
+                                        placeholder="0">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ing_proteinas">Proteínas (g)</label>
+                                    <input type="number" id="ing_proteinas" name="proteinas" step="0.01" min="0"
+                                        placeholder="0">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="ing_carbohidratos">Carbohidratos (g)</label>
+                                    <input type="number" id="ing_carbohidratos" name="carbohidratos" step="0.01" min="0"
+                                        placeholder="0">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ing_grasas">Grasas (g)</label>
+                                    <input type="number" id="ing_grasas" name="grasas" step="0.01" min="0"
+                                        placeholder="0">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="ing_fibra">Fibra (g)</label>
+                                    <input type="number" id="ing_fibra" name="fibra" step="0.01" min="0"
+                                        placeholder="0">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ing_sodio">Sodio (mg)</label>
+                                    <input type="number" id="ing_sodio" name="sodio" step="0.01" min="0"
+                                        placeholder="0">
+                                </div>
+                            </div>
+
+                            <div class="modal-actions">
+                                <button type="button" class="btn-secondary"
+                                    onclick="cerrarModalIngrediente()">Cancelar</button>
+                                <button type="submit" class="btn-primary">
+                                    Guardar Ingrediente
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <!-- Alérgenos -->
@@ -494,6 +582,21 @@
         <script>
             function cerrarModalDetalle() {
                 document.getElementById('modal-detalle').classList.remove('active');
+            }
+
+            function abrirModalIngrediente() {
+                document.getElementById('modal-ingrediente').classList.add('active');
+            }
+
+            function cerrarModalIngrediente() {
+                document.getElementById('modal-ingrediente').classList.remove('active');
+            }
+
+            // Cerrar al hacer clic fuera del contenido
+            document.getElementById('modal-ingrediente').onclick = function (event) {
+                if (event.target === this) {
+                    cerrarModalIngrediente();
+                }
             }
 
             // Función para cambiar entre pestañas

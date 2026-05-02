@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>Ingredientes - GastroLab</title>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo"><img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt=""></div>
+        <nav>
+            <a href="{{ url_for('inicio') }}"><img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20px" height="20px"> Dashboard</a>
+            <a href="{{ url_for('inicio') }}"><img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px" height="20px"> Recetas</a>
+            <a href="{{ url_for('ingredientes') }}" class="active"><img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px" height="20px"> Ingredientes</a>
+            <a href="{{ url_for('menus') }}"><img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px"> Menús</a>
+            <a href="{{ url_for('alergenos') }}"><img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px" height="20px"> Alérgenos</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/tabla.png') }}" alt="" width="20px" height="20px"> Información nutricional</a>
+            <a href="{{ url_for('empleados') }}"><img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px" height="20px"> Empleados</a>
+            <a href="#"><img src="{{ url_for('static', filename='img/icons/archivo.png') }}" alt="" width="20px" height="20px"> Contratos</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#">Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- BREADCRUMB -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('inicio') }}">Dashboard</a> › Ingredientes
+        </div>
+
+        <!-- TABLA INGREDIENTES -->
+        <div class="card">
+            <div class="section-header">
+                <div>
+                    <h2>Ingredientes</h2>
+                    <p>Gestiona todos los ingredientes disponibles</p>
+                </div>
+                <button class="btn-primary" onclick="abrirModalIngrediente()">+ Nuevo ingrediente</button>
+            </div>
+
+            <div class="filters">
+                <form method="GET" action="{{ url_for('ingredientes') }}">
+                    <input type="text" name="busqueda" placeholder="Buscar ingrediente..."
+                        value="{{ request.args.get('busqueda', '') }}">
+
+                    <select name="categoria" onchange="this.form.submit()">
+                        <option value="">Todas las categorías</option>
+                        {% for cat in categorias %}
+                        <option value="{{ cat }}" {% if categoria_actual == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select name="unidad" onchange="this.form.submit()">
+                        <option value="">Todas las unidades</option>
+                        <option value="g" {% if unidad_actual == 'g' %}selected{% endif %}>Gramos (g)</option>
+                        <option value="ml" {% if unidad_actual == 'ml' %}selected{% endif %}>Mililitros (ml)</option>
+                        <option value="unidad" {% if unidad_actual == 'unidad' %}selected{% endif %}>Unidad</option>
+                    </select>
+
+                    {% if categoria_actual or unidad_actual %}
+                    <a href="{{ url_for('ingredientes') }}" class="btn-sm">Limpiar filtros</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Unidad</th>
+                        <th>Calorías (kcal)</th>
+                        <th>Proteínas (g)</th>
+                        <th>Carbohidratos (g)</th>
+                        <th>Grasas (g)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ing in ingredientes %}
+                    <tr>
+                        <td>{{ ing[1] }}</td>
+                        <td>{{ ing[2] if ing[2] else '—' }}</td>
+                        <td><span class="badge badge-activo">{{ ing[3] }}</span></td>
+                        <td>{{ ing[4] if ing[4] else '—' }}</td>
+                        <td>{{ ing[5] if ing[5] else '—' }}</td>
+                        <td>{{ ing[6] if ing[6] else '—' }}</td>
+                        <td>{{ ing[7] if ing[7] else '—' }}</td>
+                        <td>
+                            <div class="actions">
+                                <form action="{{ url_for('ver_ingrediente', id_ingrediente=ing[0]) }}" method="GET">
+                                    <button class="btn-sm btn-view">
+                                        <img src="{{ url_for('static', filename='img/icons/ojo.png') }}" alt="" width="16px" height="16px">
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('editar_ingrediente', id_ingrediente=ing[0]) }}" method="GET">
+                                    <button class="btn-sm btn-edit">
+                                        <img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt="" width="16px" height="16px">
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('eliminar_ingrediente', id_ingrediente=ing[0]) }}" method="POST"
+                                    onsubmit="return confirm('¿Seguro que quieres eliminar este ingrediente?')">
+                                    <button type="submit" class="btn-sm btn-del">
+                                        <img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="Eliminar" width="16px" height="16px">
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align:center; color:#13315C; padding: 20px;">No se encontraron ingredientes.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <span>Página {{ page }} de {{ total_pages }}</span>
+                <div class="pages">
+                    {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if unidad_actual %}&unidad={{ unidad_actual }}{% endif %}">
+                        <button>‹</button>
+                    </a>
+                    {% endif %}
+                    {% for p in range(1, total_pages + 1) %}
+                    <a href="?page={{ p }}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if unidad_actual %}&unidad={{ unidad_actual }}{% endif %}">
+                        <button class="{% if p == page %}active{% endif %}">{{ p }}</button>
+                    </a>
+                    {% endfor %}
+                    {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if unidad_actual %}&unidad={{ unidad_actual }}{% endif %}">
+                        <button>›</button>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- DETALLE INGREDIENTE (modal al hacer clic en ver) -->
+        {% if ingrediente_detalle %}
+        <div id="modal-detalle-ing" class="modal active">
+            <div class="modal-content" style="max-width: 620px;">
+                <div class="modal-header">
+                    <h2>{{ ingrediente_detalle[1] }}</h2>
+                    <span class="modal-close" onclick="cerrarModalDetalle()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row" style="margin-bottom:12px;">
+                        <div>
+                            <span class="badge badge-activo">{{ ingrediente_detalle[3] }}</span>
+                        </div>
+                        <div style="color:#13315C; font-size:13px;">
+                            Categoría: <strong>{{ ingrediente_detalle[2] if ingrediente_detalle[2] else '—' }}</strong>
+                        </div>
+                    </div>
+
+                    <h3 style="font-size:14px; font-weight:700; margin-bottom:10px; border-bottom:1px solid #8DA9C4; padding-bottom:6px;">
+                        Información nutricional por 100g/ml
+                    </h3>
+
+                    <table class="nutricion-table">
+                        <tr>
+                            <td>Calorías</td>
+                            <td>{{ ingrediente_detalle[4] if ingrediente_detalle[4] else '—' }} kcal</td>
+                        </tr>
+                        <tr>
+                            <td>Proteínas</td>
+                            <td>{{ ingrediente_detalle[5] if ingrediente_detalle[5] else '—' }} g</td>
+                        </tr>
+                        <tr>
+                            <td>Carbohidratos</td>
+                            <td>{{ ingrediente_detalle[6] if ingrediente_detalle[6] else '—' }} g</td>
+                        </tr>
+                        <tr>
+                            <td>Grasas</td>
+                            <td>{{ ingrediente_detalle[7] if ingrediente_detalle[7] else '—' }} g</td>
+                        </tr>
+                        <tr>
+                            <td>Fibra</td>
+                            <td>{{ ingrediente_detalle[8] if ingrediente_detalle[8] else '—' }} g</td>
+                        </tr>
+                        <tr>
+                            <td>Sodio</td>
+                            <td>{{ ingrediente_detalle[9] if ingrediente_detalle[9] else '—' }} mg</td>
+                        </tr>
+                    </table>
+
+                    {% if ingrediente_detalle[10] %}
+                    <h3 style="font-size:14px; font-weight:700; margin:14px 0 8px; border-bottom:1px solid #8DA9C4; padding-bottom:6px;">
+                        Alérgenos
+                    </h3>
+                    <div class="alergenos-list">
+                        {% for a in ingrediente_detalle[10].split(',') %}
+                        <span class="alergeno-badge">{{ a.strip() }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="modal-actions">
+                        <button class="btn-secondary" onclick="cerrarModalDetalle()">Cerrar</button>
+                        <a href="{{ url_for('editar_ingrediente', id_ingrediente=ingrediente_detalle[0]) }}" class="btn-primary" style="text-decoration:none; display:inline-flex; align-items:center;">
+                            Editar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- MODAL NUEVO INGREDIENTE -->
+        <div id="modal-ingrediente" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Nuevo Ingrediente</h2>
+                    <span class="modal-close" onclick="cerrarModalIngrediente()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('ingredientes') }}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ing_nombre">Nombre *</label>
+                                <input type="text" id="ing_nombre" name="nombreIng" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="ing_categoria">Categoría</label>
+                                <input type="text" id="ing_categoria" name="categoria" placeholder="Ej: verduras, carnes...">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ing_unidad">Unidad de medida *</label>
+                            <select id="ing_unidad" name="unidad" required>
+                                <option value="g">Gramos (g)</option>
+                                <option value="ml">Mililitros (ml)</option>
+                                <option value="unidad">Unidad</option>
+                                <option value="cucharada">Cucharada</option>
+                                <option value="cucharadita">Cucharadita</option>
+                                <option value="taza">Taza</option>
+                            </select>
+                        </div>
+
+                        <h3 style="font-size:14px; font-weight:600; margin: 14px 0 10px; border-bottom:1px solid #8DA9C4; padding-bottom:6px; color:#0B2545;">
+                            Información Nutricional (por 100g/ml)
+                        </h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ing_calorias">Calorías (kcal)</label>
+                                <input type="number" id="ing_calorias" name="calorias" step="0.01" min="0" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="ing_proteinas">Proteínas (g)</label>
+                                <input type="number" id="ing_proteinas" name="proteinas" step="0.01" min="0" placeholder="0">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ing_carbohidratos">Carbohidratos (g)</label>
+                                <input type="number" id="ing_carbohidratos" name="carbohidratos" step="0.01" min="0" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="ing_grasas">Grasas (g)</label>
+                                <input type="number" id="ing_grasas" name="grasas" step="0.01" min="0" placeholder="0">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ing_fibra">Fibra (g)</label>
+                                <input type="number" id="ing_fibra" name="fibra" step="0.01" min="0" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="ing_sodio">Sodio (mg)</label>
+                                <input type="number" id="ing_sodio" name="sodio" step="0.01" min="0" placeholder="0">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ing_alergenos">Alérgenos (separados por coma)</label>
+                            <input type="text" id="ing_alergenos" name="alergenos" placeholder="Ej: gluten, lactosa, huevo...">
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="cerrarModalIngrediente()">Cancelar</button>
+                            <button type="submit" class="btn-primary">Guardar Ingrediente</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <footer>© 2024 Gestión de Recetas - Todos los derechos reservados</footer>
+    </div>
+
+    <script>
+        function abrirModalIngrediente() {
+            document.getElementById('modal-ingrediente').classList.add('active');
+        }
+
+        function cerrarModalIngrediente() {
+            document.getElementById('modal-ingrediente').classList.remove('active');
+        }
+
+        function cerrarModalDetalle() {
+            const modal = document.getElementById('modal-detalle-ing');
+            if (modal) modal.classList.remove('active');
+        }
+
+        document.getElementById('modal-ingrediente').onclick = function (event) {
+            if (event.target === this) cerrarModalIngrediente();
+        }
+    </script>
+
+</body>
+</html>
