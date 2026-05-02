@@ -32,14 +32,6 @@
         .badge-diario   { background: #dbeafe; color: #1e40af; }
         .badge-semanal  { background: #ede9fe; color: #5b21b6; }
         .badge-especial { background: #fce7f3; color: #9d174d; }
-        .badge-temporal { background: #fef9c3; color: #92400e; }
-
-        .menu-detalle-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
 
         .receta-drag-handle {
             cursor: grab;
@@ -98,7 +90,6 @@
                         <option value="diario"   {% if tipo_actual == 'diario' %}selected{% endif %}>Diario</option>
                         <option value="semanal"  {% if tipo_actual == 'semanal' %}selected{% endif %}>Semanal</option>
                         <option value="especial" {% if tipo_actual == 'especial' %}selected{% endif %}>Especial</option>
-                        <option value="temporal" {% if tipo_actual == 'temporal' %}selected{% endif %}>Temporal</option>
                     </select>
 
                     <select name="activo" onchange="this.form.submit()">
@@ -119,8 +110,7 @@
                         <th>Nombre del menú</th>
                         <th>Tipo</th>
                         <th>Nº Recetas</th>
-                        <th>Precio</th>
-                        <th>Vigencia</th>
+                        <th>Creado</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
@@ -135,16 +125,11 @@
                             </span>
                         </td>
                         <td>{{ menu[3] }}</td>
-                        <td>{{ '%.2f'|format(menu[4]) }} €</td>
                         <td style="font-size:12px; color:#13315C;">
-                            {% if menu[5] and menu[6] %}
-                            {{ menu[5] }} → {{ menu[6] }}
-                            {% else %}
-                            Sin fecha límite
-                            {% endif %}
+                            {{ menu[4] if menu[4] else '—' }}
                         </td>
                         <td>
-                            {% if menu[7] %}
+                            {% if menu[5] %}
                             <span class="badge" style="background:#d1fae5; color:#065f46;">Activo</span>
                             {% else %}
                             <span class="badge" style="background:#fee2e2; color:#991b1b;">Inactivo</span>
@@ -173,7 +158,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" style="text-align:center; color:#13315C; padding:20px;">No se encontraron menús.</td>
+                        <td colspan="6" style="text-align:center; color:#13315C; padding:20px;">No se encontraron menús.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -183,17 +168,17 @@
                 <span>Página {{ page }} de {{ total_pages }}</span>
                 <div class="pages">
                     {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}{% if tipo_actual %}&tipo={{ tipo_actual }}{% endif %}">
+                    <a href="?page={{ page - 1 }}{% if tipo_actual %}&tipo={{ tipo_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
                         <button>‹</button>
                     </a>
                     {% endif %}
                     {% for p in range(1, total_pages + 1) %}
-                    <a href="?page={{ p }}{% if tipo_actual %}&tipo={{ tipo_actual }}{% endif %}">
+                    <a href="?page={{ p }}{% if tipo_actual %}&tipo={{ tipo_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
                         <button class="{% if p == page %}active{% endif %}">{{ p }}</button>
                     </a>
                     {% endfor %}
                     {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}{% if tipo_actual %}&tipo={{ tipo_actual }}{% endif %}">
+                    <a href="?page={{ page + 1 }}{% if tipo_actual %}&tipo={{ tipo_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
                         <button>›</button>
                     </a>
                     {% endif %}
@@ -201,7 +186,7 @@
             </div>
         </div>
 
-        <!-- DETALLE MENÚ -->
+        <!-- DETALLE MENÚ (modal) -->
         {% if menu_detalle %}
         <div id="modal-detalle-menu" class="modal active">
             <div class="modal-content" style="max-width:720px;">
@@ -215,14 +200,18 @@
                 <div class="modal-body">
                     <div class="detail-meta">
                         <span>🍽️ {{ recetas_menu|length }} recetas</span>
-                        <span>💶 {{ '%.2f'|format(menu_detalle[4]) }} €</span>
-                        {% if menu_detalle[5] and menu_detalle[6] %}
-                        <span>📅 {{ menu_detalle[5] }} → {{ menu_detalle[6] }}</span>
+                        {% if menu_detalle[4] %}
+                        <span>📅 Creado: {{ menu_detalle[4] }}</span>
+                        {% endif %}
+                        {% if menu_detalle[5] %}
+                        <span>✅ Activo</span>
+                        {% else %}
+                        <span>⛔ Inactivo</span>
                         {% endif %}
                     </div>
 
-                    {% if menu_detalle[8] %}
-                    <p style="color:#13315C; font-size:13px; margin-bottom:14px;">{{ menu_detalle[8] }}</p>
+                    {% if menu_detalle[6] %}
+                    <p style="color:#13315C; font-size:13px; margin-bottom:14px;">{{ menu_detalle[6] }}</p>
                     {% endif %}
 
                     <h3 style="font-size:14px; font-weight:700; margin-bottom:10px; border-bottom:1px solid #8DA9C4; padding-bottom:6px;">
@@ -271,33 +260,17 @@
                                     <option value="diario">Diario</option>
                                     <option value="semanal">Semanal</option>
                                     <option value="especial">Especial</option>
-                                    <option value="temporal">Temporal</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="menu_precio">Precio (€)</label>
-                                <input type="number" id="menu_precio" name="precio" step="0.01" min="0" placeholder="0.00">
-                            </div>
-                            <div class="form-group">
                                 <label>Estado</label>
                                 <div class="checkbox-group" style="margin-top:10px;">
                                     <input type="checkbox" id="menu_activo" name="activo" value="1" checked>
                                     <label for="menu_activo">Menú activo</label>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="menu_fecha_inicio">Fecha inicio</label>
-                                <input type="date" id="menu_fecha_inicio" name="fecha_inicio">
-                            </div>
-                            <div class="form-group">
-                                <label for="menu_fecha_fin">Fecha fin</label>
-                                <input type="date" id="menu_fecha_fin" name="fecha_fin">
                             </div>
                         </div>
 
@@ -370,10 +343,10 @@
                         <div class="form-group" style="flex:1;">
                             <label>Plato</label>
                             <select name="tipo_plato[]">
-                                <option value="primero">Primero</option>
-                                <option value="segundo">Segundo</option>
-                                <option value="postre">Postre</option>
                                 <option value="entrante">Entrante</option>
+                                <option value="principal">Principal</option>
+                                <option value="postre">Postre</option>
+                                <option value="bebida">Bebida</option>
                             </select>
                         </div>
                         <div style="padding-top:22px; flex-shrink:0;">
