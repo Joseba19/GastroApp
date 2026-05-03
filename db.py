@@ -956,5 +956,65 @@ def eliminarEmpleadoDB(id_empleado):
         cursor.close()
 
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DASHBOARD
+# ─────────────────────────────────────────────────────────────────────────────
+
+def ingredientesRecientes(limite=5):
+    """Devuelve los últimos N ingredientes añadidos a la BD.
+    Cada fila: (id_ingrediente, nombre, calorias_100g)
+    """
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            SELECT id_ingrediente, nombre, calorias_100g
+            FROM ingredientes
+            ORDER BY id_ingrediente DESC
+            LIMIT %s
+        """, (limite,))
+        rows = cursor.fetchall()
+        cursor.close()
+    return rows
+
+
+def menusRecientes(limite=5):
+    """Devuelve los últimos N menús con número de recetas.
+    Cada fila: (id_menu, nombre, tipo, n_recetas)
+    """
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            SELECT m.id_menu, m.nombre, m.tipo,
+                   COUNT(mr.id_receta) AS n_recetas
+            FROM menus m
+            LEFT JOIN menus_recetas mr ON m.id_menu = mr.id_menu
+            WHERE m.activo = 1
+            GROUP BY m.id_menu
+            ORDER BY m.id_menu DESC
+            LIMIT %s
+        """, (limite,))
+        rows = cursor.fetchall()
+        cursor.close()
+    return rows
+
+
+def empleadosRecientes(limite=5):
+    """Devuelve los últimos N empleados activos.
+    Cada fila: (id_empleado, nombre, apellidos, puesto, activo)
+    """
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            SELECT id_empleado, nombre, apellidos, puesto, activo
+            FROM empleados
+            ORDER BY id_empleado DESC
+            LIMIT %s
+        """, (limite,))
+        rows = cursor.fetchall()
+        cursor.close()
+    return rows
+
+
 if __name__ == "__main__":
     alergenosReceta(2)

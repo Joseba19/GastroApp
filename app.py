@@ -33,6 +33,7 @@ def inicio():
             request.form.get("sodio"),
             alergenos_str
         )
+        return redirect(url_for("inicio"))
 
     receta_detalle = None
     pasosReceta = None
@@ -46,6 +47,12 @@ def inicio():
         nutriReceta = db.infoNutriReceta(receta_id)
         alergenoReceta = db.alergenosReceta(receta_id)
 
+    # Datos reales para las mini-cards del dashboard
+    ingredientes_recientes = db.ingredientesRecientes(5)
+    menus_recientes = db.menusRecientes(5)
+    empleados_recientes = db.empleadosRecientes(5)
+    todos_alergenos = db.listaAlergenosUnicos()
+
     return render_template('index.html',
                          categorias=categorias,
                          recetas=recetas,
@@ -57,7 +64,11 @@ def inicio():
                          pasosReceta=pasosReceta,
                          ingredientesReceta=ingredientesReceta,
                          nutriReceta=nutriReceta,
-                         alergenoReceta=alergenoReceta)
+                         alergenoReceta=alergenoReceta,
+                         ingredientes_recientes=ingredientes_recientes,
+                         menus_recientes=menus_recientes,
+                         empleados_recientes=empleados_recientes,
+                         todos_alergenos=todos_alergenos)
 
 
 @app.route('/nueva-receta', methods=["GET", "POST"])
@@ -212,9 +223,18 @@ def editar_ingrediente(id_ingrediente):
             request.form.get("fibra"),
             request.form.get("sodio")
         )
-        return redirect(url_for("ingredientes"))
+        for al in db.obtenerAlergenosIngrediente(id_ingrediente):
+            db.eliminarAlergeno(id_ingrediente, al[0])
+        for nombre_alergeno in request.form.getlist("alergenos"):
+            db.asignarAlergeno(id_ingrediente, nombre_alergeno)
+        return redirect(url_for("ingredientes", ing_id=id_ingrediente))
     ingrediente = db.obtenerIngrediente(id_ingrediente)
-    return render_template('editarIngrediente.html', ingrediente=ingrediente)
+    alergenos_ingrediente = db.obtenerAlergenosIngrediente(id_ingrediente)
+    todos_alergenos = db.listaAlergenosUnicos()
+    return render_template('editarIngrediente.html',
+                           ingrediente=ingrediente,
+                           alergenos_ingrediente=alergenos_ingrediente,
+                           todos_alergenos=todos_alergenos)
 
 
 @app.route('/eliminar-ingrediente/<int:id_ingrediente>', methods=["POST"])

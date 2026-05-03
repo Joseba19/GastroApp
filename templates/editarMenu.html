@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>Editar Menú - GastroLab</title>
+    <style>
+        .badge-diario   { background: #dbeafe; color: #1e40af; }
+        .badge-semanal  { background: #ede9fe; color: #5b21b6; }
+        .badge-especial { background: #fce7f3; color: #9d174d; }
+
+        .receta-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            padding: 14px;
+            background: #EEF4ED;
+            border: 1px solid #8DA9C4;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .receta-row .form-group {
+            margin-bottom: 0;
+        }
+
+        .tipo-plato-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .tipo-entrante  { background: #d1fae5; color: #065f46; }
+        .tipo-principal { background: #dbeafe; color: #1e40af; }
+        .tipo-postre    { background: #fce7f3; color: #9d174d; }
+        .tipo-bebida    { background: #fef3c7; color: #92400e; }
+
+        .resumen-receta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #EEF4ED;
+            border: 1px solid #8DA9C4;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #0B2545;
+        }
+
+        .resumen-receta .orden-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #134074;
+            color: #EEF4ED;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #134074;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt="">
+        </div>
+        <nav>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20px" height="20px"> Dashboard
+            </a>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px" height="20px"> Recetas
+            </a>
+            <a href="{{ url_for('ingredientes') }}">
+                <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px" height="20px"> Ingredientes
+            </a>
+            <a href="{{ url_for('menus') }}" class="active">
+                <img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px"> Menús
+            </a>
+            <a href="{{ url_for('alergenos') }}">
+                <img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px" height="20px"> Alérgenos
+            </a>
+            <a href="#">
+                <img src="{{ url_for('static', filename='img/icons/tabla.png') }}" alt="" width="20px" height="20px"> Información nutricional
+            </a>
+            <a href="{{ url_for('empleados') }}">
+                <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px" height="20px"> Empleados
+            </a>
+            <a href="#">
+                <img src="{{ url_for('static', filename='img/icons/archivo.png') }}" alt="" width="20px" height="20px"> Contratos
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#">Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- BREADCRUMB -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('inicio') }}">Dashboard</a> ›
+            <a href="{{ url_for('menus') }}">Menús</a> ›
+            Editar: {{ menu[1] }}
+        </div>
+
+        <form method="POST" action="{{ url_for('editar_menu', id_menu=menu[0]) }}">
+
+            <!-- ── CARD 1: DATOS GENERALES ── -->
+            <div class="card">
+                <div class="section-header">
+                    <div>
+                        <h2>Editar Menú</h2>
+                        <p>Modifica los datos del menú y sus recetas asociadas</p>
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <span class="badge badge-{{ menu[2] }}">{{ menu[2]|capitalize }}</span>
+                        <span style="font-size:12px; color:#13315C;">{{ menu[3] }} recetas</span>
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <!-- Nombre y Tipo -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombre">Nombre del menú *</label>
+                            <input type="text" id="nombre" name="nombre"
+                                   value="{{ menu[1] }}" required
+                                   placeholder="Ej: Menú del día">
+                        </div>
+                        <div class="form-group">
+                            <label for="tipo">Tipo *</label>
+                            <select id="tipo" name="tipo" required>
+                                <option value="diario"   {% if menu[2] == 'diario' %}selected{% endif %}>Diario</option>
+                                <option value="semanal"  {% if menu[2] == 'semanal' %}selected{% endif %}>Semanal</option>
+                                <option value="especial" {% if menu[2] == 'especial' %}selected{% endif %}>Especial</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Estado y Fecha -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="activo" name="activo" value="1"
+                                       {% if menu[5] %}checked{% endif %}>
+                                <label for="activo">Menú activo</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de creación</label>
+                            <input type="text" value="{{ menu[4] if menu[4] else '—' }}" disabled
+                                   style="background:#EEF4ED; color:#13315C; cursor:not-allowed;">
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea id="descripcion" name="descripcion"
+                                  placeholder="Descripción del menú...">{{ menu[6] if menu[6] else '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <!-- ── CARD 2: RECETAS ── -->
+            <div class="card">
+                <div class="section-header">
+                    <div>
+                        <h2>Recetas del menú</h2>
+                        <p>Añade, modifica o elimina las recetas que componen este menú</p>
+                    </div>
+                    <button type="button" class="btn-primary" onclick="agregarReceta()">
+                        + Añadir receta
+                    </button>
+                </div>
+
+                <div id="recetas-container">
+                    {# recetas_menu: (0=id_receta, 1=nombre, 2=dificultad, 3=t_prep, 4=tipo_plato) #}
+                    {% for receta in recetas_menu %}
+                    <div class="receta-row">
+                        <!-- Número de orden -->
+                        <div style="flex-shrink:0; padding-bottom:2px;">
+                            <div class="resumen-receta" style="padding:6px 10px; margin:0;">
+                                <div class="orden-num">{{ loop.index }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Selector de receta -->
+                        <div class="form-group" style="flex:3;">
+                            <label>Receta</label>
+                            <select name="recetas_ids[]" required>
+                                <option value="{{ receta[0] }}" selected>{{ receta[1] }}</option>
+                                {% for r in todas_recetas %}
+                                {% if r[0] != receta[0] %}
+                                <option value="{{ r[0] }}">{{ r[1] }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Tipo de plato -->
+                        <div class="form-group" style="flex:1; min-width:140px;">
+                            <label>Plato</label>
+                            <select name="tipo_plato[]">
+                                <option value="entrante"  {% if receta[4] == 'entrante' %}selected{% endif %}>Entrante</option>
+                                <option value="principal" {% if receta[4] == 'principal' %}selected{% endif %}>Principal</option>
+                                <option value="postre"    {% if receta[4] == 'postre' %}selected{% endif %}>Postre</option>
+                                <option value="bebida"    {% if receta[4] == 'bebida' %}selected{% endif %}>Bebida</option>
+                            </select>
+                        </div>
+
+                        <!-- Botón eliminar fila -->
+                        <div style="flex-shrink:0; padding-bottom:2px;">
+                            <button type="button" class="btn-sm btn-del"
+                                    onclick="this.closest('.receta-row').remove(); renumerarRecetas();"
+                                    title="Eliminar esta receta del menú">
+                                <img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="" width="14px" height="14px">
+                            </button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Mensaje si no hay recetas (se ocultará al añadir la primera) -->
+                    <p id="msg-sin-recetas" style="color:#13315C; font-size:13px; margin-bottom:16px;">
+                        Este menú no tiene recetas. Pulsa «+ Añadir receta» para comenzar.
+                    </p>
+                    {% endfor %}
+                </div>
+
+                <!-- Acciones del formulario -->
+                <div class="form-actions" style="margin-top:24px;">
+                    <a href="{{ url_for('menus') }}" class="btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn-primary">Guardar cambios</button>
+                </div>
+            </div>
+
+        </form>
+
+        <footer>© 2024 Gestión de Recetas - Todos los derechos reservados</footer>
+    </div>
+
+    <script>
+        // Serializar todas las recetas disponibles para usarlas en JS
+        const todasRecetas = JSON.parse('{{ todas_recetas | tojson | safe }}');
+
+        function generarOpcionesRecetas(selectedId = null) {
+            return todasRecetas.map(r => {
+                const sel = r[0] == selectedId ? ' selected' : '';
+                return `<option value="${r[0]}"${sel}>${r[1]}</option>`;
+            }).join('');
+        }
+
+        function renumerarRecetas() {
+            document.querySelectorAll('#recetas-container .receta-row').forEach((row, i) => {
+                const num = row.querySelector('.orden-num');
+                if (num) num.textContent = i + 1;
+            });
+            // Ocultar/mostrar mensaje vacío
+            const msg = document.getElementById('msg-sin-recetas');
+            if (msg) {
+                const filas = document.querySelectorAll('#recetas-container .receta-row').length;
+                msg.style.display = filas === 0 ? 'block' : 'none';
+            }
+        }
+
+        function agregarReceta() {
+            const container = document.getElementById('recetas-container');
+
+            // Ocultar mensaje vacío si existe
+            const msg = document.getElementById('msg-sin-recetas');
+            if (msg) msg.style.display = 'none';
+
+            const filas = container.querySelectorAll('.receta-row').length;
+            const num = filas + 1;
+
+            container.insertAdjacentHTML('beforeend', `
+                <div class="receta-row">
+                    <div style="flex-shrink:0; padding-bottom:2px;">
+                        <div class="resumen-receta" style="padding:6px 10px; margin:0;">
+                            <div class="orden-num">${num}</div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="flex:3;">
+                        <label>Receta</label>
+                        <select name="recetas_ids[]" required>
+                            <option value="">Selecciona una receta</option>
+                            ${generarOpcionesRecetas()}
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:1; min-width:140px;">
+                        <label>Plato</label>
+                        <select name="tipo_plato[]">
+                            <option value="entrante">Entrante</option>
+                            <option value="principal">Principal</option>
+                            <option value="postre">Postre</option>
+                            <option value="bebida">Bebida</option>
+                        </select>
+                    </div>
+                    <div style="flex-shrink:0; padding-bottom:2px;">
+                        <button type="button" class="btn-sm btn-del"
+                                onclick="this.closest('.receta-row').remove(); renumerarRecetas();"
+                                title="Eliminar esta receta del menú">
+                            <img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="" width="14px" height="14px">
+                        </button>
+                    </div>
+                </div>
+            `);
+        }
+    </script>
+
+</body>
+</html>

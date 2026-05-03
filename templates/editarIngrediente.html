@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>Editar Ingrediente - GastroLab</title>
+    <style>
+
+        /* ── Sección nutricional ── */
+        .nutricion-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+
+        .nutri-card {
+            background: #EEF4ED;
+            border: 1px solid #8DA9C4;
+            border-radius: 8px;
+            padding: 14px 16px;
+            text-align: center;
+        }
+
+        .nutri-card .label {
+            font-size: 11px;
+            color: #13315C;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .nutri-card input[type="number"] {
+            width: 100%;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: #0B2545;
+            border: none;
+            border-bottom: 2px solid #8DA9C4;
+            background: transparent;
+            padding: 4px 0;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .nutri-card input[type="number"]:focus {
+            border-bottom-color: #134074;
+        }
+
+        .nutri-card .unit {
+            font-size: 11px;
+            color: #13315C;
+            margin-top: 4px;
+        }
+
+        /* ── Alérgenos ── */
+        .alergenos-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .alergeno-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 2px solid #8DA9C4;
+            background: #EEF4ED;
+            color: #13315C;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .alergeno-chip:hover {
+            border-color: #134074;
+            background: #dbeafe;
+            color: #134074;
+        }
+
+        .alergeno-chip.seleccionado {
+            background: #134074;
+            border-color: #134074;
+            color: #EEF4ED;
+            font-weight: 600;
+        }
+
+        .alergeno-chip.seleccionado::before {
+            content: '✓ ';
+            font-size: 11px;
+        }
+
+        /* Los checkboxes reales están ocultos, los chips los controlan */
+        .alergeno-chip input[type="checkbox"] {
+            display: none;
+        }
+
+        /* ── Zona de peligro ── */
+        .danger-zone {
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            padding: 18px 20px;
+            background: #fff5f5;
+        }
+
+        .danger-zone h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #991b1b;
+            margin: 0 0 6px;
+        }
+
+        .danger-zone p {
+            font-size: 13px;
+            color: #7f1d1d;
+            margin: 0 0 14px;
+        }
+
+        /* ── Recetas que usan este ingrediente ── */
+        .uso-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 12px;
+            border-radius: 6px;
+            background: #EEF4ED;
+            border: 1px solid #8DA9C4;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #0B2545;
+        }
+
+        .uso-row span { flex: 1; }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt="">
+        </div>
+        <nav>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20px" height="20px"> Dashboard
+            </a>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px" height="20px"> Recetas
+            </a>
+            <a href="{{ url_for('ingredientes') }}" class="active">
+                <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px" height="20px"> Ingredientes
+            </a>
+            <a href="{{ url_for('menus') }}">
+                <img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px"> Menús
+            </a>
+            <a href="{{ url_for('alergenos') }}">
+                <img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px" height="20px"> Alérgenos
+            </a>
+            <a href="#">
+                <img src="{{ url_for('static', filename='img/icons/tabla.png') }}" alt="" width="20px" height="20px"> Información nutricional
+            </a>
+            <a href="{{ url_for('empleados') }}">
+                <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px" height="20px"> Empleados
+            </a>
+            <a href="#">
+                <img src="{{ url_for('static', filename='img/icons/archivo.png') }}" alt="" width="20px" height="20px"> Contratos
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#">Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- BREADCRUMB -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('inicio') }}">Dashboard</a> ›
+            <a href="{{ url_for('ingredientes') }}">Ingredientes</a> ›
+            {{ ingrediente[1] }}
+        </div>
+
+        {# ingrediente: (0=id, 1=nombre, 2=categoria, 3=unidad_medida,
+                         4=calorias, 5=proteinas, 6=carbohidratos,
+                         7=grasas, 8=fibra, 9=sodio, 10=alergenos_str) #}
+
+        <form method="POST" action="{{ url_for('editar_ingrediente', id_ingrediente=ingrediente[0]) }}">
+
+            <!-- ── CARD 1: DATOS BÁSICOS ── -->
+            <div class="card">
+                <div class="section-header">
+                    <div class="ing-header">
+                        <div class="ing-header-info">
+                            <h2>{{ ingrediente[1] }}</h2> <br>
+                            <p>
+                                {% if ingrediente[2] %}
+                                <span class="badge" style="background:#EEF4ED; color:#13315C; border:1px solid #8DA9C4;">
+                                    {{ ingrediente[2] }}
+                                </span>
+                                &nbsp;·&nbsp;
+                                {% endif %}
+                                Unidad base: <strong>{{ ingrediente[3] }}</strong>
+                                &nbsp;·&nbsp; ID #{{ ingrediente[0] }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <!-- Nombre y Categoría -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombreIng">Nombre *</label>
+                            <input type="text" id="nombreIng" name="nombreIng"
+                                   value="{{ ingrediente[1] }}" required
+                                   placeholder="Nombre del ingrediente">
+                        </div>
+                        <div class="form-group">
+                            <label for="categoria">Categoría</label>
+                            <input type="text" id="categoria" name="categoria"
+                                   value="{{ ingrediente[2] if ingrediente[2] else '' }}"
+                                   placeholder="Ej: Verdura, Carne, Lácteo...">
+                        </div>
+                    </div>
+
+                    <!-- Unidad de medida -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="unidad">Unidad de medida *</label>
+                            <select id="unidad" name="unidad" required>
+                                {% set unidades = ['g', 'kg', 'ml', 'l', 'unidad', 'cucharada', 'cucharadita', 'taza'] %}
+                                {% set etiquetas = {
+                                    'g': 'Gramos (g)',
+                                    'kg': 'Kilogramos (kg)',
+                                    'ml': 'Mililitros (ml)',
+                                    'l': 'Litros (l)',
+                                    'unidad': 'Unidad',
+                                    'cucharada': 'Cucharada',
+                                    'cucharadita': 'Cucharadita',
+                                    'taza': 'Taza'
+                                } %}
+                                {% for u in unidades %}
+                                <option value="{{ u }}" {% if ingrediente[3] == u %}selected{% endif %}>
+                                    {{ etiquetas[u] }}
+                                </option>
+                                {% endfor %}
+                                {# Si la unidad actual no está en la lista estándar, añadirla #}
+                                {% if ingrediente[3] not in unidades %}
+                                <option value="{{ ingrediente[3] }}" selected>{{ ingrediente[3] }}</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <!-- Espacio para mantener el grid simétrico -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <!-- ── CARD 2: INFORMACIÓN NUTRICIONAL ── -->
+            <div class="card">
+                <div class="section-header">
+                    <div>
+                        <h2>Información Nutricional</h2>
+                        <p>Valores por cada 100 g / ml de ingrediente</p>
+                    </div>
+                </div>
+
+                <div class="nutricion-grid">
+                    <!-- Calorías -->
+                    <div class="nutri-card">
+                        <div class="label">Calorías</div>
+                        <input type="number" name="calorias" step="0.01" min="0"
+                               value="{{ ingrediente[4] if ingrediente[4] != None else '' }}"
+                               placeholder="0">
+                        <div class="unit">kcal</div>
+                    </div>
+
+                    <!-- Proteínas -->
+                    <div class="nutri-card">
+                        <div class="label">Proteínas</div>
+                        <input type="number" name="proteinas" step="0.01" min="0"
+                               value="{{ ingrediente[5] if ingrediente[5] != None else '' }}"
+                               placeholder="0">
+                        <div class="unit">g</div>
+                    </div>
+
+                    <!-- Carbohidratos -->
+                    <div class="nutri-card">
+                        <div class="label">Carbohidratos</div>
+                        <input type="number" name="carbohidratos" step="0.01" min="0"
+                               value="{{ ingrediente[6] if ingrediente[6] != None else '' }}"
+                               placeholder="0">
+                        <div class="unit">g</div>
+                    </div>
+
+                    <!-- Grasas -->
+                    <div class="nutri-card">
+                        <div class="label">Grasas</div>
+                        <input type="number" name="grasas" step="0.01" min="0"
+                               value="{{ ingrediente[7] if ingrediente[7] != None else '' }}"
+                               placeholder="0">
+                        <div class="unit">g</div>
+                    </div>
+
+                    <!-- Fibra -->
+                    <div class="nutri-card">
+                        <div class="label">Fibra</div>
+                        <input type="number" name="fibra" step="0.01" min="0"
+                               value="{{ ingrediente[8] if ingrediente[8] != None else '' }}"
+                               placeholder="0">
+                        <div class="unit">g</div>
+                    </div>
+
+                    <!-- Sodio -->
+                    <div class="nutri-card">
+                        <div class="label">Sodio</div>
+                        <input type="number" name="sodio" step="0.01" min="0"
+                               value="{{ ingrediente[9] if ingrediente[9] != None else '' }}"
+                               placeholder="0">
+                        <div class="unit">mg</div>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <!-- ── CARD 3: ALÉRGENOS ── -->
+            <div class="card">
+                <div class="section-header">
+                    <div>
+                        <h2>Alérgenos</h2>
+                        <p>Selecciona todos los alérgenos presentes en este ingrediente</p>
+                    </div>
+                    {% if alergenos_ingrediente %}
+                    <span class="badge" style="background:#134074; color:#EEF4ED; font-size:13px;">
+                        {{ alergenos_ingrediente|length }} asignado{{ 's' if alergenos_ingrediente|length != 1 else '' }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {# Construimos un set de nombres ya asignados para marcarlos preseleccionados #}
+                {% set asignados = alergenos_ingrediente | map(attribute=1) | list %}
+
+                <div class="alergenos-selector">
+                    {% for nombre_al in todos_alergenos %}
+                    {% set esta_asignado = nombre_al in asignados %}
+                    <label class="alergeno-chip {% if esta_asignado %}seleccionado{% endif %}"
+                           id="chip-{{ loop.index }}">
+                        <input type="checkbox"
+                               name="alergenos"
+                               value="{{ nombre_al }}"
+                               {% if esta_asignado %}checked{% endif %}
+                               onchange="toggleChip(this)">
+                        {{ nombre_al }}
+                    </label>
+                    {% else %}
+                    <p style="color:#13315C; font-size:13px;">
+                        No hay alérgenos registrados en la base de datos.
+                        <a href="{{ url_for('alergenos') }}" style="color:#134074;">Gestionar alérgenos</a>
+                    </p>
+                    {% endfor %}
+                </div>
+
+                <p style="font-size:11px; color:#13315C; margin-top:12px;">
+                    Haz clic en un alérgeno para seleccionarlo o deseleccionarlo.
+                </p>
+
+                <!-- Acciones del formulario -->
+                <div class="form-actions" style="margin-top: 24px;">
+                    <a href="{{ url_for('ingredientes') }}" class="btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn-primary">Guardar cambios</button>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+
+    <script>
+        function toggleChip(checkbox) {
+            const chip = checkbox.closest('.alergeno-chip');
+            if (checkbox.checked) {
+                chip.classList.add('seleccionado');
+            } else {
+                chip.classList.remove('seleccionado');
+            }
+        }
+    </script>
+
+</body>
+</html>

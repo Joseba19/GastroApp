@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>Editar Empleado - GastroLab</title>
+    <style>
+        .avatar-grande {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #134074;
+            color: #EEF4ED;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 700;
+            flex-shrink: 0;
+            letter-spacing: -1px;
+        }
+
+        .empleado-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 6px;
+        }
+
+        .empleado-header-info h2 {
+            margin: 0 0 4px;
+            font-size: 22px;
+            color: #0B2545;
+        }
+
+        .empleado-header-info p {
+            margin: 0;
+            font-size: 13px;
+            color: #13315C;
+        }
+
+        .badge-cocinero          { background: #d1fae5; color: #065f46; }
+        .badge-docente           { background: #dbeafe; color: #1e40af; }
+        .badge-apoyo             { background: #fef3c7; color: #92400e; }
+        .badge-alumno-cocina     { background: #ede9fe; color: #5b21b6; }
+        .badge-alumno-dietetica  { background: #fce7f3; color: #9d174d; }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #134074;
+        }
+
+        .info-field {
+            background: #EEF4ED;
+            border: 1px solid #8DA9C4;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 13px;
+            color: #13315C;
+            cursor: not-allowed;
+        }
+
+        .danger-zone {
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            padding: 18px 20px;
+            background: #fff5f5;
+            margin-top: 24px;
+        }
+
+        .danger-zone h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #991b1b;
+            margin: 0 0 8px;
+        }
+
+        .danger-zone p {
+            font-size: 13px;
+            color: #7f1d1d;
+            margin: 0 0 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt="">
+        </div>
+        <nav>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20px" height="20px"> Dashboard
+            </a>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px" height="20px"> Recetas
+            </a>
+            <a href="{{ url_for('ingredientes') }}">
+                <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px" height="20px"> Ingredientes
+            </a>
+            <a href="{{ url_for('menus') }}">
+                <img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px"> Menús
+            </a>
+            <a href="{{ url_for('alergenos') }}">
+                <img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px" height="20px"> Alérgenos
+            </a>
+            <a href="#">
+                <img src="{{ url_for('static', filename='img/icons/tabla.png') }}" alt="" width="20px" height="20px"> Información nutricional
+            </a>
+            <a href="{{ url_for('empleados') }}" class="active">
+                <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px" height="20px"> Empleados
+            </a>
+            <a href="#">
+                <img src="{{ url_for('static', filename='img/icons/archivo.png') }}" alt="" width="20px" height="20px"> Contratos
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#">Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- BREADCRUMB -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('inicio') }}">Dashboard</a> ›
+            <a href="{{ url_for('empleados') }}">Empleados</a> ›
+            {{ empleado[1] }} {{ empleado[2] }}
+        </div>
+
+        {# empleado: (0=id, 1=nombre, 2=apellidos, 3=puesto, 4=telefono, 5=email, 6=fecha_alta, 7=activo) #}
+
+        <!-- ── CARD 1: DATOS DEL EMPLEADO ── -->
+        <div class="card">
+            <div class="section-header">
+                <div class="empleado-header">
+                    <!-- Avatar con iniciales -->
+                    <div class="avatar-grande">
+                        {{ empleado[1][0] }}{{ empleado[2][0] if empleado[2] else '' }}
+                    </div>
+                    <div class="empleado-header-info">
+                        <h2>{{ empleado[1] }} {{ empleado[2] }}</h2>
+                        <p>
+                            <span class="badge badge-{{ empleado[3]|lower|replace('_', '-') }}">
+                                {{ empleado[3]|replace('_', ' ')|capitalize }}
+                            </span>
+                            &nbsp;·&nbsp; ID #{{ empleado[0] }}
+                            &nbsp;·&nbsp;
+                            {% if empleado[7] %}
+                            <span style="color:#065f46; font-weight:600;">● Activo</span>
+                            {% else %}
+                            <span style="color:#991b1b; font-weight:600;">● Inactivo</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('editar_empleado', id_empleado=empleado[0]) }}">
+                <div class="form-container">
+
+                    <!-- Nombre y Apellidos -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombre">Nombre *</label>
+                            <input type="text" id="nombre" name="nombre"
+                                   value="{{ empleado[1] }}" required
+                                   placeholder="Nombre">
+                        </div>
+                        <div class="form-group">
+                            <label for="apellidos">Apellidos</label>
+                            <input type="text" id="apellidos" name="apellidos"
+                                   value="{{ empleado[2] if empleado[2] else '' }}"
+                                   placeholder="Apellidos">
+                        </div>
+                    </div>
+
+                    <!-- Puesto y Fecha de alta -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="puesto">Puesto *</label>
+                            <select id="puesto" name="puesto" required>
+                                <option value="cocinero"         {% if empleado[3] == 'cocinero' %}selected{% endif %}>Cocinero</option>
+                                <option value="docente"          {% if empleado[3] == 'docente' %}selected{% endif %}>Docente</option>
+                                <option value="apoyo"            {% if empleado[3] == 'apoyo' %}selected{% endif %}>Apoyo</option>
+                                <option value="alumno_cocina"    {% if empleado[3] == 'alumno_cocina' %}selected{% endif %}>Alumno Cocina</option>
+                                <option value="alumno_dietetica" {% if empleado[3] == 'alumno_dietetica' %}selected{% endif %}>Alumno Dietética</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha_alta">Fecha de alta</label>
+                            <input type="date" id="fecha_alta" name="fecha_alta"
+                                   value="{{ empleado[6].strftime('%Y-%m-%d') if empleado[6] else '' }}">
+                        </div>
+                    </div>
+
+                    <!-- Teléfono y Email -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telefono">Teléfono</label>
+                            <input type="tel" id="telefono" name="telefono"
+                                   value="{{ empleado[4] if empleado[4] else '' }}"
+                                   placeholder="Ej: 612345678">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email"
+                                   value="{{ empleado[5] if empleado[5] else '' }}"
+                                   placeholder="nombre@email.com">
+                        </div>
+                    </div>
+
+                    <!-- Estado activo -->
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="activo" name="activo" value="1"
+                                   {% if empleado[7] %}checked{% endif %}>
+                            <label for="activo">Empleado activo</label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Acciones del formulario -->
+                <div class="form-actions">
+                    <a href="{{ url_for('empleados') }}" class="btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn-primary">Guardar cambios</button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- ── CARD 2: ZONA DE PELIGRO ── -->
+        <div class="card" style="margin-top:20px;">
+            <div class="danger-zone">
+                <h3>⚠ Zona de peligro</h3>
+                <p>
+                    Esta acción eliminará permanentemente al empleado
+                    <strong>{{ empleado[1] }} {{ empleado[2] }}</strong> y todos sus datos asociados.
+                    Esta operación no se puede deshacer.
+                </p>
+                <form action="{{ url_for('eliminar_empleado', id_empleado=empleado[0]) }}" method="POST"
+                      onsubmit="return confirm('¿Seguro que quieres eliminar a {{ empleado[1] }} {{ empleado[2] }}? Esta acción no se puede deshacer.')">
+                    <button type="submit" class="btn-del" style="padding: 9px 18px; border-radius: 6px; border: none; background: #dc2626; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">
+                        Eliminar empleado
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <footer>© 2024 Gestión de Recetas - Todos los derechos reservados</footer>
+    </div>
+
+</body>
+</html>
