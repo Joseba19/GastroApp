@@ -1,3 +1,7 @@
+/* ============================================================
+   1. RESET Y BASE
+   ============================================================ */
+
 * {
   margin: 0;
   padding: 0;
@@ -13,7 +17,12 @@ body {
   color: #0B2545;
 }
 
-/* SIDEBAR */
+
+/* ============================================================
+   2. LAYOUT
+   ============================================================ */
+
+/* -- Sidebar -- */
 .sidebar {
   width: 200px;
   background: #0B2545;
@@ -74,7 +83,7 @@ body {
   gap: 8px;
 }
 
-/* MAIN */
+/* -- Main -- */
 .main {
   flex: 1;
   overflow-y: auto;
@@ -84,7 +93,12 @@ body {
   gap: 16px;
 }
 
-/* CARD */
+
+/* ============================================================
+   3. COMPONENTES GLOBALES
+   ============================================================ */
+
+/* -- 3.1 Cards -- */
 .card {
   background: #F5F8F3;
   border: 1px solid #8DA9C4;
@@ -99,7 +113,13 @@ body {
   padding: 16px;
 }
 
-/* TABLE SECTION */
+.section {
+  background: #EEF4ED;
+  border: 1px solid #8DA9C4;
+  border-radius: 4px;
+  padding: 16px;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -117,6 +137,57 @@ body {
   font-size: 13px;
 }
 
+/* -- 3.2 Badges -- */
+.badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* Dificultad de recetas */
+.badge-facil   { background: #d1fae5; color: #065f46; }
+.badge-medio   { background: #fef9c3; color: #92400e; }
+.badge-dificil { background: #fee2e2; color: #991b1b; }
+.badge-activo  { background: #8DA9C4; color: #0B2545; }
+
+/* Tipo de menú */
+.badge-diario   { background: #dbeafe; color: #1e40af; }
+.badge-semanal  { background: #ede9fe; color: #5b21b6; }
+.badge-especial { background: #fce7f3; color: #9d174d; }
+
+/* Puesto de empleado */
+.badge-cocinero         { background: #d1fae5; color: #065f46; }
+.badge-docente          { background: #dbeafe; color: #1e40af; }
+.badge-apoyo            { background: #fef3c7; color: #92400e; }
+.badge-alumno-cocina    { background: #ede9fe; color: #5b21b6; }
+.badge-alumno-dietetica { background: #fce7f3; color: #9d174d; }
+.badge-chef             { background: #dbeafe; color: #1e40af; }
+.badge-sous-chef        { background: #ede9fe; color: #5b21b6; }
+.badge-ayudante         { background: #fef9c3; color: #92400e; }
+.badge-camarero         { background: #fce7f3; color: #9d174d; }
+.badge-gerente          { background: #fee2e2; color: #991b1b; }
+
+/* Alérgenos */
+.alergenos-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.alergeno-badge {
+  display: inline-block;
+  background: #134074;
+  color: #EEF4ED;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* -- 3.3 Botones -- */
 .btn-primary {
   background: #134074;
   color: #EEF4ED;
@@ -127,26 +198,45 @@ body {
   font-size: 13px;
 }
 
-.filters {
-  display: flex;
-  gap: 8px;
-  margin: 12px 0;
+.btn-primary:hover {
+  background: #0B2545;
 }
 
-.filters input,
-.filters select {
-  padding: 7px 10px;
-  border: 1px solid #8DA9C4;
+.btn-secondary {
+  background: #8DA9C4;
+  color: #0B2545;
+  border: none;
+  padding: 8px 20px;
   border-radius: 3px;
+  cursor: pointer;
   font-size: 13px;
-  background: #EEF4ED;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #6c8eae;
   color: #0B2545;
 }
 
-.filters input {
-  flex: 1;
+.btn-sm {
+  border: none;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #EEF4ED;
 }
 
+.btn-view { background: #134074; }
+.btn-edit { background: #13315C; }
+.btn-del  { background: #8DA9C4; color: #0B2545; }
+
+/* -- 3.4 Tabla -- */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -169,69 +259,71 @@ td {
   border-bottom: 1px solid #8DA9C4;
 }
 
-.badge {
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  display: inline-block;
-}
-
-.badge-facil {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.badge-medio {
-  background: #fef9c3;
-  color: #92400e;
-}
-
-.badge-dificil {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.badge-activo {
-  background: #8DA9C4;
-  color: #0B2545;
-}
-
-.icon-check {
-  color: #16a34a;
-  font-size: 18px;
-}
-
-.icon-cross {
-  color: #dc2626;
-  font-size: 18px;
-}
-
 .actions {
   display: flex;
   gap: 4px;
 }
 
-.btn-sm {
-  border: none;
-  padding: 5px 8px;
-  border-radius: 5px;
-  cursor: pointer;
+.icon-check { color: #16a34a; font-size: 18px; }
+.icon-cross { color: #dc2626; font-size: 18px; }
+
+/* Tabla nutricional (modal detalle) */
+.nutricion-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.nutricion-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #8DA9C4;
+}
+
+.nutricion-table td:first-child {
+  font-weight: 600;
+  width: 40%;
+  color: #134074;
+}
+
+/* Mini tabla (dashboard) */
+.mini-table {
+  width: 100%;
+  border-collapse: collapse;
   font-size: 12px;
-  color: #EEF4ED;
 }
 
-.btn-view {
-  background: #134074;
+.mini-table th {
+  color: #13315C;
+  font-weight: 600;
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1px solid #8DA9C4;
 }
 
-.btn-edit {
-  background: #13315C;
+.mini-table td {
+  padding: 7px 6px;
+  border-bottom: 1px solid #8DA9C4;
 }
 
-.btn-del {
-  background: #8DA9C4;
+/* -- 3.5 Filtros y paginación -- */
+.filters {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.filters input,
+.filters select {
+  padding: 7px 10px;
+  border: 1px solid #8DA9C4;
+  border-radius: 3px;
+  font-size: 13px;
+  background: #EEF4ED;
   color: #0B2545;
+}
+
+.filters input {
+  flex: 1;
 }
 
 .pagination {
@@ -263,7 +355,301 @@ td {
   border-color: #134074;
 }
 
-/* DETAIL */
+/* -- 3.6 Formularios -- */
+.form-container {
+  margin-top: 8px;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #0B2545;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #8DA9C4;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  background: #EEF4ED;
+  color: #0B2545;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #134074;
+  box-shadow: 0 0 0 2px rgba(19, 64, 116, 0.2);
+  background: #ffffff;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.checkbox-group input {
+  width: 18px;
+  height: 18px;
+  accent-color: #134074;
+  margin: 0;
+}
+
+.checkbox-group label {
+  margin: 0;
+  font-weight: normal;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  border-top: 1px solid #8DA9C4;
+  padding-top: 20px;
+}
+
+/* -- 3.7 Modal -- */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(11, 37, 69, 0.6);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: #FFFFFF;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(11, 37, 69, 0.25);
+  animation: slideUp 0.25s ease;
+}
+
+.modal-header {
+  background: #134074;
+  color: #EEF4ED;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #EEF4ED;
+}
+
+.modal-close {
+  font-size: 24px;
+  font-weight: 700;
+  color: #EEF4ED;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: #8DA9C4;
+}
+
+.modal-body {
+  padding: 20px;
+  background: #F5F8F3;
+  border-radius: 0 0 8px 8px;
+}
+
+.modal-body .form-group {
+  margin-bottom: 16px;
+}
+
+.modal-body .form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.modal-body .form-row .form-group {
+  flex: 1;
+  min-width: 160px;
+}
+
+.modal-body h3.detail-text {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0B2545;
+  border-bottom: 1px solid #8DA9C4;
+  padding-bottom: 6px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #8DA9C4;
+}
+
+/* -- 3.8 Breadcrumb y footer -- */
+.breadcrumb {
+  font-size: 13px;
+  color: #13315C;
+  margin-bottom: 8px;
+}
+
+.breadcrumb a {
+  color: #134074;
+  text-decoration: none;
+}
+
+footer {
+  text-align: center;
+  padding: 12px;
+  color: #13315C;
+  font-size: 12px;
+  border-top: 1px solid #8DA9C4;
+}
+
+/* -- 3.9 Otros componentes compartidos -- */
+
+/* Stat boxes (dashboard, empleados, alérgenos) */
+.stat-box {
+  flex: 1;
+  border: 1px solid #8DA9C4;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat-box .label {
+  font-size: 12px;
+  color: #13315C;
+}
+
+.stat-box .value {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 4px 0 2px;
+  color: #134074;
+}
+
+/* Avatares */
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #8DA9C4;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #134074;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #EEF4ED;
+  font-weight: bold;
+}
+
+.employee-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Zona de peligro (editar empleado, editar ingrediente) */
+.danger-zone {
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 18px 20px;
+  background: #fff5f5;
+  margin-top: 24px;
+}
+
+.danger-zone h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #991b1b;
+  margin: 0 0 8px;
+}
+
+.danger-zone p {
+  font-size: 13px;
+  color: #7f1d1d;
+  margin: 0 0 14px;
+}
+
+/* Pestañas y contenido dinámico */
+.tab-btn {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  border-bottom: 2px solid #134074;
+  color: #134074;
+  font-weight: 600;
+  margin-bottom: -2px;
+}
+
+.tab-content {
+  width: 100%;
+  animation: fadeContent 0.25s ease;
+}
+
+/* Vista detalle de receta */
 .detail-header {
   display: flex;
   justify-content: space-between;
@@ -360,27 +746,7 @@ td {
   margin-top: 12px;
 }
 
-.stat-box {
-  flex: 1;
-  border: 1px solid #8DA9C4;
-  border-radius: 8px;
-  padding: 12px;
-  text-align: center;
-}
-
-.stat-box .label {
-  font-size: 12px;
-  color: #13315C;
-}
-
-.stat-box .value {
-  font-size: 20px;
-  font-weight: 700;
-  margin: 4px 0 2px;
-  color: #134074;
-}
-
-/* BOTTOM CARDS */
+/* Mini cards (dashboard) */
 .bottom-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -410,25 +776,6 @@ td {
   justify-content: center;
 }
 
-.mini-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-
-.mini-table th {
-  color: #13315C;
-  font-weight: 600;
-  text-align: left;
-  padding: 4px 6px;
-  border-bottom: 1px solid #8DA9C4;
-}
-
-.mini-table td {
-  padding: 7px 6px;
-  border-bottom: 1px solid #8DA9C4;
-}
-
 .see-all {
   color: #134074;
   font-size: 12px;
@@ -437,357 +784,376 @@ td {
   margin-top: 10px;
 }
 
-.employee-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #8DA9C4;
-  object-fit: cover;
-}
-
-.avatar-placeholder {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #134074;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  color: #EEF4ED;
-  font-weight: bold;
-}
-
-.breadcrumb {
-  font-size: 13px;
-  color: #13315C;
-  margin-bottom: 8px;
-}
-
-.breadcrumb a {
-  color: #134074;
-  text-decoration: none;
-}
-
-footer {
-  text-align: center;
-  padding: 12px;
-  color: #13315C;
-  font-size: 12px;
-  border-top: 1px solid #8DA9C4;
-}
-
-/* FORMULARIO - NUEVO ESTILO COHERENTE */
-.form-container {
-  margin-top: 8px;
-}
-
-.form-row {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.form-group {
-  flex: 1;
-  min-width: 180px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-group label {
-  font-weight: 600;
-  font-size: 13px;
-  color: #0B2545;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  padding: 10px 12px;
-  border: 1px solid #8DA9C4;
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 13px;
-  background: #EEF4ED;
-  color: #0B2545;
-  transition: all 0.2s ease;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #134074;
-  box-shadow: 0 0 0 2px rgba(19, 64, 116, 0.2);
-  background: #ffffff;
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.checkbox-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.checkbox-group input {
-  width: 18px;
-  height: 18px;
-  accent-color: #134074;
-  margin: 0;
-}
-
-.checkbox-group label {
-  margin: 0;
-  font-weight: normal;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-  border-top: 1px solid #8DA9C4;
-  padding-top: 20px;
-}
-
-.btn-secondary {
-  background: #8DA9C4;
-  color: #0B2545;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: background 0.2s;
-}
-
-.btn-secondary:hover {
-  background: #6c8eae;
-  color: #0B2545;
-}
-
-.btn-primary {
-  background: #134074;
-  padding: 8px 24px;
-}
-
-.btn-primary:hover {
-  background: #0B2545;
-}
-
-.section {
-  background: #EEF4ED;
-  border: 1px solid #8DA9C4;
-  border-radius: 4px;
-  padding: 16px;
-}
-
-/* MODAL MEJORADO */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(11, 37, 69, 0.6);
-  /* #0B2545 con opacidad */
-  z-index: 1000;
-  justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease;
-}
-
+/* Animaciones */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.modal.active {
-  display: flex;
-}
-
-.modal-content {
-  background: #FFFFFF;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 580px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(11, 37, 69, 0.25);
-  animation: slideUp 0.25s ease;
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from {
-    transform: translateY(30px);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.modal-header {
-  background: #134074;
-  color: #EEF4ED;
-  padding: 16px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 8px 8px 0 0;
-}
-
-.modal-header h2 {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0;
-  color: #EEF4ED;
-}
-
-.modal-close {
-  font-size: 24px;
-  font-weight: 700;
-  color: #EEF4ED;
-  cursor: pointer;
-  line-height: 1;
-  transition: color 0.2s;
-}
-
-.modal-close:hover {
-  color: #8DA9C4;
-}
-
-.modal-body {
-  padding: 20px;
-  background: #F5F8F3;
-  border-radius: 0 0 8px 8px;
-}
-
-.modal-body .form-group {
-  margin-bottom: 16px;
-}
-
-.modal-body .form-row {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 0;
-}
-
-.modal-body .form-row .form-group {
-  flex: 1;
-  min-width: 160px;
-}
-
-.modal-body h3.detail-text {
-  margin-top: 12px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #0B2545;
-  border-bottom: 1px solid #8DA9C4;
-  padding-bottom: 6px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #8DA9C4;
-}
-
-/* Para las pestañas y contenido dinámico */
-.tab-btn {
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.tab-btn.active {
-  border-bottom: 2px solid #134074;
-  color: #134074;
-  font-weight: 600;
-  margin-bottom: -2px;
-}
-
-.tab-content {
-  width: 100%;
-  animation: fadeContent 0.25s ease;
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 
 @keyframes fadeContent {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0);   }
 }
 
-/* Estilos para la tabla nutricional */
-.nutricion-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
+
+/* ============================================================
+   4. PÁGINAS ESPECÍFICAS
+   ============================================================ */
+
+/* -- 4.1 Alérgenos -- */
+.alergeno-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid #8DA9C4;
+  border-radius: 6px;
+  background: #F5F8F3;
+  margin-bottom: 8px;
 }
 
-.nutricion-table td {
-  padding: 10px 8px;
-  border-bottom: 1px solid #8DA9C4;
+.alergeno-icon {
+  width: 38px;
+  height: 38px;
+  background: #134074;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #EEF4ED;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
 }
 
-.nutricion-table td:first-child {
+.alergeno-info {
+  flex: 1;
+}
+
+.alergeno-info strong {
+  display: block;
+  font-size: 14px;
+  color: #0B2545;
+}
+
+.alergeno-info span {
+  font-size: 12px;
+  color: #13315C;
+}
+
+.alergeno-recetas {
+  font-size: 12px;
+  color: #134074;
   font-weight: 600;
-  width: 40%;
+}
+
+.semaforo {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.semaforo-alto  { background: #dc2626; }
+.semaforo-medio { background: #d97706; }
+.semaforo-bajo  { background: #16a34a; }
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+/* -- 4.2 Empleados -- */
+.empleado-avatar-lg {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #134074;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #EEF4ED;
+  flex-shrink: 0;
+}
+
+.empleado-info {
+  flex: 1;
+}
+
+.empleado-info strong {
+  display: block;
+  font-size: 14px;
+  color: #0B2545;
+}
+
+.empleado-info span {
+  font-size: 12px;
+  color: #13315C;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.turno-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.turno-mañana  { background: #fef9c3; color: #92400e; }
+.turno-tarde   { background: #dbeafe; color: #1e40af; }
+.turno-noche   { background: #1e1b4b; color: #c7d2fe; }
+.turno-partido { background: #f3e8ff; color: #6b21a8; }
+
+/* -- 4.3 Editar empleado -- */
+.avatar-grande {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #134074;
+  color: #EEF4ED;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: -1px;
+}
+
+.empleado-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 6px;
+}
+
+.empleado-header-info h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  color: #0B2545;
+}
+
+.empleado-header-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #13315C;
+}
+
+.info-field {
+  background: #EEF4ED;
+  border: 1px solid #8DA9C4;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #13315C;
+  cursor: not-allowed;
+}
+
+/* -- 4.4 Editar ingrediente -- */
+.nutricion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.nutri-card {
+  background: #EEF4ED;
+  border: 1px solid #8DA9C4;
+  border-radius: 8px;
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.nutri-card .label {
+  font-size: 11px;
+  color: #13315C;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.nutri-card input[type="number"] {
+  width: 100%;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0B2545;
+  border: none;
+  border-bottom: 2px solid #8DA9C4;
+  background: transparent;
+  padding: 4px 0;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.nutri-card input[type="number"]:focus {
+  border-bottom-color: #134074;
+}
+
+.nutri-card .unit {
+  font-size: 11px;
+  color: #13315C;
+  margin-top: 4px;
+}
+
+.alergenos-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.alergeno-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 2px solid #8DA9C4;
+  background: #EEF4ED;
+  color: #13315C;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.alergeno-chip:hover {
+  border-color: #134074;
+  background: #dbeafe;
   color: #134074;
 }
 
-/* Estilos para los badges de alérgenos */
-.alergenos-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+.alergeno-chip.seleccionado {
+  background: #134074;
+  border-color: #134074;
+  color: #EEF4ED;
+  font-weight: 600;
 }
 
-.alergeno-badge {
+.alergeno-chip.seleccionado::before {
+  content: '✓ ';
+  font-size: 11px;
+}
+
+.alergeno-chip input[type="checkbox"] {
+  display: none;
+}
+
+.uso-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 6px;
+  background: #EEF4ED;
+  border: 1px solid #8DA9C4;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #0B2545;
+}
+
+.uso-row span { flex: 1; }
+
+/* -- 4.5 Editar menú -- */
+.receta-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 14px;
+  background: #EEF4ED;
+  border: 1px solid #8DA9C4;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.receta-row .form-group {
+  margin-bottom: 0;
+}
+
+.tipo-plato-badge {
   display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tipo-entrante  { background: #d1fae5; color: #065f46; }
+.tipo-principal { background: #dbeafe; color: #1e40af; }
+.tipo-postre    { background: #fce7f3; color: #9d174d; }
+.tipo-bebida    { background: #fef3c7; color: #92400e; }
+
+.resumen-receta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #EEF4ED;
+  border: 1px solid #8DA9C4;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #0B2545;
+}
+
+.resumen-receta .orden-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
   background: #134074;
   color: #EEF4ED;
-  padding: 6px 14px;
-  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* -- 4.6 Menús -- */
+.menu-receta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border: 1px solid #8DA9C4;
+  border-radius: 4px;
+  background: #EEF4ED;
+  margin-bottom: 6px;
   font-size: 13px;
-  font-weight: 500;
+}
+
+.menu-receta-row span {
+  flex: 1;
+  color: #0B2545;
+}
+
+.menu-receta-row .badge {
+  margin-right: 8px;
+}
+
+.receta-drag-handle {
+  cursor: grab;
+  color: #8DA9C4;
+  font-size: 16px;
+  margin-right: 8px;
 }
