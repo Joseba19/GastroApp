@@ -119,9 +119,9 @@
                     <div style="font-size:11px; color:#13315C;">en brigada</div>
                 </div>
                 <div class="stat-box">
-                    <div class="label">Sala</div>
+                    <div class="label">Docencia</div>
                     <div class="value">{{ empleados_sala }}</div>
-                    <div style="font-size:11px; color:#13315C;">en servicio</div>
+                    <div style="font-size:11px; color:#13315C;">docentes y alumnos</div>
                 </div>
             </div>
         </div>
@@ -142,20 +142,11 @@
 
                     <select name="puesto" onchange="this.form.submit()">
                         <option value="">Todos los puestos</option>
-                        <option value="Chef"      {% if puesto_actual == 'Chef' %}selected{% endif %}>Chef</option>
-                        <option value="Sous Chef" {% if puesto_actual == 'Sous Chef' %}selected{% endif %}>Sous Chef</option>
-                        <option value="Cocinero"  {% if puesto_actual == 'Cocinero' %}selected{% endif %}>Cocinero</option>
-                        <option value="Ayudante"  {% if puesto_actual == 'Ayudante' %}selected{% endif %}>Ayudante</option>
-                        <option value="Camarero"  {% if puesto_actual == 'Camarero' %}selected{% endif %}>Camarero</option>
-                        <option value="Gerente"   {% if puesto_actual == 'Gerente' %}selected{% endif %}>Gerente</option>
-                    </select>
-
-                    <select name="turno" onchange="this.form.submit()">
-                        <option value="">Todos los turnos</option>
-                        <option value="mañana"  {% if turno_actual == 'mañana' %}selected{% endif %}>Mañana</option>
-                        <option value="tarde"   {% if turno_actual == 'tarde' %}selected{% endif %}>Tarde</option>
-                        <option value="noche"   {% if turno_actual == 'noche' %}selected{% endif %}>Noche</option>
-                        <option value="partido" {% if turno_actual == 'partido' %}selected{% endif %}>Partido</option>
+                        <option value="cocinero"          {% if puesto_actual == 'cocinero' %}selected{% endif %}>Cocinero</option>
+                        <option value="docente"           {% if puesto_actual == 'docente' %}selected{% endif %}>Docente</option>
+                        <option value="apoyo"             {% if puesto_actual == 'apoyo' %}selected{% endif %}>Apoyo</option>
+                        <option value="alumno_cocina"     {% if puesto_actual == 'alumno_cocina' %}selected{% endif %}>Alumno Cocina</option>
+                        <option value="alumno_dietetica"  {% if puesto_actual == 'alumno_dietetica' %}selected{% endif %}>Alumno Dietética</option>
                     </select>
 
                     <select name="activo" onchange="this.form.submit()">
@@ -164,7 +155,7 @@
                         <option value="0" {% if activo_actual == '0' %}selected{% endif %}>Inactivos</option>
                     </select>
 
-                    {% if puesto_actual or turno_actual or activo_actual %}
+                    {% if puesto_actual or activo_actual %}
                     <a href="{{ url_for('empleados') }}" class="btn-sm">Limpiar filtros</a>
                     {% endif %}
                 </form>
@@ -175,8 +166,8 @@
                     <tr>
                         <th>Empleado</th>
                         <th>Puesto</th>
-                        <th>Turno</th>
                         <th>Teléfono</th>
+                        <th>Email</th>
                         <th>Fecha alta</th>
                         <th>Estado</th>
                         <th>Acciones</th>
@@ -194,11 +185,9 @@
                             </div>
                         </td>
                         <td>
-                            <span class="badge badge-{{ emp[3]|lower|replace(' ', '-') }}">{{ emp[3] }}</span>
+                            <span class="badge badge-{{ emp[3]|lower|replace('_', '-') }}">{{ emp[3]|replace('_', ' ')|capitalize }}</span>
                         </td>
-                        <td>
-                            <span class="turno-badge turno-{{ emp[4] }}">{{ emp[4]|capitalize if emp[4] else '—' }}</span>
-                        </td>
+                        <td style="font-size:12px; color:#13315C;">{{ emp[4] if emp[4] else '—' }}</td>
                         <td style="font-size:12px; color:#13315C;">{{ emp[5] if emp[5] else '—' }}</td>
                         <td style="font-size:12px; color:#13315C;">{{ emp[6] if emp[6] else '—' }}</td>
                         <td>
@@ -241,17 +230,17 @@
                 <span>Página {{ page }} de {{ total_pages }}</span>
                 <div class="pages">
                     {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if turno_actual %}&turno={{ turno_actual }}{% endif %}">
+                    <a href="?page={{ page - 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
                         <button>‹</button>
                     </a>
                     {% endif %}
                     {% for p in range(1, total_pages + 1) %}
-                    <a href="?page={{ p }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if turno_actual %}&turno={{ turno_actual }}{% endif %}">
+                    <a href="?page={{ p }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
                         <button class="{% if p == page %}active{% endif %}">{{ p }}</button>
                     </a>
                     {% endfor %}
                     {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if turno_actual %}&turno={{ turno_actual }}{% endif %}">
+                    <a href="?page={{ page + 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
                         <button>›</button>
                     </a>
                     {% endif %}
@@ -277,32 +266,24 @@
                     <table class="nutricion-table">
                         <tr>
                             <td>Puesto</td>
-                            <td><span class="badge badge-{{ empleado_detalle[3]|lower|replace(' ', '-') }}">{{ empleado_detalle[3] }}</span></td>
-                        </tr>
-                        <tr>
-                            <td>Turno</td>
-                            <td><span class="turno-badge turno-{{ empleado_detalle[4] }}">{{ empleado_detalle[4]|capitalize if empleado_detalle[4] else '—' }}</span></td>
+                            <td><span class="badge badge-{{ empleado_detalle[3]|lower|replace('_', '-') }}">{{ empleado_detalle[3]|replace('_', ' ')|capitalize }}</span></td>
                         </tr>
                         <tr>
                             <td>Teléfono</td>
-                            <td>{{ empleado_detalle[5] if empleado_detalle[5] else '—' }}</td>
+                            <td>{{ empleado_detalle[4] if empleado_detalle[4] else '—' }}</td>
                         </tr>
                         <tr>
                             <td>Email</td>
-                            <td>{{ empleado_detalle[6] if empleado_detalle[6] else '—' }}</td>
+                            <td>{{ empleado_detalle[5] if empleado_detalle[5] else '—' }}</td>
                         </tr>
                         <tr>
                             <td>Fecha de alta</td>
-                            <td>{{ empleado_detalle[7] if empleado_detalle[7] else '—' }}</td>
-                        </tr>
-                        <tr>
-                            <td>Salario</td>
-                            <td>{{ '%.2f'|format(empleado_detalle[8]) }} €/mes</td>
+                            <td>{{ empleado_detalle[6] if empleado_detalle[6] else '—' }}</td>
                         </tr>
                         <tr>
                             <td>Estado</td>
                             <td>
-                                {% if empleado_detalle[9] %}
+                                {% if empleado_detalle[7] %}
                                 <span class="badge" style="background:#d1fae5; color:#065f46;">Activo</span>
                                 {% else %}
                                 <span class="badge" style="background:#fee2e2; color:#991b1b;">Inactivo</span>
@@ -310,15 +291,6 @@
                             </td>
                         </tr>
                     </table>
-
-                    {% if empleado_detalle[10] %}
-                    <div style="margin-top:14px;">
-                        <h3 style="font-size:14px; font-weight:700; margin-bottom:8px; border-bottom:1px solid #8DA9C4; padding-bottom:6px;">
-                            Notas
-                        </h3>
-                        <p style="font-size:13px; color:#13315C; line-height:1.5;">{{ empleado_detalle[10] }}</p>
-                    </div>
-                    {% endif %}
 
                     <div class="modal-actions">
                         <button class="btn-secondary" onclick="cerrarModalDetalle()">Cerrar</button>
@@ -357,22 +329,16 @@
                                 <label for="emp_puesto">Puesto *</label>
                                 <select id="emp_puesto" name="puesto" required>
                                     <option value="">Selecciona un puesto</option>
-                                    <option value="Chef">Chef</option>
-                                    <option value="Sous Chef">Sous Chef</option>
-                                    <option value="Cocinero">Cocinero</option>
-                                    <option value="Ayudante">Ayudante de cocina</option>
-                                    <option value="Camarero">Camarero/a</option>
-                                    <option value="Gerente">Gerente</option>
+                                    <option value="cocinero">Cocinero</option>
+                                    <option value="docente">Docente</option>
+                                    <option value="apoyo">Apoyo</option>
+                                    <option value="alumno_cocina">Alumno Cocina</option>
+                                    <option value="alumno_dietetica">Alumno Dietética</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="emp_turno">Turno</label>
-                                <select id="emp_turno" name="turno">
-                                    <option value="mañana">Mañana</option>
-                                    <option value="tarde">Tarde</option>
-                                    <option value="noche">Noche</option>
-                                    <option value="partido">Partido</option>
-                                </select>
+                                <label for="emp_fecha_alta">Fecha de alta *</label>
+                                <input type="date" id="emp_fecha_alta" name="fecha_alta" required>
                             </div>
                         </div>
 
@@ -385,22 +351,6 @@
                                 <label for="emp_email">Email</label>
                                 <input type="email" id="emp_email" name="email" placeholder="nombre@email.com">
                             </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="emp_fecha_alta">Fecha de alta</label>
-                                <input type="date" id="emp_fecha_alta" name="fecha_alta">
-                            </div>
-                            <div class="form-group">
-                                <label for="emp_salario">Salario mensual (€)</label>
-                                <input type="number" id="emp_salario" name="salario" step="0.01" min="0" placeholder="0.00">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="emp_notas">Notas</label>
-                            <textarea id="emp_notas" name="notas" placeholder="Observaciones, habilidades especiales..."></textarea>
                         </div>
 
                         <div class="checkbox-group">

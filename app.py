@@ -19,6 +19,8 @@ def inicio():
     total_pages = (total + per_page - 1) // per_page
 
     if request.method == "POST":
+        alergenos_lista = request.form.getlist("alergenos")
+        alergenos_str = ", ".join(alergenos_lista) if alergenos_lista else None
         db.guardarIngrediente(
             request.form.get("nombreIng"),
             request.form.get("unidad"),
@@ -28,7 +30,8 @@ def inicio():
             request.form.get("carbohidratos"),
             request.form.get("grasas"),
             request.form.get("fibra"),
-            request.form.get("sodio")
+            request.form.get("sodio"),
+            alergenos_str
         )
 
     receta_detalle = None
@@ -80,6 +83,8 @@ def nueva_receta():
             )
             return redirect(url_for("inicio"))
         else:
+            alergenos_lista = request.form.getlist("alergenos")
+            alergenos_str = ", ".join(alergenos_lista) if alergenos_lista else None
             db.guardarIngrediente(
                 request.form.get("nombreIng"),
                 request.form.get("unidad"),
@@ -89,7 +94,8 @@ def nueva_receta():
                 request.form.get("carbohidratos"),
                 request.form.get("grasas"),
                 request.form.get("fibra"),
-                request.form.get("sodio")
+                request.form.get("sodio"),
+                alergenos_str
             )
 
     return render_template('nuevaReceta.html', categorias=categorias, ingredientes=ingredientes)
@@ -151,6 +157,8 @@ def ingredientes():
     ing_id           = request.args.get('ing_id', type=int)
 
     if request.method == "POST":
+        alergenos_lista = request.form.getlist("alergenos")
+        alergenos_str = ", ".join(alergenos_lista) if alergenos_lista else None
         db.guardarIngrediente(
             request.form.get("nombreIng"),
             request.form.get("unidad"),
@@ -160,7 +168,8 @@ def ingredientes():
             request.form.get("carbohidratos"),
             request.form.get("grasas"),
             request.form.get("fibra"),
-            request.form.get("sodio")
+            request.form.get("sodio"),
+            alergenos_str
         )
         return redirect(url_for("ingredientes"))
 
@@ -169,6 +178,7 @@ def ingredientes():
     categorias  = db.obtenerCategoriasIngredientes()
 
     ingrediente_detalle = db.obtenerIngrediente(ing_id) if ing_id else None
+    alergenos_ingrediente = db.obtenerAlergenosIngrediente(ing_id) if ing_id else []
 
     return render_template('ingredientes.html',
                            ingredientes=ingredientes_list,
@@ -177,7 +187,9 @@ def ingredientes():
                            categorias=categorias,
                            categoria_actual=categoria_actual,
                            unidad_actual=unidad_actual,
-                           ingrediente_detalle=ingrediente_detalle)
+                           ingrediente_detalle=ingrediente_detalle,
+                           alergenos_ingrediente=alergenos_ingrediente,
+                           todos_alergenos=db.listaAlergenosUnicos())
 
 
 @app.route('/ver-ingrediente/<int:id_ingrediente>', methods=["GET"])
@@ -209,6 +221,13 @@ def editar_ingrediente(id_ingrediente):
 def eliminar_ingrediente(id_ingrediente):
     db.eliminarIngredienteDB(id_ingrediente)
     return redirect(url_for("ingredientes"))
+
+
+@app.route('/eliminar-alergeno-ingrediente/<int:id_ingrediente>/<int:id_alergeno>', methods=["POST"])
+def eliminar_alergeno_ingrediente(id_ingrediente, id_alergeno):
+    """Elimina la relación entre un ingrediente y un alérgeno."""
+    db.eliminarAlergeno(id_ingrediente, id_alergeno)
+    return redirect(url_for("ingredientes", ing_id=id_ingrediente))
 
 
 # ── ALÉRGENOS ─────────────────────────────────────────────────────────────────
@@ -356,7 +375,7 @@ def empleados():
                            total_empleados=total_empleados,
                            empleados_activos=empleados_activos,
                            empleados_cocina=empleados_cocina,
-                           empleados_docencia=empleados_docencia,
+                           empleados_sala=empleados_docencia,
                            empleado_detalle=empleado_detalle)
 
 

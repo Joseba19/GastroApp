@@ -200,8 +200,15 @@
                         Alérgenos
                     </h3>
                     <div class="alergenos-list">
-                        {% for a in ingrediente_detalle[10].split(',') %}
-                        <span class="alergeno-badge">{{ a.strip() }}</span>
+                        {% for alergeno in alergenos_ingrediente %}
+                        <span class="alergeno-badge" style="display:inline-flex; align-items:center; gap:6px;">
+                            {{ alergeno[1] }}
+                            <form action="{{ url_for('eliminar_alergeno_ingrediente', id_ingrediente=ingrediente_detalle[0], id_alergeno=alergeno[0]) }}"
+                                  method="POST" style="margin:0; display:inline;"
+                                  onsubmit="return confirm('¿Eliminar alérgeno {{ alergeno[1] }}?')">
+                                <button type="submit" style="background:none; border:none; cursor:pointer; color:#991b1b; font-size:14px; line-height:1; padding:0;" title="Eliminar">✕</button>
+                            </form>
+                        </span>
                         {% endfor %}
                     </div>
                     {% endif %}
@@ -287,8 +294,15 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="ing_alergenos">Alérgenos (separados por coma)</label>
-                            <input type="text" id="ing_alergenos" name="alergenos" placeholder="Ej: gluten, lactosa, huevo...">
+                            <label for="ing_alergenos">Alérgenos</label>
+                            <select id="ing_alergenos" name="alergenos" multiple
+                                    style="height:120px;"
+                                    title="Mantén Ctrl/Cmd para seleccionar varios">
+                                {% for a in todos_alergenos %}
+                                <option value="{{ a }}">{{ a }}</option>
+                                {% endfor %}
+                            </select>
+                            <small style="color:#13315C; font-size:11px;">Mantén Ctrl (o Cmd en Mac) para seleccionar varios</small>
                         </div>
 
                         <div class="modal-actions">

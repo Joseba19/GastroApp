@@ -276,8 +276,8 @@ def actualizarReceta(id_receta, nombre, id_categoria, dificultad, raciones, tiem
 
         cursor.close()
 
-def guardarIngrediente(nombre, unidad, categoria, calorias, proteina, carbohidratos, grasas, fibra, sodio):
-    """Guarda un ingrediente en la base de datos"""
+def guardarIngrediente(nombre, unidad, categoria, calorias, proteina, carbohidratos, grasas, fibra, sodio, alergenos=None):
+    """Guarda un ingrediente en la base de datos y asigna sus alérgenos."""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
 
@@ -291,6 +291,26 @@ def guardarIngrediente(nombre, unidad, categoria, calorias, proteina, carbohidra
               fibra or None, sodio or None))
 
         conexion.commit()
+        id_ingrediente = cursor.lastrowid
+
+        # Procesar alérgenos si se han proporcionado
+        if alergenos:
+            nombres_alergenos = [a.strip() for a in alergenos.split(',') if a.strip()]
+            for nombre_alergeno in nombres_alergenos:
+                cursor.execute("SELECT id_alergeno FROM alergenos WHERE nombre = %s", (nombre_alergeno,))
+                fila = cursor.fetchone()
+                if fila:
+                    id_alergeno = fila[0]
+                else:
+                    cursor.execute("INSERT INTO alergenos (nombre) VALUES (%s)", (nombre_alergeno,))
+                    conexion.commit()
+                    id_alergeno = cursor.lastrowid
+                cursor.execute("""
+                    INSERT IGNORE INTO ingredientes_alergenos (id_ingrediente, id_alergeno)
+                    VALUES (%s, %s)
+                """, (id_ingrediente, id_alergeno))
+                conexion.commit()
+
         cursor.close()
 
 
@@ -540,12 +560,48 @@ def resumenAlergenos():
 
 
 def listaAlergenosUnicos():
-    """Devuelve la lista fija de los 14 alérgenos UE para el filtro."""
-    return [
-        "Gluten", "Crustáceos", "Huevo", "Pescado", "Cacahuetes",
-        "Soja", "Lácteos", "Frutos de cáscara", "Apio", "Mostaza",
-        "Sésamo", "Dióxido de azufre", "Altramuces", "Moluscos"
-    ]
+    """Devuelve la lista de alérgenos existentes en la BD, ordenados alfabéticamente."""
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("SELECT nombre FROM alergenos ORDER BY nombre ASC")
+        alergenos = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+    # Si la tabla está vacía, devolver los 14 UE como fallback
+    if not alergenos:
+        alergenos = [
+            "Apio", "Altramuces", "Cacahuetes", "Crustáceos", "Dióxido de azufre",
+            "Frutos de cáscara", "Gluten", "Huevo", "Lácteos", "Moluscos",
+            "Mostaza", "Pescado", "Sésamo", "Soja"
+        ]
+    return alergenos
+
+
+def eliminarAlergeno(id_ingrediente, id_alergeno):
+    """Elimina la relación entre un ingrediente y un alérgeno."""
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            DELETE FROM ingredientes_alergenos
+            WHERE id_ingrediente = %s AND id_alergeno = %s
+        """, (id_ingrediente, id_alergeno))
+        conexion.commit()
+        cursor.close()
+
+
+def obtenerAlergenosIngrediente(id_ingrediente):
+    """Devuelve los alérgenos asignados a un ingrediente con su id."""
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            SELECT a.id_alergeno, a.nombre
+            FROM ingredientes_alergenos ia
+            JOIN alergenos a ON ia.id_alergeno = a.id_alergeno
+            WHERE ia.id_ingrediente = %s
+            ORDER BY a.nombre ASC
+        """, (id_ingrediente,))
+        alergenos = cursor.fetchall()
+        cursor.close()
+    return alergenos
 
 
 # ─────────────────────────────────────────────────────────────────────────────
