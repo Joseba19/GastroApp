@@ -789,11 +789,12 @@ def eliminarMenuDB(id_menu):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def obtenerEmpleadosFiltrados(page, per_page, puesto=None, activo=None):
-    """Obtiene empleados paginados con filtros opcionales.
-    CORRECCIÓN: eliminadas las columnas turno, salario, notas que no existen
-                en la tabla empleados. Columnas reales: id_empleado, nombre,
-                apellidos, email, telefono, puesto, activo, fecha_alta.
-    Cada fila: (id, nombre, apellidos, puesto, telefono, email, fecha_alta, activo)
+    """Obtiene empleados paginados con filtros opcionales, incluyendo datos del
+    contrato activo más reciente (LEFT JOIN contratos).
+    Cada fila: (0=id, 1=nombre, 2=apellidos, 3=puesto, 4=telefono, 5=email,
+                6=fecha_alta, 7=activo, 8=tipo_contrato, 9=fecha_inicio_contrato,
+                10=fecha_fin_contrato, 11=horas_semanales, 12=salario_bruto_anual,
+                13=salario_neto, 14=contrato_activo)
     """
     offset = (page - 1) * per_page
 
@@ -801,22 +802,32 @@ def obtenerEmpleadosFiltrados(page, per_page, puesto=None, activo=None):
         cursor = conexion.cursor()
 
         query = """
-        SELECT id_empleado, nombre, apellidos, puesto,
-               telefono, email, fecha_alta, activo
-        FROM empleados
+        SELECT e.id_empleado, e.nombre, e.apellidos, e.puesto,
+               e.telefono, e.email, e.fecha_alta, e.activo,
+               c.tipo_contrato, c.fecha_inicio, c.fecha_fin,
+               c.horas_semanales, c.salario_bruto_anual, c.salario_neto, c.activo
+        FROM empleados e
+        LEFT JOIN contratos c
+            ON c.id_empleado = e.id_empleado
+            AND c.id_contrato = (
+                SELECT id_contrato FROM contratos
+                WHERE id_empleado = e.id_empleado
+                ORDER BY activo DESC, fecha_inicio DESC
+                LIMIT 1
+            )
         WHERE 1=1
         """
         params = []
 
         if puesto:
-            query += " AND puesto = %s"
+            query += " AND e.puesto = %s"
             params.append(puesto)
 
         if activo is not None and activo != "":
-            query += " AND activo = %s"
+            query += " AND e.activo = %s"
             params.append(int(activo))
 
-        query += " ORDER BY apellidos ASC, nombre ASC LIMIT %s OFFSET %s"
+        query += " ORDER BY e.apellidos ASC, e.nombre ASC LIMIT %s OFFSET %s"
         params.extend([per_page, offset])
 
         cursor.execute(query, params)
@@ -841,16 +852,30 @@ def obtenerEmpleadosFiltrados(page, per_page, puesto=None, activo=None):
 
 
 def obtenerEmpleado(id_empleado):
-    """Devuelve todos los datos de un empleado por su id.
-    CORRECCIÓN: eliminadas columnas turno, salario, notas.
+    """Devuelve todos los datos de un empleado por su id, incluyendo el contrato
+    activo más reciente.
+    Fila: (0=id, 1=nombre, 2=apellidos, 3=puesto, 4=telefono, 5=email,
+           6=fecha_alta, 7=activo, 8=tipo_contrato, 9=fecha_inicio,
+           10=fecha_fin, 11=horas_semanales, 12=salario_bruto_anual,
+           13=salario_neto, 14=contrato_activo)
     """
     with conexionDB() as conexion:
         cursor = conexion.cursor()
         cursor.execute("""
-            SELECT id_empleado, nombre, apellidos, puesto,
-                   telefono, email, fecha_alta, activo
-            FROM empleados
-            WHERE id_empleado = %s
+            SELECT e.id_empleado, e.nombre, e.apellidos, e.puesto,
+                   e.telefono, e.email, e.fecha_alta, e.activo,
+                   c.tipo_contrato, c.fecha_inicio, c.fecha_fin,
+                   c.horas_semanales, c.salario_bruto_anual, c.salario_neto, c.activo
+            FROM empleados e
+            LEFT JOIN contratos c
+                ON c.id_empleado = e.id_empleado
+                AND c.id_contrato = (
+                    SELECT id_contrato FROM contratos
+                    WHERE id_empleado = e.id_empleado
+                    ORDER BY activo DESC, fecha_inicio DESC
+                    LIMIT 1
+                )
+            WHERE e.id_empleado = %s
         """, (id_empleado,))
         empleado = cursor.fetchone()
         cursor.close()
@@ -893,6 +918,51 @@ def obtenerResumenEmpleados():
         return total, activos, cocina, docencia
 
 
+def obtenerResumenContratos():
+    """Devuelve estadísticas de contratos activos:
+    (contratos_activos, masa_salarial_bruta, horas_semanales_total, contratos_indefinidos)
+    """
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+
+        cursor.execute("SELECT COUNT(*) FROM contratos WHERE activo = 1")
+        contratos_activos = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COALESCE(SUM(salario_bruto_anual), 0) FROM contratos WHERE activo = 1")
+        masa_salarial = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COALESCE(SUM(horas_semanales), 0) FROM contratos WHERE activo = 1")
+        horas_total = cursor.fetchone()[0]
+
+        cursor.execute("""
+            SELECT COUNT(*) FROM contratos
+            WHERE activo = 1 AND tipo_contrato LIKE '%Indefinido%'
+        """)
+        indefinidos = cursor.fetchone()[0]
+
+        cursor.close()
+        return contratos_activos, float(masa_salarial), float(horas_total), indefinidos
+
+
+def obtenerContratosEmpleado(id_empleado):
+    """Devuelve todos los contratos de un empleado ordenados por fecha descendente.
+    Cada fila: (id_contrato, tipo_contrato, fecha_inicio, fecha_fin,
+                horas_semanales, salario_bruto_anual, salario_neto, activo)
+    """
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            SELECT id_contrato, tipo_contrato, fecha_inicio, fecha_fin,
+                   horas_semanales, salario_bruto_anual, salario_neto, activo
+            FROM contratos
+            WHERE id_empleado = %s
+            ORDER BY activo DESC, fecha_inicio DESC
+        """, (id_empleado,))
+        contratos = cursor.fetchall()
+        cursor.close()
+        return contratos
+
+
 def guardarEmpleado(nombre, apellidos, puesto, telefono, email, fecha_alta, activo):
     """Inserta un nuevo empleado en la base de datos.
     CORRECCIÓN: eliminados parámetros turno, salario, notas que no existen
@@ -919,16 +989,14 @@ def guardarEmpleado(nombre, apellidos, puesto, telefono, email, fecha_alta, acti
 
 
 def actualizarEmpleado(id_empleado, nombre, apellidos, puesto,
-                       telefono, email, fecha_alta, activo):
-    """Actualiza los datos de un empleado existente.
-    CORRECCIÓN: eliminados parámetros turno, salario, notas.
-    """
+                       telefono, email, fecha_alta):
+    """Actualiza los datos personales de un empleado existente."""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
         cursor.execute("""
             UPDATE empleados
             SET nombre = %s, apellidos = %s, puesto = %s,
-                telefono = %s, email = %s, fecha_alta = %s, activo = %s
+                telefono = %s, email = %s, fecha_alta = %s
             WHERE id_empleado = %s
         """, (
             nombre,
@@ -937,8 +1005,58 @@ def actualizarEmpleado(id_empleado, nombre, apellidos, puesto,
             telefono or None,
             email or None,
             fecha_alta or None,
-            activo,
             id_empleado
+        ))
+        conexion.commit()
+        cursor.close()
+
+
+def actualizarContrato(id_contrato, tipo_contrato, fecha_inicio, fecha_fin,
+                       horas_semanales, salario_bruto_anual, salario_neto):
+    """Actualiza los datos de un contrato existente."""
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            UPDATE contratos
+            SET tipo_contrato = %s, fecha_inicio = %s, fecha_fin = %s,
+                horas_semanales = %s, salario_bruto_anual = %s, salario_neto = %s
+            WHERE id_contrato = %s
+        """, (
+            tipo_contrato,
+            fecha_inicio or None,
+            fecha_fin or None,
+            horas_semanales or None,
+            salario_bruto_anual or None,
+            salario_neto or None,
+            id_contrato
+        ))
+        conexion.commit()
+        cursor.close()
+
+
+def crearContrato(id_empleado, tipo_contrato, fecha_inicio, fecha_fin,
+                  horas_semanales, salario_bruto_anual, salario_neto):
+    """Crea un nuevo contrato para un empleado.
+    Marca como inactivos los contratos previos antes de insertar el nuevo.
+    """
+    with conexionDB() as conexion:
+        cursor = conexion.cursor()
+        cursor.execute("""
+            UPDATE contratos SET activo = 0 WHERE id_empleado = %s
+        """, (id_empleado,))
+        cursor.execute("""
+            INSERT INTO contratos
+            (id_empleado, tipo_contrato, fecha_inicio, fecha_fin,
+             horas_semanales, salario_bruto_anual, salario_neto, activo)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 1)
+        """, (
+            id_empleado,
+            tipo_contrato,
+            fecha_inicio or None,
+            fecha_fin or None,
+            horas_semanales or None,
+            salario_bruto_anual or None,
+            salario_neto or None
         ))
         conexion.commit()
         cursor.close()
@@ -1014,6 +1132,89 @@ def empleadosRecientes(limite=5):
         rows = cursor.fetchall()
         cursor.close()
     return rows
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AUTENTICACIÓN
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Puestos que tienen acceso al sistema. Los alumnos nunca pueden entrar.
+PUESTOS_CON_ACCESO = ('cocinero', 'docente', 'apoyo')
+
+
+def verificarLogin(username, password):
+    """Comprueba credenciales y devuelve un dict con datos del usuario si son
+    correctas y el empleado tiene permiso de acceso (no es alumno).
+    Devuelve None si falla cualquier comprobación.
+
+    Requiere: pip install bcrypt
+    """
+    try:
+        import bcrypt
+    except ImportError:
+        raise RuntimeError("Instala bcrypt: pip install bcrypt")
+
+    with conexionDB() as conexion:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT ul.id_usuario, ul.password_hash, ul.activo,
+                   e.id_empleado, e.nombre, e.apellidos, e.puesto, e.activo AS emp_activo
+            FROM usuarios_login ul
+            JOIN empleados e ON ul.id_empleado = e.id_empleado
+            WHERE ul.username = %s
+        """, (username,))
+        row = cursor.fetchone()
+        cursor.close()
+
+    if not row:
+        return None  # Usuario no existe
+
+    # Comprobar que el login y el empleado están activos
+    if not row['activo'] or not row['emp_activo']:
+        return None
+
+    # Los alumnos nunca tienen acceso, aunque tuviesen entrada en usuarios_login
+    if row['puesto'] not in PUESTOS_CON_ACCESO:
+        return None
+
+    # Verificar contraseña con bcrypt
+    if not bcrypt.checkpw(password.encode('utf-8'), row['password_hash'].encode('utf-8')):
+        return None
+
+    return {
+        'id_usuario': row['id_usuario'],
+        'nombre':     f"{row['nombre']} {row['apellidos']}",
+        'puesto':     row['puesto'],
+    }
+
+
+def crearUsuarioLogin(id_empleado, username, password):
+    """Crea un usuario de login para un empleado. Solo para uso administrativo
+    (por ejemplo desde la shell). No se expone como ruta web.
+
+    Lanza ValueError si el empleado es alumno.
+    """
+    try:
+        import bcrypt
+    except ImportError:
+        raise RuntimeError("Instala bcrypt: pip install bcrypt")
+
+    with conexionDB() as conexion:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("SELECT puesto FROM empleados WHERE id_empleado = %s", (id_empleado,))
+        emp = cursor.fetchone()
+        if not emp:
+            raise ValueError(f"No existe el empleado {id_empleado}")
+        if emp['puesto'] not in PUESTOS_CON_ACCESO:
+            raise ValueError(f"El empleado tiene puesto '{emp['puesto']}' y no puede tener acceso al sistema.")
+
+        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
+        cursor.execute("""
+            INSERT INTO usuarios_login (id_empleado, username, password_hash)
+            VALUES (%s, %s, %s)
+        """, (id_empleado, username, password_hash))
+        conexion.commit()
+        cursor.close()
 
 
 if __name__ == "__main__":

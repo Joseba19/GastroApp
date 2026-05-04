@@ -1,9 +1,55 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
+from functools import wraps
 import db
 
 app = Flask(__name__)
+app.secret_key = 'gastrolab-secret-key-cambia-esto-en-produccion'
+
+
+# ── AUTENTICACIÓN ──────────────────────────────────────────────────────────────
+
+def login_required(f):
+    """Decorador: redirige al login si el usuario no ha iniciado sesión."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'usuario_id' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if 'usuario_id' in session:
+        return redirect(url_for('inicio'))
+
+    error = None
+    username_prev = None
+
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        username_prev = username
+
+        usuario = db.verificarLogin(username, password)
+        if usuario:
+            session['usuario_id']     = usuario['id_usuario']
+            session['usuario_nombre'] = usuario['nombre']
+            session['usuario_puesto'] = usuario['puesto']
+            return redirect(url_for('inicio'))
+        else:
+            error = "Usuario o contraseña incorrectos, o no tienes permiso de acceso."
+
+    return render_template('login.html', error=error, username_prev=username_prev)
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 @app.route('/', methods=["GET", "POST"])
+@login_required
 def inicio():
     page = request.args.get('page', 1, type=int)
     per_page = 10
@@ -72,6 +118,7 @@ def inicio():
 
 
 @app.route('/nueva-receta', methods=["GET", "POST"])
+@login_required
 def nueva_receta():
     categorias = db.categoriasBD()
     ingredientes = db.nombreIngredientes()
@@ -113,12 +160,14 @@ def nueva_receta():
 
 
 @app.route('/eliminar-receta/<int:id_receta>', methods=["POST"])
+@login_required
 def eliminar_receta(id_receta):
     db.eliminarReceta(id_receta)
     return redirect(url_for("inicio"))
 
 
 @app.route('/ver-receta/<int:id_receta>', methods=["GET"])
+@login_required
 def ver_receta(id_receta):
     receta = db.obtenerReceta(id_receta)
     if receta is None:
@@ -127,6 +176,7 @@ def ver_receta(id_receta):
 
 
 @app.route('/editar-receta/<int:id_receta>', methods=["GET", "POST"])
+@login_required
 def editar_receta(id_receta):
     categorias = db.categoriasBD()
     ingredientes = db.obtenerIngredientes(id_receta)
@@ -160,6 +210,7 @@ def editar_receta(id_receta):
 # ── INGREDIENTES ──────────────────────────────────────────────────────────────
 
 @app.route('/ingredientes', methods=["GET", "POST"])
+@login_required
 def ingredientes():
     page             = request.args.get('page', 1, type=int)
     per_page         = 15
@@ -204,11 +255,13 @@ def ingredientes():
 
 
 @app.route('/ver-ingrediente/<int:id_ingrediente>', methods=["GET"])
+@login_required
 def ver_ingrediente(id_ingrediente):
     return redirect(url_for('ingredientes', ing_id=id_ingrediente))
 
 
 @app.route('/editar-ingrediente/<int:id_ingrediente>', methods=["GET", "POST"])
+@login_required
 def editar_ingrediente(id_ingrediente):
     if request.method == "POST":
         db.actualizarIngrediente(
@@ -238,12 +291,14 @@ def editar_ingrediente(id_ingrediente):
 
 
 @app.route('/eliminar-ingrediente/<int:id_ingrediente>', methods=["POST"])
+@login_required
 def eliminar_ingrediente(id_ingrediente):
     db.eliminarIngredienteDB(id_ingrediente)
     return redirect(url_for("ingredientes"))
 
 
 @app.route('/eliminar-alergeno-ingrediente/<int:id_ingrediente>/<int:id_alergeno>', methods=["POST"])
+@login_required
 def eliminar_alergeno_ingrediente(id_ingrediente, id_alergeno):
     """Elimina la relación entre un ingrediente y un alérgeno."""
     db.eliminarAlergeno(id_ingrediente, id_alergeno)
@@ -253,6 +308,7 @@ def eliminar_alergeno_ingrediente(id_ingrediente, id_alergeno):
 # ── ALÉRGENOS ─────────────────────────────────────────────────────────────────
 
 @app.route('/alergenos', methods=["GET", "POST"])
+@login_required
 def alergenos():
     page            = request.args.get('page', 1, type=int)
     per_page        = 12
@@ -284,6 +340,7 @@ def alergenos():
 # ── MENÚS ─────────────────────────────────────────────────────────────────────
 
 @app.route('/menus', methods=["GET", "POST"])
+@login_required
 def menus():
     page          = request.args.get('page', 1, type=int)
     per_page      = 10
@@ -325,11 +382,13 @@ def menus():
 
 
 @app.route('/ver-menu/<int:id_menu>', methods=["GET"])
+@login_required
 def ver_menu(id_menu):
     return redirect(url_for('menus', menu_id=id_menu))
 
 
 @app.route('/editar-menu/<int:id_menu>', methods=["GET", "POST"])
+@login_required
 def editar_menu(id_menu):
     if request.method == "POST":
         # CORRECCIÓN: eliminados precio, fecha_inicio, fecha_fin
@@ -351,6 +410,7 @@ def editar_menu(id_menu):
 
 
 @app.route('/eliminar-menu/<int:id_menu>', methods=["POST"])
+@login_required
 def eliminar_menu(id_menu):
     db.eliminarMenuDB(id_menu)
     return redirect(url_for("menus"))
@@ -359,6 +419,7 @@ def eliminar_menu(id_menu):
 # ── EMPLEADOS ─────────────────────────────────────────────────────────────────
 
 @app.route('/empleados', methods=["GET", "POST"])
+@login_required
 def empleados():
     page          = request.args.get('page', 1, type=int)
     per_page      = 10
@@ -367,7 +428,6 @@ def empleados():
     emp_id        = request.args.get('emp_id', type=int)
 
     if request.method == "POST":
-        # CORRECCIÓN: eliminados turno, salario, notas (no existen en la tabla empleados)
         db.guardarEmpleado(
             request.form.get("nombre"),
             request.form.get("apellidos"),
@@ -379,12 +439,13 @@ def empleados():
         )
         return redirect(url_for("empleados"))
 
-    # CORRECCIÓN: eliminado turno_actual (columna turno no existe)
     empleados_list, total = db.obtenerEmpleadosFiltrados(page, per_page, puesto_actual, activo_actual)
     total_pages = (total + per_page - 1) // per_page
     total_empleados, empleados_activos, empleados_cocina, empleados_docencia = db.obtenerResumenEmpleados()
+    contratos_activos, masa_salarial, horas_total, contratos_indefinidos = db.obtenerResumenContratos()
 
     empleado_detalle = db.obtenerEmpleado(emp_id) if emp_id else None
+    contratos_empleado = db.obtenerContratosEmpleado(emp_id) if emp_id else []
 
     return render_template('empleados.html',
                            empleados=empleados_list,
@@ -396,18 +457,25 @@ def empleados():
                            empleados_activos=empleados_activos,
                            empleados_cocina=empleados_cocina,
                            empleados_sala=empleados_docencia,
-                           empleado_detalle=empleado_detalle)
+                           contratos_activos=contratos_activos,
+                           masa_salarial=masa_salarial,
+                           horas_total=horas_total,
+                           contratos_indefinidos=contratos_indefinidos,
+                           empleado_detalle=empleado_detalle,
+                           contratos_empleado=contratos_empleado)
 
 
 @app.route('/ver-empleado/<int:id_empleado>', methods=["GET"])
+@login_required
 def ver_empleado(id_empleado):
     return redirect(url_for('empleados', emp_id=id_empleado))
 
 
 @app.route('/editar-empleado/<int:id_empleado>', methods=["GET", "POST"])
+@login_required
 def editar_empleado(id_empleado):
     if request.method == "POST":
-        # CORRECCIÓN: eliminados turno, salario, notas
+        # ── Datos del empleado ──
         db.actualizarEmpleado(
             id_empleado,
             request.form.get("nombre"),
@@ -415,15 +483,42 @@ def editar_empleado(id_empleado):
             request.form.get("puesto"),
             request.form.get("telefono"),
             request.form.get("email"),
-            request.form.get("fecha_alta"),
-            1 if request.form.get("activo") else 0
+            request.form.get("fecha_alta")
         )
+        # ── Datos del contrato ──
+        fecha_fin_val = request.form.get("fecha_fin") or None  # vacío = indefinido
+        id_contrato   = request.form.get("id_contrato")
+        if id_contrato:
+            db.actualizarContrato(
+                id_contrato,
+                request.form.get("tipo_contrato"),
+                request.form.get("fecha_inicio"),
+                fecha_fin_val,
+                request.form.get("horas_semanales"),
+                request.form.get("salario_bruto_anual"),
+                request.form.get("salario_neto")
+            )
+        elif request.form.get("tipo_contrato"):
+            db.crearContrato(
+                id_empleado,
+                request.form.get("tipo_contrato"),
+                request.form.get("fecha_inicio"),
+                fecha_fin_val,
+                request.form.get("horas_semanales"),
+                request.form.get("salario_bruto_anual"),
+                request.form.get("salario_neto")
+            )
         return redirect(url_for("empleados"))
-    empleado = db.obtenerEmpleado(id_empleado)
-    return render_template('editarEmpleado.html', empleado=empleado)
+
+    empleado          = db.obtenerEmpleado(id_empleado)
+    contratos_empleado = db.obtenerContratosEmpleado(id_empleado)
+    return render_template('editarEmpleado.html',
+                           empleado=empleado,
+                           contratos_empleado=contratos_empleado)
 
 
 @app.route('/eliminar-empleado/<int:id_empleado>', methods=["POST"])
+@login_required
 def eliminar_empleado(id_empleado):
     db.eliminarEmpleadoDB(id_empleado)
     return redirect(url_for("empleados"))

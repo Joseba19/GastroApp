@@ -14,17 +14,35 @@
     <div class="sidebar">
         <div class="sidebar-logo"><img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt=""></div>
         <nav>
-            <a href="{{ url_for('inicio') }}"><img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20px" height="20px"> Dashboard</a>
-            <a href="{{ url_for('inicio') }}"><img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px" height="20px"> Recetas</a>
-            <a href="{{ url_for('ingredientes') }}"><img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px" height="20px"> Ingredientes</a>
-            <a href="{{ url_for('menus') }}"><img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px"> Menús</a>
-            <a href="{{ url_for('alergenos') }}" class="active"><img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px" height="20px"> Alérgenos</a>
-            <a href="#"><img src="{{ url_for('static', filename='img/icons/tabla.png') }}" alt="" width="20px" height="20px"> Información nutricional</a>
-            <a href="{{ url_for('empleados') }}"><img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px" height="20px"> Empleados</a>
-            <a href="#"><img src="{{ url_for('static', filename='img/icons/archivo.png') }}" alt="" width="20px" height="20px"> Contratos</a>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20px" height="20px">
+                Dashboard
+            </a>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px" height="20px">
+                Recetas
+            </a>
+            <a href="{{ url_for('ingredientes') }}">
+                <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px"
+                    height="20px"> Ingredientes
+            </a>
+            <a href="{{ url_for('menus') }}">
+                <img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px">
+                Menús
+            </a>
+            <a href="{{ url_for('alergenos') }}" class="active">
+                <img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px"
+                    height="20px"> Alérgenos
+            </a>
+            <a href="{{ url_for('empleados') }}">
+                <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px"
+                    height="20px"> Empleados
+            </a>
         </nav>
-        <div class="sidebar-footer">
-            <a href="#">Cerrar sesión</a>
+        <div class="sidebar-user">
+            <div class="user-name">{{ session.get('usuario_nombre', 'Usuario') }}</div>
+            <div class="user-role">{{ session.get('usuario_puesto', '') }}</div>
+            <a href="{{ url_for('logout') }}">← Cerrar sesión</a>
         </div>
     </div>
 
