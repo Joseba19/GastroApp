@@ -7,6 +7,31 @@
 
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+<!-- MODAL RECETA -->
+<div id="receta-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+
+        <span class="close" onclick="cerrarReceta()">&times;</span>
+
+        <img id="modal-img" src="" alt="">
+
+        <h2 id="modal-titulo"></h2>
+
+        <p id="modal-descripcion"></p>
+
+        <div class="modal-info">
+            <p><strong>Tiempo:</strong> <span id="modal-tiempo"></span> min</p>
+            <p><strong>Dificultad:</strong> <span id="modal-dificultad"></span></p>
+        </div>
+
+        <h3>Ingredientes</h3>
+        <ul id="modal-ingredientes"></ul>
+
+        <h3>Pasos</h3>
+        <ol id="modal-pasos"></ol>
+
+    </div>
+</div>
 
 <body>
 
@@ -40,7 +65,6 @@
 <!-- PAGINA RECETAS -->
 <div id="page-recetas" class="page">
     <main>
-        <!-- 🔥 CORREGIDO ID -->
         <section class="recetas" id="contenedor-recetas"></section>
     </main>
 </div>
@@ -60,25 +84,31 @@
 </div>
 
 <script>
-// CAMBIO DE PAGINAS
+
+// =====================
+// CAMBIO DE PÁGINAS
+// =====================
 function showPage(id) {
     document.querySelectorAll('.page').forEach(p => {
         p.style.display = 'none';
     });
 
-    document.getElementById('page-' + id).style.display = 'block';
+    const page = document.getElementById('page-' + id);
+    if (page) page.style.display = 'block';
 
     if (id === "recetas") {
         cargarRecetas();
     }
 }
 
+// =====================
 // LOGIN PANEL
+// =====================
 function toggleLogin() {
     document.getElementById('login-panel').classList.toggle('open');
 }
 
-// CERRAR LOGIN SI CLICK FUERA
+// cerrar login al hacer click fuera
 document.addEventListener("click", function(e) {
     const panel = document.getElementById("login-panel");
     const btn = document.querySelector(".menu-hamburguesa");
@@ -88,7 +118,9 @@ document.addEventListener("click", function(e) {
     }
 });
 
-// LOGIN REAL
+// =====================
+// LOGIN
+// =====================
 function login() {
     fetch("/login", {
         method: "POST",
@@ -112,31 +144,41 @@ function login() {
     });
 }
 
-// ✅ CARGAR RECETAS (ÚNICA FUNCIÓN)
+// =====================
+// RECETAS (TARJETAS NETFLIX)
+// =====================
 function cargarRecetas() {
     fetch("/recetas")
         .then(res => res.json())
         .then(data => {
             const contenedor = document.getElementById("contenedor-recetas");
-
-            if (!contenedor) {
-                console.error("No existe contenedor-recetas");
-                return;
-            }
-
             contenedor.innerHTML = "";
 
             data.forEach(receta => {
-                const div = document.createElement("article");
-                div.className = "receta";
-                div.innerHTML = `<p>${receta.nombre}</p>`;
-                contenedor.appendChild(div);
+                const card = document.createElement("div");
+                card.className = "receta-card";
+                card.onclick = () => abrirReceta(receta);
+
+                card.innerHTML = `
+                    <div class="receta-img">
+                        <img src="${receta.imagen || 'https://via.placeholder.com/400x300'}" alt="${receta.nombre}">
+                    </div>
+
+                    <div class="receta-info">
+                        <h3>${receta.nombre}</h3>
+                        <p>${receta.descripcion || ""}</p>
+                    </div>
+                `;
+
+                contenedor.appendChild(card);
             });
         })
-        .catch(err => console.error("Error:", err));
+        .catch(err => console.error("Error cargando recetas:", err));
 }
 
-// PANEL ADMIN
+// =====================
+// ADMIN
+// =====================
 function cargarAdmin() {
     fetch("/recetas")
     .then(res => res.json())
@@ -147,7 +189,7 @@ function cargarAdmin() {
         data.forEach(r => {
             container.innerHTML += `
                 <article class="receta admin-card">
-                    
+
                     <div class="admin-overlay">
                         <input id="receta-${r.id}" value="${r.nombre}">
                         <div class="admin-botones">
@@ -164,7 +206,7 @@ function cargarAdmin() {
     });
 }
 
-// EDITAR
+// editar
 function editar(id) {
     const nombre = document.getElementById("receta-" + id).value;
 
@@ -179,7 +221,7 @@ function editar(id) {
     });
 }
 
-// BORRAR
+// borrar
 function borrar(id) {
     fetch("/borrar_receta/" + id, {
         method: "POST"
@@ -190,10 +232,47 @@ function borrar(id) {
     });
 }
 
-// INICIO (solo una vez)
-window.onload = function () {
-    cargarRecetas();
-};
+// =====================
+// INICIO LIMPIO
+// =====================
+document.addEventListener("DOMContentLoaded", () => {
+    showPage("recetas");
+});
+function abrirReceta(receta) {
+    document.getElementById("receta-modal").style.display = "flex";
+
+    document.getElementById("modal-img").src = receta.imagen;
+    document.getElementById("modal-titulo").innerText = receta.nombre;
+    document.getElementById("modal-descripcion").innerText = receta.descripcion;
+
+    document.getElementById("modal-tiempo").innerText = receta.tiempo;
+    document.getElementById("modal-dificultad").innerText = receta.dificultad;
+
+    // ingredientes
+    const ing = document.getElementById("modal-ingredientes");
+    ing.innerHTML = "";
+    receta.ingredientes.forEach(i => {
+        ing.innerHTML += `<li>${i.cantidad} ${i.nombre}</li>`;
+    });
+
+    // pasos
+    const pasos = document.getElementById("modal-pasos");
+    pasos.innerHTML = "";
+    receta.pasos.forEach(p => {
+        pasos.innerHTML += `<li>${p}</li>`;
+    });
+}
+function cerrarReceta() {
+    document.getElementById("receta-modal").style.display = "none";
+}
+
+// cerrar al clicar fuera
+document.getElementById("receta-modal").addEventListener("click", function(e) {
+    if (e.target.id === "receta-modal") {
+        cerrarReceta();
+    }
+});
+
 </script>
 
 </body>

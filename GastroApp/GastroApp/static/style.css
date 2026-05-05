@@ -503,3 +503,108 @@ main {
 .receta {
     background-color: var(--sage);
 }
+.receta-card {
+    background: white;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 200px;
+    display: inline-block;
+    vertical-align: top;
+}
+.recetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+/* CARD */
+.receta-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+}
+
+.receta-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.25);
+}
+
+/* IMG */
+.receta-img {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+}
+
+.receta-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.receta-card:hover img {
+    transform: scale(1.1);
+}
+
+/* INFO */
+.receta-info {
+    padding: 12px;
+}
+
+.receta-info h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.receta-info p {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #666;
+}
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 15px;
+    padding: 20px;
+    position: relative;
+}
+
+.modal-content img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.modal-info {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
