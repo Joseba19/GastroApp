@@ -26,14 +26,6 @@
                 <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px"
                     height="20px"> Ingredientes
             </a>
-            <a href="{{ url_for('menus') }}">
-                <img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px">
-                Menús
-            </a>
-            <a href="{{ url_for('alergenos') }}">
-                <img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px"
-                    height="20px"> Alérgenos
-            </a>
             <a href="{{ url_for('empleados') }}" class="active">
                 <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px"
                     height="20px"> Empleados
@@ -265,75 +257,7 @@
                     </button>
                 </div>
             </form>
-
-            <!-- Historial de contratos anteriores -->
-            {% if contratos_empleado and contratos_empleado|length > 1 %}
-            <div style="border-top: 1px solid #DDE4EE; margin-top: 24px; padding-top: 20px;">
-                <p style="font-size:11px; font-weight:700; color:#8DA9C4; text-transform:uppercase;
-                           letter-spacing:0.5px; margin-bottom:12px;">
-                    Historial de contratos anteriores
-                </p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tipo</th>
-                            <th>Inicio</th>
-                            <th>Fin</th>
-                            <th>Horas/sem.</th>
-                            <th>Bruto anual</th>
-                            <th>Neto anual</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for hist in contratos_empleado %}
-                        {% if not loop.first %}
-                        <tr style="font-size:12px; {% if not hist[7] %}opacity:0.6;{% endif %}">
-                            <td>{{ hist[1] }}</td>
-                            <td>{{ hist[2] if hist[2] else '—' }}</td>
-                            <td>
-                                {% if hist[3] %}{{ hist[3] }}
-                                {% else %}<span style="color:#065f46;">Indefinido</span>
-                                {% endif %}
-                            </td>
-                            <td style="text-align:center;">{{ hist[4]|int if hist[4] is not none else '—' }}h</td>
-                            <td style="text-align:right;">{{ "{:,.0f}".format(hist[5]) if hist[5] is not none else '—' }} €</td>
-                            <td style="text-align:right;">{{ "{:,.0f}".format(hist[6]) if hist[6] is not none else '—' }} €</td>
-                            <td>
-                                {% if hist[7] %}
-                                <span class="badge" style="background:#d1fae5; color:#065f46;">Activo</span>
-                                {% else %}
-                                <span class="badge" style="background:#f3f4f6; color:#6b7280;">Caducado</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endif %}
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endif %}
         </div>
-
-        <!-- ── CARD 3: ZONA DE PELIGRO ── -->
-        <div class="card" style="margin-top:20px;">
-            <div class="danger-zone">
-                <h3>⚠ Zona de peligro</h3>
-                <p>
-                    Esta acción eliminará permanentemente al empleado
-                    <strong>{{ empleado[1] }} {{ empleado[2] }}</strong> y todos sus datos asociados.
-                    Esta operación no se puede deshacer.
-                </p>
-                <form action="{{ url_for('eliminar_empleado', id_empleado=empleado[0]) }}" method="POST"
-                      onsubmit="return confirm('¿Seguro que quieres eliminar a {{ empleado[1] }} {{ empleado[2] }}? Esta acción no se puede deshacer.')">
-                    <button type="submit" class="btn-del" style="padding: 9px 18px; border-radius: 6px; border: none; background: #dc2626; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">
-                        Eliminar empleado
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <footer>© 2024 Gestión de Recetas - Todos los derechos reservados</footer>
     </div>
 
 </body>

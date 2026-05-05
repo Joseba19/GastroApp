@@ -13,31 +13,25 @@
 
     <!-- SIDEBAR -->
     <div class="sidebar">
-        <div class="sidebar-logo"><img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt=""></div>
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt="">
+        </div>
         <nav>
             <a href="{{ url_for('inicio') }}">
-                <img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20px" height="20px">
+                <img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20" height="20">
                 Dashboard
             </a>
             <a href="{{ url_for('inicio') }}">
-                <img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px" height="20px">
+                <img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20" height="20">
                 Recetas
             </a>
             <a href="{{ url_for('ingredientes') }}">
-                <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px"
-                    height="20px"> Ingredientes
-            </a>
-            <a href="{{ url_for('menus') }}">
-                <img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px">
-                Menús
-            </a>
-            <a href="{{ url_for('alergenos') }}">
-                <img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px"
-                    height="20px"> Alérgenos
+                <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20" height="20">
+                Ingredientes
             </a>
             <a href="{{ url_for('empleados') }}" class="active">
-                <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px"
-                    height="20px"> Empleados
+                <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20" height="20">
+                Empleados
             </a>
         </nav>
         <div class="sidebar-user">
@@ -55,83 +49,19 @@
             <a href="{{ url_for('inicio') }}">Dashboard</a> › Empleados
         </div>
 
-        <!-- ── CARD 1: RESUMEN PERSONAL ── -->
-        <div class="card">
-            <div class="section-header">
-                <div>
-                    <h2>Empleados y Contratos</h2>
-                    <p>Gestión de personal y datos laborales de GastroLab</p>
-                </div>
-                <button class="btn-primary" onclick="abrirModalEmpleado()">+ Nuevo empleado</button>
-            </div>
-
-            <!-- Fila 1: estadísticas de personal -->
-            <div class="stat-row" style="margin-top:16px;">
-                <div class="stat-box">
-                    <div class="label">Total empleados</div>
-                    <div class="value">{{ total_empleados }}</div>
-                    <div style="font-size:11px; color:#13315C;">en plantilla</div>
-                </div>
-                <div class="stat-box">
-                    <div class="label">Activos</div>
-                    <div class="value">{{ empleados_activos }}</div>
-                    <div style="font-size:11px; color:#13315C;">en activo</div>
-                </div>
-                <div class="stat-box">
-                    <div class="label">Brigada cocina</div>
-                    <div class="value">{{ empleados_cocina }}</div>
-                    <div style="font-size:11px; color:#13315C;">cocineros y alumnos</div>
-                </div>
-                <div class="stat-box">
-                    <div class="label">Docencia</div>
-                    <div class="value">{{ empleados_sala }}</div>
-                    <div style="font-size:11px; color:#13315C;">docentes y dietética</div>
-                </div>
-            </div>
-
-            <!-- Fila 2: estadísticas de contratos -->
-            <div style="border-top: 1px solid #DDE4EE; margin-top: 16px; padding-top: 16px;">
-                <p style="font-size: 12px; font-weight: 600; color: #8DA9C4; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
-                    Resumen de contratos activos
-                </p>
-                <div class="stat-row">
-                    <div class="stat-box">
-                        <div class="label">Contratos activos</div>
-                        <div class="value">{{ contratos_activos }}</div>
-                        <div style="font-size:11px; color:#13315C;">vigentes</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="label">Contratos indefinidos</div>
-                        <div class="value">{{ contratos_indefinidos }}</div>
-                        <div style="font-size:11px; color:#13315C;">de larga duración</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="label">Masa salarial bruta</div>
-                        <div class="value" style="font-size:18px;">{{ "{:,.0f}".format(masa_salarial) }} €</div>
-                        <div style="font-size:11px; color:#13315C;">anual total</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="label">Horas contratadas</div>
-                        <div class="value">{{ horas_total|int }}</div>
-                        <div style="font-size:11px; color:#13315C;">horas/semana totales</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ── CARD 2: TABLA EMPLEADOS ── -->
+        <!-- CARD 1: TABLA EMPLEADOS -->
         <div class="card">
             <div class="section-header">
                 <div>
                     <h2>Listado de empleados</h2>
                     <p>Personal con datos de contrato vigente</p>
                 </div>
+                <button class="btn-primary" onclick="abrirModalEmpleado()">+ Nuevo empleado</button>
             </div>
 
             <div class="filters">
                 <form method="GET" action="{{ url_for('empleados') }}">
-                    <input type="text" name="busqueda" placeholder="Buscar empleado..."
-                        value="{{ request.args.get('busqueda', '') }}">
+                    <input type="text" name="busqueda" placeholder="Buscar empleado...">
 
                     <select name="puesto" onchange="this.form.submit()">
                         <option value="">Todos los puestos</option>
@@ -168,10 +98,6 @@
                 </thead>
                 <tbody>
                     {% for emp in empleados %}
-                    {# emp: 0=id, 1=nombre, 2=apellidos, 3=puesto, 4=tel, 5=email,
-                            6=fecha_alta, 7=activo, 8=tipo_contrato, 9=fecha_inicio,
-                            10=fecha_fin, 11=horas_sem, 12=salario_bruto, 13=salario_neto,
-                            14=contrato_activo #}
                     <tr>
                         <td>
                             <div class="employee-row">
@@ -179,67 +105,59 @@
                                     {{ emp[1][0] }}{{ emp[2][0] if emp[2] else '' }}
                                 </span>
                                 <div>
-                                    <div style="font-weight:600;">{{ emp[1] }} {{ emp[2] }}</div>
-                                    <div style="font-size:11px; color:#8DA9C4;">{{ emp[5] if emp[5] else '—' }}</div>
+                                    <div class="emp-nombre">{{ emp[1] }} {{ emp[2] }}</div>
+                                    <div class="emp-email">{{ emp[5] if emp[5] else '—' }}</div>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <span class="badge badge-{{ emp[3]|lower|replace('_', '-') }}">{{ emp[3]|replace('_', ' ')|capitalize }}</span>
+                                {{ emp[3]|capitalize }}
                         </td>
-                        <td style="font-size:12px;">
+                        <td class="td-sm">
                             {% if emp[8] %}
                                 {% if 'Indefinido' in emp[8] %}
-                                    <span style="color:#065f46; font-weight:600;">● </span>
+                                    <span class="dot dot--green">●</span>
                                 {% elif 'prácticas' in emp[8] or 'Prácticas' in emp[8] %}
-                                    <span style="color:#92400e; font-weight:600;">● </span>
+                                    <span class="dot dot--amber">●</span>
                                 {% else %}
-                                    <span style="color:#1e40af; font-weight:600;">● </span>
+                                    <span class="dot dot--blue">●</span>
                                 {% endif %}
                                 {{ emp[8] }}
                             {% else %}
-                                <span style="color:#8DA9C4;">Sin contrato</span>
+                                <span class="text-muted">Sin contrato</span>
                             {% endif %}
                         </td>
-                        <td style="font-size:12px; text-align:center;">
+                        <td class="td-sm td-center">
                             {% if emp[11] is not none %}
                                 <strong>{{ emp[11]|int }}</strong>h
                             {% else %}—{% endif %}
                         </td>
-                        <td style="font-size:12px; text-align:right;">
+                        <td class="td-sm td-right">
                             {% if emp[12] is not none %}
                                 <strong>{{ "{:,.0f}".format(emp[12]) }} €</strong>
-                                <div style="font-size:10px; color:#8DA9C4;">
-                                    Neto: {{ "{:,.0f}".format(emp[13]) }} €
-                                </div>
                             {% else %}—{% endif %}
                         </td>
-                        <td style="font-size:11px; color:#13315C;">
+                        <td class="td-xs text-dark">
                             {% if emp[9] %}
                                 <div>Desde: {{ emp[9] }}</div>
                                 {% if emp[10] %}
-                                <div style="color:#dc2626;">Hasta: {{ emp[10] }}</div>
+                                    <div class="text-red">Hasta: {{ emp[10] }}</div>
                                 {% else %}
-                                <div style="color:#065f46;">Indefinido</div>
+                                    <div class="text-green">Indefinido</div>
                                 {% endif %}
                             {% else %}—{% endif %}
                         </td>
                         <td>
                             <div class="actions">
-                                <form action="{{ url_for('ver_empleado', id_empleado=emp[0]) }}" method="GET">
-                                    <button class="btn-sm btn-view">
-                                        <img src="{{ url_for('static', filename='img/icons/ojo.png') }}" alt="" width="16px" height="16px">
-                                    </button>
-                                </form>
                                 <form action="{{ url_for('editar_empleado', id_empleado=emp[0]) }}" method="GET">
                                     <button class="btn-sm btn-edit">
-                                        <img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt="" width="16px" height="16px">
+                                        <img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt="" width="16" height="16">
                                     </button>
                                 </form>
                                 <form action="{{ url_for('eliminar_empleado', id_empleado=emp[0]) }}" method="POST"
                                     onsubmit="return confirm('¿Seguro que quieres eliminar este empleado?')">
                                     <button type="submit" class="btn-sm btn-del">
-                                        <img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="Eliminar" width="16px" height="16px">
+                                        <img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="Eliminar" width="16" height="16">
                                     </button>
                                 </form>
                             </div>
@@ -247,7 +165,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" style="text-align:center; color:#13315C; padding:20px;">No se encontraron empleados.</td>
+                        <td colspan="7" class="td-empty">No se encontraron empleados.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -275,152 +193,9 @@
             </div>
         </div>
 
-        <!-- ── MODAL DETALLE EMPLEADO ── -->
-        {% if empleado_detalle %}
-        {# emp_detalle: 0=id, 1=nombre, 2=apellidos, 3=puesto, 4=tel, 5=email,
-                        6=fecha_alta, 7=activo, 8=tipo_contrato, 9=fecha_inicio,
-                        10=fecha_fin, 11=horas_sem, 12=salario_bruto, 13=salario_neto,
-                        14=contrato_activo #}
-        <div id="modal-detalle-emp" class="modal active">
-            <div class="modal-content" style="max-width:660px;">
-                <div class="modal-header">
-                    <div style="display:flex; align-items:center; gap:14px;">
-                        <div class="empleado-avatar-lg">
-                            {{ empleado_detalle[1][0] }}{{ empleado_detalle[2][0] if empleado_detalle[2] else '' }}
-                        </div>
-                        <div>
-                            <h2 style="margin-bottom:4px;">{{ empleado_detalle[1] }} {{ empleado_detalle[2] }}</h2>
-                            <span class="badge badge-{{ empleado_detalle[3]|lower|replace('_', '-') }}">
-                                {{ empleado_detalle[3]|replace('_', ' ')|capitalize }}
-                            </span>
-                        </div>
-                    </div>
-                    <span class="modal-close" onclick="cerrarModalDetalle()">&times;</span>
-                </div>
-                <div class="modal-body">
-
-                    <!-- Datos personales -->
-                    <p style="font-size:11px; font-weight:700; color:#8DA9C4; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Datos personales</p>
-                    <table class="nutricion-table">
-                        <tr>
-                            <td>Email</td>
-                            <td>{{ empleado_detalle[5] if empleado_detalle[5] else '—' }}</td>
-                        </tr>
-                        <tr>
-                            <td>Teléfono</td>
-                            <td>{{ empleado_detalle[4] if empleado_detalle[4] else '—' }}</td>
-                        </tr>
-                        <tr>
-                            <td>Fecha de alta</td>
-                            <td>{{ empleado_detalle[6] if empleado_detalle[6] else '—' }}</td>
-                        </tr>
-                    </table>
-
-                    <!-- Datos del contrato vigente -->
-                    <p style="font-size:11px; font-weight:700; color:#8DA9C4; text-transform:uppercase; letter-spacing:0.5px; margin:16px 0 8px;">Contrato vigente</p>
-                    {% if empleado_detalle[8] %}
-                    <table class="nutricion-table">
-                        <tr>
-                            <td>Tipo</td>
-                            <td><strong>{{ empleado_detalle[8] }}</strong></td>
-                        </tr>
-                        <tr>
-                            <td>Inicio</td>
-                            <td>{{ empleado_detalle[9] if empleado_detalle[9] else '—' }}</td>
-                        </tr>
-                        <tr>
-                            <td>Fin</td>
-                            <td>
-                                {% if empleado_detalle[10] %}
-                                    <span style="color:#dc2626; font-weight:600;">{{ empleado_detalle[10] }}</span>
-                                {% else %}
-                                    <span style="color:#065f46; font-weight:600;">Indefinido</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Horas / semana</td>
-                            <td><strong>{{ empleado_detalle[11]|int if empleado_detalle[11] is not none else '—' }} h</strong></td>
-                        </tr>
-                        <tr>
-                            <td>Salario bruto anual</td>
-                            <td><strong>{{ "{:,.2f}".format(empleado_detalle[12]) }} €</strong></td>
-                        </tr>
-                        <tr>
-                            <td>Salario neto anual</td>
-                            <td>{{ "{:,.2f}".format(empleado_detalle[13]) }} €</td>
-                        </tr>
-                        <tr>
-                            <td>Estado contrato</td>
-                            <td>
-                                {% if empleado_detalle[14] %}
-                                <span class="badge" style="background:#d1fae5; color:#065f46;">Activo</span>
-                                {% else %}
-                                <span class="badge" style="background:#fee2e2; color:#991b1b;">Inactivo</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    </table>
-                    {% else %}
-                    <p style="color:#8DA9C4; font-size:13px; padding: 12px 0;">Este empleado no tiene contratos registrados.</p>
-                    {% endif %}
-
-                    <!-- Historial de contratos -->
-                    {% if contratos_empleado and contratos_empleado|length > 1 %}
-                    <p style="font-size:11px; font-weight:700; color:#8DA9C4; text-transform:uppercase; letter-spacing:0.5px; margin:16px 0 8px;">
-                        Historial de contratos ({{ contratos_empleado|length }})
-                    </p>
-                    <div style="max-height:160px; overflow-y:auto;">
-                        <table class="nutricion-table" style="font-size:11px;">
-                            <thead>
-                                <tr style="background:#EEF4ED;">
-                                    <th style="padding:6px 10px; text-align:left;">Tipo</th>
-                                    <th style="padding:6px 10px;">Inicio</th>
-                                    <th style="padding:6px 10px;">Fin</th>
-                                    <th style="padding:6px 10px;">Bruto/año</th>
-                                    <th style="padding:6px 10px;">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for c in contratos_empleado %}
-                                {# c: 0=id, 1=tipo, 2=inicio, 3=fin, 4=horas, 5=bruto, 6=neto, 7=activo #}
-                                <tr>
-                                    <td style="padding:5px 10px;">{{ c[1] }}</td>
-                                    <td style="padding:5px 10px; text-align:center;">{{ c[2] }}</td>
-                                    <td style="padding:5px 10px; text-align:center;">
-                                        {% if c[3] %}{{ c[3] }}{% else %}<span style="color:#065f46;">Indef.</span>{% endif %}
-                                    </td>
-                                    <td style="padding:5px 10px; text-align:right;">{{ "{:,.0f}".format(c[5]) }} €</td>
-                                    <td style="padding:5px 10px; text-align:center;">
-                                        {% if c[7] %}
-                                        <span style="color:#065f46;">●</span>
-                                        {% else %}
-                                        <span style="color:#dc2626;">●</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% endif %}
-
-                    <div class="modal-actions" style="margin-top:20px;">
-                        <button class="btn-secondary" onclick="cerrarModalDetalle()">Cerrar</button>
-                        <a href="{{ url_for('editar_empleado', id_empleado=empleado_detalle[0]) }}"
-                           class="btn-primary"
-                           style="text-decoration:none; display:inline-flex; align-items:center;">
-                            Editar empleado
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- ── MODAL NUEVO EMPLEADO ── -->
+        <!-- MODAL NUEVO EMPLEADO -->
         <div id="modal-empleado" class="modal">
-            <div class="modal-content" style="max-width:640px;">
+            <div class="modal-content modal-content--lg">
                 <div class="modal-header">
                     <h2>Nuevo Empleado</h2>
                     <span class="modal-close" onclick="cerrarModalEmpleado()">&times;</span>
@@ -480,8 +255,6 @@
                 </div>
             </div>
         </div>
-
-        <footer>© 2024 Gestión de Recetas - Todos los derechos reservados</footer>
     </div>
 
     <script>

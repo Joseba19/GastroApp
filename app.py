@@ -17,7 +17,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated
 
-
 @app.route('/login', methods=["GET", "POST"])
 def login():
     if 'usuario_id' in session:
@@ -95,7 +94,6 @@ def inicio():
 
     # Datos reales para las mini-cards del dashboard
     ingredientes_recientes = db.ingredientesRecientes(5)
-    menus_recientes = db.menusRecientes(5)
     empleados_recientes = db.empleadosRecientes(5)
     todos_alergenos = db.listaAlergenosUnicos()
 
@@ -112,7 +110,6 @@ def inicio():
                          nutriReceta=nutriReceta,
                          alergenoReceta=alergenoReceta,
                          ingredientes_recientes=ingredientes_recientes,
-                         menus_recientes=menus_recientes,
                          empleados_recientes=empleados_recientes,
                          todos_alergenos=todos_alergenos)
 
@@ -263,7 +260,15 @@ def ver_ingrediente(id_ingrediente):
 @app.route('/editar-ingrediente/<int:id_ingrediente>', methods=["GET", "POST"])
 @login_required
 def editar_ingrediente(id_ingrediente):
+
+    # Carga los datos para mostrar el formulario
+    ingrediente = db.obtenerIngrediente(id_ingrediente)
+    alergenos_ingrediente = db.obtenerAlergenosIngrediente(id_ingrediente)
+    todos_alergenos = db.listaAlergenosUnicos()
+
+    # Procesa el formulario enviado
     if request.method == "POST":
+        # Actualiza los campos del ingrediente
         db.actualizarIngrediente(
             id_ingrediente,
             request.form.get("nombreIng"),
@@ -276,14 +281,18 @@ def editar_ingrediente(id_ingrediente):
             request.form.get("fibra"),
             request.form.get("sodio")
         )
+        
+        # Elimina los alérgenos actuales del ingrediente
         for al in db.obtenerAlergenosIngrediente(id_ingrediente):
             db.eliminarAlergeno(id_ingrediente, al[0])
+        
+        # Asigna los nuevos alérgenos seleccionados
         for nombre_alergeno in request.form.getlist("alergenos"):
             db.asignarAlergeno(id_ingrediente, nombre_alergeno)
+        
+        # Redirige a la lista de ingredientes
         return redirect(url_for("ingredientes", ing_id=id_ingrediente))
-    ingrediente = db.obtenerIngrediente(id_ingrediente)
-    alergenos_ingrediente = db.obtenerAlergenosIngrediente(id_ingrediente)
-    todos_alergenos = db.listaAlergenosUnicos()
+    
     return render_template('editarIngrediente.html',
                            ingrediente=ingrediente,
                            alergenos_ingrediente=alergenos_ingrediente,
@@ -296,137 +305,19 @@ def eliminar_ingrediente(id_ingrediente):
     db.eliminarIngredienteDB(id_ingrediente)
     return redirect(url_for("ingredientes"))
 
-
-@app.route('/eliminar-alergeno-ingrediente/<int:id_ingrediente>/<int:id_alergeno>', methods=["POST"])
-@login_required
-def eliminar_alergeno_ingrediente(id_ingrediente, id_alergeno):
-    """Elimina la relación entre un ingrediente y un alérgeno."""
-    db.eliminarAlergeno(id_ingrediente, id_alergeno)
-    return redirect(url_for("ingredientes", ing_id=id_ingrediente))
-
-
-# ── ALÉRGENOS ─────────────────────────────────────────────────────────────────
-
-@app.route('/alergenos', methods=["GET", "POST"])
-@login_required
-def alergenos():
-    page            = request.args.get('page', 1, type=int)
-    per_page        = 12
-    alergeno_actual = request.args.get('alergeno')
-
-    if request.method == "POST":
-        db.asignarAlergeno(
-            request.form.get("id_ingrediente"),
-            request.form.get("alergeno")
-        )
-        return redirect(url_for("alergenos"))
-
-    recetas_alergenos, total = db.recetasConAlergenos(page, per_page, alergeno_actual)
-    total_pages       = (total + per_page - 1) // per_page
-    resumen_alergenos = db.resumenAlergenos()
-    lista_alergenos   = db.listaAlergenosUnicos()
-    todos_ingredientes = db.nombreIngredientes()
-
-    return render_template('alergenos.html',
-                           recetas_alergenos=recetas_alergenos,
-                           page=page,
-                           total_pages=total_pages,
-                           resumen_alergenos=resumen_alergenos,
-                           lista_alergenos=lista_alergenos,
-                           alergeno_actual=alergeno_actual,
-                           todos_ingredientes=todos_ingredientes)
-
-
-# ── MENÚS ─────────────────────────────────────────────────────────────────────
-
-@app.route('/menus', methods=["GET", "POST"])
-@login_required
-def menus():
-    page          = request.args.get('page', 1, type=int)
-    per_page      = 10
-    tipo_actual   = request.args.get('tipo')
-    activo_actual = request.args.get('activo')
-    menu_id       = request.args.get('menu_id', type=int)
-
-    if request.method == "POST":
-        # CORRECCIÓN: eliminados precio, fecha_inicio, fecha_fin (no existen en BD)
-        db.guardarMenu(
-            request.form.get("nombre"),
-            request.form.get("tipo"),
-            request.form.get("activo"),
-            request.form.get("descripcion"),
-            request.form.getlist("recetas_ids[]"),
-            request.form.getlist("tipo_plato[]")
-        )
-        return redirect(url_for("menus"))
-
-    menus_list, total = db.obtenerMenusFiltrados(page, per_page, tipo_actual, activo_actual)
-    total_pages = (total + per_page - 1) // per_page
-    todas_recetas, _ = db.infoRecetaFiltrada(1, 9999)
-
-    menu_detalle = None
-    recetas_menu = []
-    if menu_id:
-        menu_detalle = db.obtenerMenuDetalle(menu_id)
-        recetas_menu = db.obtenerRecetasMenu(menu_id)
-
-    return render_template('menus.html',
-                           menus=menus_list,
-                           page=page,
-                           total_pages=total_pages,
-                           tipo_actual=tipo_actual,
-                           activo_actual=activo_actual,
-                           todas_recetas=todas_recetas,
-                           menu_detalle=menu_detalle,
-                           recetas_menu=recetas_menu)
-
-
-@app.route('/ver-menu/<int:id_menu>', methods=["GET"])
-@login_required
-def ver_menu(id_menu):
-    return redirect(url_for('menus', menu_id=id_menu))
-
-
-@app.route('/editar-menu/<int:id_menu>', methods=["GET", "POST"])
-@login_required
-def editar_menu(id_menu):
-    if request.method == "POST":
-        # CORRECCIÓN: eliminados precio, fecha_inicio, fecha_fin
-        db.actualizarMenu(
-            id_menu,
-            request.form.get("nombre"),
-            request.form.get("tipo"),
-            request.form.get("activo"),
-            request.form.get("descripcion"),
-            request.form.getlist("recetas_ids[]"),
-            request.form.getlist("tipo_plato[]")
-        )
-        return redirect(url_for("menus"))
-    menu = db.obtenerMenuDetalle(id_menu)
-    recetas_menu = db.obtenerRecetasMenu(id_menu)
-    todas_recetas, _ = db.infoRecetaFiltrada(1, 9999)
-    return render_template('editarMenu.html', menu=menu,
-                           recetas_menu=recetas_menu, todas_recetas=todas_recetas)
-
-
-@app.route('/eliminar-menu/<int:id_menu>', methods=["POST"])
-@login_required
-def eliminar_menu(id_menu):
-    db.eliminarMenuDB(id_menu)
-    return redirect(url_for("menus"))
-
-
 # ── EMPLEADOS ─────────────────────────────────────────────────────────────────
 
 @app.route('/empleados', methods=["GET", "POST"])
 @login_required
 def empleados():
+    # Parámetros de paginación y filtros
     page          = request.args.get('page', 1, type=int)
     per_page      = 10
     puesto_actual = request.args.get('puesto')
     activo_actual = request.args.get('activo')
     emp_id        = request.args.get('emp_id', type=int)
 
+    # Guarda un nuevo empleado
     if request.method == "POST":
         db.guardarEmpleado(
             request.form.get("nombre"),
@@ -439,11 +330,17 @@ def empleados():
         )
         return redirect(url_for("empleados"))
 
+    # Obtiene empleados filtrados y paginados
     empleados_list, total = db.obtenerEmpleadosFiltrados(page, per_page, puesto_actual, activo_actual)
     total_pages = (total + per_page - 1) // per_page
+    
+    # Resumen general de empleados
     total_empleados, empleados_activos, empleados_cocina, empleados_docencia = db.obtenerResumenEmpleados()
+    
+    # Resumen de contratos
     contratos_activos, masa_salarial, horas_total, contratos_indefinidos = db.obtenerResumenContratos()
 
+    # Detalle de empleado seleccionado
     empleado_detalle = db.obtenerEmpleado(emp_id) if emp_id else None
     contratos_empleado = db.obtenerContratosEmpleado(emp_id) if emp_id else []
 

@@ -26,14 +26,6 @@
                 <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px"
                     height="20px"> Ingredientes
             </a>
-            <a href="{{ url_for('menus') }}">
-                <img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px">
-                Menús
-            </a>
-            <a href="{{ url_for('alergenos') }}">
-                <img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px"
-                    height="20px"> Alérgenos
-            </a>
             <a href="{{ url_for('empleados') }}">
                 <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px"
                     height="20px"> Empleados
@@ -233,16 +225,8 @@
                         {{ nombre_al }}
                     </label>
                     {% else %}
-                    <p style="color:#13315C; font-size:13px;">
-                        No hay alérgenos registrados en la base de datos.
-                        <a href="{{ url_for('alergenos') }}" style="color:#134074;">Gestionar alérgenos</a>
-                    </p>
                     {% endfor %}
                 </div>
-
-                <p style="font-size:11px; color:#13315C; margin-top:12px;">
-                    Haz clic en un alérgeno para seleccionarlo o deseleccionarlo.
-                </p>
 
                 <!-- Acciones del formulario -->
                 <div class="form-actions" style="margin-top: 24px;">

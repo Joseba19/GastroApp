@@ -1,4 +1,5 @@
 import mysql.connector
+import bcrypt
 from datetime import datetime, date
 from mysql.connector import Error
 from contextlib import contextmanager
@@ -25,7 +26,7 @@ def conexionDB():
             conexion.close()
 
 def categoriasBD():
-    """Obtiene todas las categorías de recetas"""
+    """Obtiene todas las categorías de las recetas"""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
         cursor.execute("SELECT id_categoria, nombre FROM categorias_receta")
@@ -34,7 +35,7 @@ def categoriasBD():
         return categorias
 
 def nombreIngredientes():
-    """Obtiene todos los ingredientes"""
+    """Obtiene los nombres de todos los ingredientes"""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
         cursor.execute("SELECT id_ingrediente, nombre FROM ingredientes ORDER BY nombre ASC")
@@ -44,7 +45,7 @@ def nombreIngredientes():
 
 def infoRecetaFiltrada(page, per_page, categoria=None, dificultad=None):
     """Obtiene recetas paginadas con filtros opcionales"""
-    offset = (page - 1) * per_page
+    offset = (page - 1) * per_page      #Paginacion hecha con IA, sino la web es larguisima
 
     with conexionDB() as conexion:
         cursor = conexion.cursor()
@@ -56,22 +57,24 @@ def infoRecetaFiltrada(page, per_page, categoria=None, dificultad=None):
         LEFT JOIN categorias_receta c ON r.id_categoria = c.id_categoria
         WHERE 1=1
         """
-        params = []
-
+        
+        # Añade las condiciones a la query y los valores a la lista param
+        param = []
         if categoria and categoria != "Todas las categorías":
             query += " AND c.nombre = %s"
-            params.append(categoria)
+            param.append(categoria)
 
         if dificultad and dificultad != "Todas las dificultades":
             query += " AND r.dificultad = %s"
-            params.append(dificultad.lower())
+            param.append(dificultad.lower())
 
         query += " LIMIT %s OFFSET %s"
-        params.extend([per_page, offset])
+        param.extend([per_page, offset])        #Parte de la paginacion, extend sirve para introducir iterables en una lista
 
-        cursor.execute(query, params)
+        cursor.execute(query, param)
         recetas = cursor.fetchall()
 
+        #Cuenta la cantidad de recetas, para ajustar las paginas
         count_query = """
         SELECT COUNT(*)
         FROM recetas r
@@ -94,57 +97,80 @@ def infoRecetaFiltrada(page, per_page, categoria=None, dificultad=None):
         cursor.close()
         return recetas, total
 
-def guardarReceta(nombre, id_categoria, dificultad, raciones, tiempo_preparacion,
-                tiempo_coccion, descripcion, listaIngredientes,
+def guardarReceta(nombre, id_categoria, dificultad, raciones, tiempo_preparacion, 
+                tiempo_coccion, descripcion, listaIngredientes, 
                 listaCantidades, listaUnidades, listaNotas, listaPasos):
     """Inserta una nueva receta en la base de datos"""
-
+    
     with conexionDB() as conexion:
         cursor = conexion.cursor()
-
+        
         query = """
-        INSERT INTO recetas
-        (nombre, id_categoria, dificultad, tiempo_preparacion,
+        INSERT INTO recetas 
+        (nombre, id_categoria, dificultad, tiempo_preparacion, 
          tiempo_coccion, raciones, descripcion, id_creador, fecha_creacion)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-
-        valores = (nombre, id_categoria, dificultad, tiempo_preparacion,
+        
+        valores = (nombre, id_categoria, dificultad, tiempo_preparacion, 
                   tiempo_coccion, raciones, descripcion, 1, date.today())
-
+        
         cursor.execute(query, valores)
-        conexion.commit()
-
-        # CORRECCIÓN: usar lastrowid en lugar de SELECT MAX para evitar race conditions
-        ultimaReceta = cursor.lastrowid
-
-        for idx, i in enumerate(listaIngredientes):
-            nota = listaNotas[idx] if listaNotas and listaNotas[idx] != '' else None
-            cursor.execute("""
-                INSERT INTO recetas_ingredientes
-                (id_receta, id_ingrediente, cantidad, unidad, notas)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (ultimaReceta, i, listaCantidades[idx], listaUnidades[idx], nota))
+        conexion.commit()  # Guardar los cambios
+                
+        query2 = """
+        SELECT MAX(id_receta) FROM recetas
+        """
+        
+        cursor.execute(query2)
+        ultimaReceta = cursor.fetchone()[0]
+        
+        contadorI = 0
+        for i in listaIngredientes:
+            
+            query3 = """
+            INSERT INTO recetas_ingredientes 
+            (id_receta, id_ingrediente, cantidad, unidad, notas)
+            VALUES (%s, %s, %s, %s, %s)
+            """
+            
+            if listaNotas == []:
+                valores3 = (ultimaReceta, i, listaCantidades[contadorI], listaUnidades[contadorI], None)
+            elif listaNotas[contadorI] == '':
+                valores3 = (ultimaReceta, i, listaCantidades[contadorI], listaUnidades[contadorI], None)
+            else:
+                valores3 = (ultimaReceta, i, listaCantidades[contadorI], listaUnidades[contadorI], listaNotas[contadorI])
+            
+            contadorI += 1
+            cursor.execute(query3, valores3)
             conexion.commit()
-
-        for idx, p in enumerate(listaPasos, start=1):
-            cursor.execute("""
-                INSERT INTO pasos_receta
-                (id_receta, numero_paso, descripcion)
-                VALUES (%s, %s, %s)
-            """, (ultimaReceta, idx, p))
+        
+        contadorP = 0
+        for p in listaPasos:
+            contadorP += 1
+            
+            query4 = """
+            INSERT INTO pasos_receta
+            (id_receta, numero_paso, descripcion)
+            VALUES (%s, %s, %s)
+            """
+            
+            valores4 = (ultimaReceta, contadorP, p)
+            
+            cursor.execute(query4, valores4)
             conexion.commit()
-
+            
         cursor.close()
 
 def eliminarReceta(id_receta):
-    """Elimina una receta y sus datos relacionados (las FK CASCADE lo gestionan automáticamente)"""
+    """Elimina una receta y sus datos relacionados"""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
-        # pasos_receta y recetas_ingredientes tienen ON DELETE CASCADE, pero borramos explícitamente
+        # Elimina los datos dependientes de la receta primero, y luego la rceta
         cursor.execute("DELETE FROM pasos_receta WHERE id_receta = %s", (id_receta,))
         cursor.execute("DELETE FROM recetas_ingredientes WHERE id_receta = %s", (id_receta,))
         cursor.execute("DELETE FROM recetas WHERE id_receta = %s", (id_receta,))
+        
         conexion.commit()
         cursor.close()
 
@@ -152,7 +178,7 @@ def obtenerReceta(id_receta):
     """Obtiene toda la información de una receta"""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
-        cursor.execute("SELECT * FROM recetas WHERE id_receta = %s", (id_receta,))
+        cursor.execute("SELECT * FROM recetas WHERE id_receta = %s", (id_receta,))      #Al ser una sola variable, hay que poner una coma al final (sinsentido)
         datosReceta = cursor.fetchone()
         cursor.close()
         return datosReceta
@@ -161,10 +187,11 @@ def obtenerPasos(id_receta):
     """Obtiene todos los pasos de una receta ordenados"""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
-        cursor.execute(
-            "SELECT numero_paso, descripcion FROM pasos_receta WHERE id_receta = %s ORDER BY numero_paso ASC",
-            (id_receta,)
-        )
+        cursor.execute("""
+        SELECT numero_paso, descripcion 
+        FROM pasos_receta 
+        WHERE id_receta = %s ORDER BY numero_paso ASC""", (id_receta,))
+        
         pasosReceta = cursor.fetchall()
         cursor.close()
         return pasosReceta
@@ -182,14 +209,18 @@ def obtenerIngredientes(id_receta):
         ingredientesReceta = cursor.fetchall()
         cursor.close()
 
-        ingredientesReceta = [list(item) for item in ingredientesReceta]
+        listaIngredientes = []
         for i in ingredientesReceta:
+            listaIngredientes.append(list(i))      #list() convierte tuplas en listas
+
+        #Bucle para hacer que los ingredientes tengan 2 decimales o ninguno
+        for i in listaIngredientes:
             if i[3] == i[3].to_integral_value():
                 i[3] = str(int(i[3]))
             else:
                 i[3] = f"{float(i[3]):.2f}"
 
-        return ingredientesReceta
+        return listaIngredientes
 
 def infoNutriReceta(id_receta):
     """Obtiene todos los macronutrientes de una receta usando la vista"""
@@ -204,18 +235,19 @@ def infoNutriReceta(id_receta):
         nutri = cursor.fetchone()
         cursor.close()
 
+    #Manejo de errores
     if not nutri:
         return []
 
-    # CORRECCIÓN: iterar sobre la única fila resultado, manejar None y usar lista_formateada
+    #Bucle para cambiar las cadenas vacias por "—" y formatear los numeros como antes
     nutri_formateado = []
-    for valor in nutri:
-        if valor is None:
+    for info in nutri:
+        if info is None:
             nutri_formateado.append("—")
-        elif valor == valor.to_integral_value():
-            nutri_formateado.append(str(int(valor)))
+        elif info == info.to_integral_value():
+            nutri_formateado.append(str(int(info)))
         else:
-            nutri_formateado.append(f"{float(valor):.2f}")
+            nutri_formateado.append(f"{float(info):.2f}")
 
     return nutri_formateado
 
@@ -228,14 +260,18 @@ def alergenosReceta(id_receta):
         FROM vista_nutricion_receta
         WHERE id_receta = %s;""", (id_receta,))
 
-        resultado = cursor.fetchone()
+        alergenos = cursor.fetchone()
         cursor.close()
 
-    if not resultado or resultado[0] is None:
+    #Manejo de errores
+    if alergenos[0] is None:
         return None
 
-    # CORRECCIÓN: devolver alergenosFormateado, no alergenos en bruto
-    alergenosFormateado = [a.strip() for a in resultado[0].split(",")]
+    #Bucle para pasar de una tupla con una cadena de texto, a una lista bien separada
+    alergenosFormateado = []
+    for a in alergenos[0].split(","):
+        alergenosFormateado.append(a.strip())
+
     return alergenosFormateado
 
 def actualizarReceta(id_receta, nombre, id_categoria, dificultad, raciones, tiempo_preparacion,
@@ -254,30 +290,51 @@ def actualizarReceta(id_receta, nombre, id_categoria, dificultad, raciones, tiem
         """, (nombre, descripcion, tiempo_preparacion, tiempo_coccion, raciones,
               dificultad, id_categoria, id_receta))
         conexion.commit()
-
-        # CORRECCIÓN: borrar y reinsertar ingredientes en lugar de UPDATE sin contador
+        
+        #Borramos los datos dependientes y los reescribimos
         cursor.execute("DELETE FROM recetas_ingredientes WHERE id_receta = %s", (id_receta,))
-        for idx, i in enumerate(listaIngredientes):
-            nota = listaNotas[idx] if listaNotas and listaNotas[idx] != '' else None
-            cursor.execute("""
-                INSERT INTO recetas_ingredientes (id_receta, id_ingrediente, cantidad, unidad, notas)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (id_receta, i, listaCantidades[idx], listaUnidades[idx], nota))
+        
+        contadorI = 0
+        for i in listaIngredientes:
+            
+            query3 = """
+            INSERT INTO recetas_ingredientes 
+            (id_receta, id_ingrediente, cantidad, unidad, notas)
+            VALUES (%s, %s, %s, %s, %s)
+            """
+            
+            if listaNotas == []:
+                valores3 = (id_receta, i, listaCantidades[contadorI], listaUnidades[contadorI], None)
+            elif listaNotas[contadorI] == '':
+                valores3 = (id_receta, i, listaCantidades[contadorI], listaUnidades[contadorI], None)
+            else:
+                valores3 = (id_receta, i, listaCantidades[contadorI], listaUnidades[contadorI], listaNotas[contadorI])
+            
+            contadorI += 1
+            cursor.execute(query3, valores3)
             conexion.commit()
 
-        # CORRECCIÓN: borrar y reinsertar pasos en lugar de UPDATE con contador siempre 0
         cursor.execute("DELETE FROM pasos_receta WHERE id_receta = %s", (id_receta,))
-        for idx, p in enumerate(listaPasos, start=1):
-            cursor.execute("""
-                INSERT INTO pasos_receta (id_receta, numero_paso, descripcion)
-                VALUES (%s, %s, %s)
-            """, (id_receta, idx, p))
+
+        contadorP = 0
+        for p in listaPasos:
+            contadorP += 1
+            
+            query4 = """
+            INSERT INTO pasos_receta
+            (id_receta, numero_paso, descripcion)
+            VALUES (%s, %s, %s)
+            """
+            
+            valores4 = (id_receta, contadorP, p)
+            
+            cursor.execute(query4, valores4)
             conexion.commit()
 
         cursor.close()
 
 def guardarIngrediente(nombre, unidad, categoria, calorias, proteina, carbohidratos, grasas, fibra, sodio, alergenos=None):
-    """Guarda un ingrediente en la base de datos y asigna sus alérgenos."""
+    """Guarda un ingrediente en la base de datos y asigna sus alérgenos"""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
 
@@ -286,47 +343,18 @@ def guardarIngrediente(nombre, unidad, categoria, calorias, proteina, carbohidra
         (nombre, unidad_medida, categoria, calorias_100g,
         proteinas_100g, carbohidratos_100g, grasas_100g, fibra_100g, sodio_100g)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (nombre, unidad, categoria or None, calorias or None,
-              proteina or None, carbohidratos or None, grasas or None,
-              fibra or None, sodio or None))
+        """, (nombre, unidad, categoria, calorias,
+              proteina, carbohidratos, grasas,
+              fibra, sodio))
 
         conexion.commit()
-        id_ingrediente = cursor.lastrowid
-
-        # Procesar alérgenos si se han proporcionado
-        if alergenos:
-            nombres_alergenos = [a.strip() for a in alergenos.split(',') if a.strip()]
-            for nombre_alergeno in nombres_alergenos:
-                cursor.execute("SELECT id_alergeno FROM alergenos WHERE nombre = %s", (nombre_alergeno,))
-                fila = cursor.fetchone()
-                if fila:
-                    id_alergeno = fila[0]
-                else:
-                    cursor.execute("INSERT INTO alergenos (nombre) VALUES (%s)", (nombre_alergeno,))
-                    conexion.commit()
-                    id_alergeno = cursor.lastrowid
-                cursor.execute("""
-                    INSERT IGNORE INTO ingredientes_alergenos (id_ingrediente, id_alergeno)
-                    VALUES (%s, %s)
-                """, (id_ingrediente, id_alergeno))
-                conexion.commit()
-
         cursor.close()
 
-
-# ─────────────────────────────────────────────────────────────────────────────
 # INGREDIENTES
-# ─────────────────────────────────────────────────────────────────────────────
 
+#Paginacion echa con IA
 def obtenerIngredientesFiltrados(page, per_page, categoria=None, unidad=None):
-    """Obtiene ingredientes paginados con filtros opcionales.
-    Devuelve (lista, total).
-    Cada fila: (id, nombre, categoria, unidad_medida, calorias_100g,
-                proteinas_100g, carbohidratos_100g, grasas_100g,
-                fibra_100g, sodio_100g, alergenos)
-    CORRECCIÓN: la columna 'alergenos' no existe en la tabla ingredientes;
-                se obtiene mediante JOIN con ingredientes_alergenos y alergenos.
-    """
+    """Obtiene ingredientes paginados con filtros opcionales"""
     offset = (page - 1) * per_page
 
     with conexionDB() as conexion:
@@ -375,26 +403,28 @@ def obtenerIngredientesFiltrados(page, per_page, categoria=None, unidad=None):
         cursor.close()
         return ingredientes, total
 
-
 def obtenerCategoriasIngredientes():
-    """Devuelve la lista de categorías únicas de ingredientes (sin None)."""
+    """Devuelve la lista de categorías únicas de ingredientes"""
+    
     with conexionDB() as conexion:
         cursor = conexion.cursor()
         cursor.execute("""
             SELECT DISTINCT categoria
             FROM ingredientes
-            WHERE categoria IS NOT NULL AND categoria != ''
+            WHERE categoria IS NOT NULL
             ORDER BY categoria ASC
         """)
-        categorias = [row[0] for row in cursor.fetchall()]
+
+        categorias = []
+        for row in cursor.fetchall():
+            categorias.append(row[0])
+        
         cursor.close()
         return categorias
 
-
 def obtenerIngrediente(id_ingrediente):
-    """Devuelve todos los datos de un ingrediente por su id.
-    CORRECCIÓN: obtiene alergenos mediante JOIN, no de columna inexistente.
-    """
+    """Devuelve todos los datos de un ingrediente por su id"""
+   
     with conexionDB() as conexion:
         cursor = conexion.cursor()
         cursor.execute("""
@@ -408,6 +438,7 @@ def obtenerIngrediente(id_ingrediente):
             WHERE i.id_ingrediente = %s
             GROUP BY i.id_ingrediente
         """, (id_ingrediente,))
+
         ingrediente = cursor.fetchone()
         cursor.close()
         return ingrediente
@@ -418,178 +449,79 @@ def actualizarIngrediente(id_ingrediente, nombre, unidad, categoria,
     """Actualiza los datos de un ingrediente existente."""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
+
         cursor.execute("""
             UPDATE ingredientes
-            SET nombre = %s, unidad_medida = %s, categoria = %s,
-                calorias_100g = %s, proteinas_100g = %s,
-                carbohidratos_100g = %s, grasas_100g = %s,
+            SET nombre = %s, unidad_medida = %s, categoria = %s, calorias_100g = %s, 
+                proteinas_100g = %s, carbohidratos_100g = %s, grasas_100g = %s,
                 fibra_100g = %s, sodio_100g = %s
             WHERE id_ingrediente = %s
-        """, (nombre, unidad, categoria or None, calorias or None, proteina or None,
-              carbohidratos or None, grasas or None, fibra or None,
-              sodio or None, id_ingrediente))
+            """, (nombre, unidad, categoria, calorias, proteina,
+            carbohidratos, grasas, fibra, sodio, id_ingrediente))
+        
         conexion.commit()
         cursor.close()
 
 
 def eliminarIngredienteDB(id_ingrediente):
-    """Elimina un ingrediente. Las FK CASCADE eliminan sus referencias automáticamente."""
+    """Elimina un ingrediente. Las FK CASCADE eliminan sus referencias automáticamente"""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
-        # ingredientes_alergenos tiene ON DELETE CASCADE, pero borramos explícitamente
-        cursor.execute(
-            "DELETE FROM ingredientes_alergenos WHERE id_ingrediente = %s",
-            (id_ingrediente,)
-        )
-        cursor.execute(
-            "DELETE FROM recetas_ingredientes WHERE id_ingrediente = %s",
-            (id_ingrediente,)
-        )
-        cursor.execute(
-            "DELETE FROM ingredientes WHERE id_ingrediente = %s",
-            (id_ingrediente,)
-        )
+        # Elimina los datos dependientes del ingrediente primero, y luego el ingrediente
+        cursor.execute("DELETE FROM ingredientes_alergenos WHERE id_ingrediente = %s", (id_ingrediente,))
+        cursor.execute("DELETE FROM recetas_ingredientes WHERE id_ingrediente = %s", (id_ingrediente,))
+        cursor.execute("DELETE FROM ingredientes WHERE id_ingrediente = %s",(id_ingrediente,))
+
         conexion.commit()
         cursor.close()
 
-
-# ─────────────────────────────────────────────────────────────────────────────
 # ALÉRGENOS
-# ─────────────────────────────────────────────────────────────────────────────
 
 def asignarAlergeno(id_ingrediente, alergeno):
-    """Asigna un alérgeno a un ingrediente usando la tabla ingredientes_alergenos.
-    CORRECCIÓN: la versión original modificaba una columna 'alergenos' que no existe
-                en ingredientes. Los alérgenos se gestionan mediante la tabla relacional.
-    """
+    """Asigna un alérgeno a un ingrediente usando la tabla ingredientes_alergenos"""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
 
-        # Buscar el alérgeno por nombre en la tabla maestra
+        # Buscar el alérgeno por nombre en la tabla
         cursor.execute("SELECT id_alergeno FROM alergenos WHERE nombre = %s", (alergeno,))
         fila = cursor.fetchone()
 
-        if fila:
-            id_alergeno = fila[0]
-        else:
-            # Si no existe, insertarlo en la tabla maestra
-            cursor.execute("INSERT INTO alergenos (nombre) VALUES (%s)", (alergeno,))
-            conexion.commit()
-            id_alergeno = cursor.lastrowid
-
-        # Insertar relación (INSERT IGNORE evita error si ya existe la PK compuesta)
+        id_alergeno = fila[0]
+            
+        # Insertar relación (IGNORE evita error si ya existe la PK compuesta)
         cursor.execute("""
             INSERT IGNORE INTO ingredientes_alergenos (id_ingrediente, id_alergeno)
             VALUES (%s, %s)
-        """, (id_ingrediente, id_alergeno))
+            """, (id_ingrediente, id_alergeno))
         conexion.commit()
+        
         cursor.close()
-
-
-def recetasConAlergenos(page, per_page, alergeno_filtro=None):
-    """Devuelve recetas con sus alérgenos, paginadas.
-    Cada fila: (id_receta, nombre_receta, categoria, alergenos_str)
-    """
-    offset = (page - 1) * per_page
-
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-
-        query = """
-        SELECT r.id_receta, r.nombre, c.nombre AS categoria, v.alergenos
-        FROM recetas r
-        LEFT JOIN categorias_receta c ON r.id_categoria = c.id_categoria
-        LEFT JOIN vista_nutricion_receta v ON r.id_receta = v.id_receta
-        WHERE 1=1
-        """
-        params = []
-
-        if alergeno_filtro:
-            query += " AND v.alergenos LIKE %s"
-            params.append(f"%{alergeno_filtro}%")
-
-        query += " ORDER BY r.nombre ASC LIMIT %s OFFSET %s"
-        params.extend([per_page, offset])
-
-        cursor.execute(query, params)
-        recetas = cursor.fetchall()
-
-        count_query = """
-        SELECT COUNT(*)
-        FROM recetas r
-        LEFT JOIN vista_nutricion_receta v ON r.id_receta = v.id_receta
-        WHERE 1=1
-        """
-        count_params = []
-
-        if alergeno_filtro:
-            count_query += " AND v.alergenos LIKE %s"
-            count_params.append(f"%{alergeno_filtro}%")
-
-        cursor.execute(count_query, count_params)
-        total = cursor.fetchone()[0]
-
-        cursor.close()
-        return recetas, total
-
-
-def resumenAlergenos():
-    """Devuelve cuántas recetas contienen cada alérgeno.
-    Retorna lista de (nombre_alergeno, num_recetas).
-    """
-    alergenos_ue = [
-        "Gluten", "Crustáceos", "Huevo", "Pescado", "Cacahuetes",
-        "Soja", "Lácteos", "Frutos de cáscara", "Apio", "Mostaza",
-        "Sésamo", "Dióxido de azufre", "Altramuces", "Moluscos"
-    ]
-
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-        resumen = []
-        for alergeno in alergenos_ue:
-            cursor.execute("""
-                SELECT COUNT(DISTINCT r.id_receta)
-                FROM recetas r
-                JOIN vista_nutricion_receta v ON r.id_receta = v.id_receta
-                WHERE v.alergenos LIKE %s
-            """, (f"%{alergeno}%",))
-            count = cursor.fetchone()[0]
-            resumen.append((alergeno, count))
-        cursor.close()
-        return resumen
-
 
 def listaAlergenosUnicos():
-    """Devuelve la lista de alérgenos existentes en la BD, ordenados alfabéticamente."""
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-        cursor.execute("SELECT nombre FROM alergenos ORDER BY nombre ASC")
-        alergenos = [row[0] for row in cursor.fetchall()]
-        cursor.close()
-    # Si la tabla está vacía, devolver los 14 UE como fallback
-    if not alergenos:
-        alergenos = [
-            "Apio", "Altramuces", "Cacahuetes", "Crustáceos", "Dióxido de azufre",
-            "Frutos de cáscara", "Gluten", "Huevo", "Lácteos", "Moluscos",
-            "Mostaza", "Pescado", "Sésamo", "Soja"
+    """Devuelve la lista de alérgenos existentes en la BD, ordenados alfabéticamente"""
+    alergenos = [
+        "Apio", "Altramuces", "Cacahuetes", "Crustáceos", "Dióxido de azufre",
+        "Frutos de cáscara", "Gluten", "Huevo", "Lácteos", "Moluscos",
+        "Mostaza", "Pescado", "Sésamo", "Soja"
         ]
     return alergenos
 
-
 def eliminarAlergeno(id_ingrediente, id_alergeno):
-    """Elimina la relación entre un ingrediente y un alérgeno."""
+    """Elimina la relación entre un ingrediente y un alérgeno"""
+    
     with conexionDB() as conexion:
         cursor = conexion.cursor()
         cursor.execute("""
             DELETE FROM ingredientes_alergenos
             WHERE id_ingrediente = %s AND id_alergeno = %s
         """, (id_ingrediente, id_alergeno))
+
         conexion.commit()
         cursor.close()
 
-
 def obtenerAlergenosIngrediente(id_ingrediente):
-    """Devuelve los alérgenos asignados a un ingrediente con su id."""
+    """Devuelve los alérgenos asignados a un ingrediente con su id"""
+
     with conexionDB() as conexion:
         cursor = conexion.cursor()
         cursor.execute("""
@@ -599,203 +531,16 @@ def obtenerAlergenosIngrediente(id_ingrediente):
             WHERE ia.id_ingrediente = %s
             ORDER BY a.nombre ASC
         """, (id_ingrediente,))
+
         alergenos = cursor.fetchall()
         cursor.close()
     return alergenos
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# MENÚS
-# ─────────────────────────────────────────────────────────────────────────────
-
-def obtenerMenusFiltrados(page, per_page, tipo=None, activo=None):
-    """Obtiene menús paginados con filtros opcionales.
-    CORRECCIÓN: eliminadas las columnas precio, fecha_inicio, fecha_fin que no
-                existen en la tabla menus. Columnas reales: id_menu, nombre,
-                descripcion, tipo, id_creador, fecha_creacion, activo.
-    Cada fila devuelta: (id_menu, nombre, tipo, n_recetas, fecha_creacion, activo, descripcion)
-    """
-    offset = (page - 1) * per_page
-
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-
-        query = """
-        SELECT m.id_menu, m.nombre, m.tipo,
-               COUNT(mr.id_receta) AS n_recetas,
-               m.fecha_creacion, m.activo, m.descripcion
-        FROM menus m
-        LEFT JOIN menus_recetas mr ON m.id_menu = mr.id_menu
-        WHERE 1=1
-        """
-        params = []
-
-        if tipo:
-            query += " AND m.tipo = %s"
-            params.append(tipo)
-
-        if activo is not None and activo != "":
-            query += " AND m.activo = %s"
-            params.append(int(activo))
-
-        query += " GROUP BY m.id_menu ORDER BY m.nombre ASC LIMIT %s OFFSET %s"
-        params.extend([per_page, offset])
-
-        cursor.execute(query, params)
-        menus = cursor.fetchall()
-
-        count_query = "SELECT COUNT(*) FROM menus WHERE 1=1"
-        count_params = []
-
-        if tipo:
-            count_query += " AND tipo = %s"
-            count_params.append(tipo)
-
-        if activo is not None and activo != "":
-            count_query += " AND activo = %s"
-            count_params.append(int(activo))
-
-        cursor.execute(count_query, count_params)
-        total = cursor.fetchone()[0]
-
-        cursor.close()
-        return menus, total
-
-
-def obtenerMenuDetalle(id_menu):
-    """Devuelve todos los datos de un menú por su id.
-    CORRECCIÓN: eliminadas columnas precio, fecha_inicio, fecha_fin.
-    Fila: (id_menu, nombre, tipo, n_recetas, fecha_creacion, activo, descripcion)
-    """
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-        cursor.execute("""
-            SELECT m.id_menu, m.nombre, m.tipo,
-                   COUNT(mr.id_receta) AS n_recetas,
-                   m.fecha_creacion, m.activo, m.descripcion
-            FROM menus m
-            LEFT JOIN menus_recetas mr ON m.id_menu = mr.id_menu
-            WHERE m.id_menu = %s
-            GROUP BY m.id_menu
-        """, (id_menu,))
-        menu = cursor.fetchone()
-        cursor.close()
-        return menu
-
-
-def obtenerRecetasMenu(id_menu):
-    """Devuelve las recetas asociadas a un menú.
-    Cada fila: (id_receta, nombre, dificultad, tiempo_preparacion, tipo_plato)
-    """
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-        cursor.execute("""
-            SELECT r.id_receta, r.nombre, r.dificultad,
-                   r.tiempo_preparacion, mr.tipo_plato
-            FROM menus_recetas mr
-            JOIN recetas r ON mr.id_receta = r.id_receta
-            WHERE mr.id_menu = %s
-            ORDER BY mr.orden ASC
-        """, (id_menu,))
-        recetas = cursor.fetchall()
-        cursor.close()
-        return recetas
-
-
-def guardarMenu(nombre, tipo, activo, descripcion, lista_recetas, lista_tipo_plato):
-    """Inserta un nuevo menú y sus recetas asociadas.
-    CORRECCIÓN: eliminados parámetros precio, fecha_inicio, fecha_fin que no
-                existen en la tabla. Añadidos id_creador y fecha_creacion (NOT NULL).
-    """
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-
-        cursor.execute("""
-            INSERT INTO menus
-            (nombre, tipo, descripcion, id_creador, fecha_creacion, activo)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (
-            nombre,
-            tipo,
-            descripcion or None,
-            1,                          # id_creador: empleado por defecto
-            date.today(),               # fecha_creacion: obligatorio NOT NULL
-            1 if activo else 0
-        ))
-        conexion.commit()
-
-        id_menu = cursor.lastrowid      # CORRECCIÓN: lastrowid en lugar de SELECT MAX
-
-        for orden, (id_receta, tipo_plato) in enumerate(
-                zip(lista_recetas, lista_tipo_plato), start=1):
-            if id_receta:
-                cursor.execute("""
-                    INSERT INTO menus_recetas (id_menu, id_receta, tipo_plato, orden)
-                    VALUES (%s, %s, %s, %s)
-                """, (id_menu, id_receta, tipo_plato or None, orden))
-                conexion.commit()
-
-        cursor.close()
-
-
-def actualizarMenu(id_menu, nombre, tipo, activo, descripcion,
-                   lista_recetas, lista_tipo_plato):
-    """Actualiza un menú y reemplaza completamente sus recetas.
-    CORRECCIÓN: eliminados parámetros precio, fecha_inicio, fecha_fin.
-    """
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-
-        cursor.execute("""
-            UPDATE menus
-            SET nombre = %s, tipo = %s, activo = %s, descripcion = %s
-            WHERE id_menu = %s
-        """, (
-            nombre,
-            tipo,
-            1 if activo else 0,
-            descripcion or None,
-            id_menu
-        ))
-        conexion.commit()
-
-        cursor.execute("DELETE FROM menus_recetas WHERE id_menu = %s", (id_menu,))
-        conexion.commit()
-
-        for orden, (id_receta, tipo_plato) in enumerate(
-                zip(lista_recetas, lista_tipo_plato), start=1):
-            if id_receta:
-                cursor.execute("""
-                    INSERT INTO menus_recetas (id_menu, id_receta, tipo_plato, orden)
-                    VALUES (%s, %s, %s, %s)
-                """, (id_menu, id_receta, tipo_plato or None, orden))
-                conexion.commit()
-
-        cursor.close()
-
-
-def eliminarMenuDB(id_menu):
-    """Elimina un menú y sus relaciones con recetas."""
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-        cursor.execute("DELETE FROM menus_recetas WHERE id_menu = %s", (id_menu,))
-        cursor.execute("DELETE FROM menus WHERE id_menu = %s", (id_menu,))
-        conexion.commit()
-        cursor.close()
-
-
-# ─────────────────────────────────────────────────────────────────────────────
 # EMPLEADOS
-# ─────────────────────────────────────────────────────────────────────────────
 
+#Paginacion hecha con IA
 def obtenerEmpleadosFiltrados(page, per_page, puesto=None, activo=None):
-    """Obtiene empleados paginados con filtros opcionales, incluyendo datos del
-    contrato activo más reciente (LEFT JOIN contratos).
-    Cada fila: (0=id, 1=nombre, 2=apellidos, 3=puesto, 4=telefono, 5=email,
-                6=fecha_alta, 7=activo, 8=tipo_contrato, 9=fecha_inicio_contrato,
-                10=fecha_fin_contrato, 11=horas_semanales, 12=salario_bruto_anual,
-                13=salario_neto, 14=contrato_activo)
-    """
+    """Obtiene empleados paginados con filtros opcionales"""
     offset = (page - 1) * per_page
 
     with conexionDB() as conexion:
@@ -852,13 +597,8 @@ def obtenerEmpleadosFiltrados(page, per_page, puesto=None, activo=None):
 
 
 def obtenerEmpleado(id_empleado):
-    """Devuelve todos los datos de un empleado por su id, incluyendo el contrato
-    activo más reciente.
-    Fila: (0=id, 1=nombre, 2=apellidos, 3=puesto, 4=telefono, 5=email,
-           6=fecha_alta, 7=activo, 8=tipo_contrato, 9=fecha_inicio,
-           10=fecha_fin, 11=horas_semanales, 12=salario_bruto_anual,
-           13=salario_neto, 14=contrato_activo)
-    """
+    """Devuelve todos los datos de un empleado por su id"""
+
     with conexionDB() as conexion:
         cursor = conexion.cursor()
         cursor.execute("""
@@ -875,12 +615,11 @@ def obtenerEmpleado(id_empleado):
                     ORDER BY activo DESC, fecha_inicio DESC
                     LIMIT 1
                 )
-            WHERE e.id_empleado = %s
-        """, (id_empleado,))
+            WHERE e.id_empleado = %s """, (id_empleado,))
+        
         empleado = cursor.fetchone()
         cursor.close()
         return empleado
-
 
 def obtenerResumenEmpleados():
     """Devuelve (total, activos, empleados_cocina, empleados_sala).
@@ -1096,26 +835,6 @@ def ingredientesRecientes(limite=5):
     return rows
 
 
-def menusRecientes(limite=5):
-    """Devuelve los últimos N menús con número de recetas.
-    Cada fila: (id_menu, nombre, tipo, n_recetas)
-    """
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-        cursor.execute("""
-            SELECT m.id_menu, m.nombre, m.tipo,
-                   COUNT(mr.id_receta) AS n_recetas
-            FROM menus m
-            LEFT JOIN menus_recetas mr ON m.id_menu = mr.id_menu
-            WHERE m.activo = 1
-            GROUP BY m.id_menu
-            ORDER BY m.id_menu DESC
-            LIMIT %s
-        """, (limite,))
-        rows = cursor.fetchall()
-        cursor.close()
-    return rows
-
 
 def empleadosRecientes(limite=5):
     """Devuelve los últimos N empleados activos.
@@ -1143,16 +862,7 @@ PUESTOS_CON_ACCESO = ('cocinero', 'docente', 'apoyo')
 
 
 def verificarLogin(username, password):
-    """Comprueba credenciales y devuelve un dict con datos del usuario si son
-    correctas y el empleado tiene permiso de acceso (no es alumno).
-    Devuelve None si falla cualquier comprobación.
-
-    Requiere: pip install bcrypt
-    """
-    try:
-        import bcrypt
-    except ImportError:
-        raise RuntimeError("Instala bcrypt: pip install bcrypt")
+    """Comprueba credenciales y devuelve un diccionario con datos del usuario"""
 
     with conexionDB() as conexion:
         cursor = conexion.cursor(dictionary=True)
@@ -1186,36 +896,6 @@ def verificarLogin(username, password):
         'nombre':     f"{row['nombre']} {row['apellidos']}",
         'puesto':     row['puesto'],
     }
-
-
-def crearUsuarioLogin(id_empleado, username, password):
-    """Crea un usuario de login para un empleado. Solo para uso administrativo
-    (por ejemplo desde la shell). No se expone como ruta web.
-
-    Lanza ValueError si el empleado es alumno.
-    """
-    try:
-        import bcrypt
-    except ImportError:
-        raise RuntimeError("Instala bcrypt: pip install bcrypt")
-
-    with conexionDB() as conexion:
-        cursor = conexion.cursor(dictionary=True)
-        cursor.execute("SELECT puesto FROM empleados WHERE id_empleado = %s", (id_empleado,))
-        emp = cursor.fetchone()
-        if not emp:
-            raise ValueError(f"No existe el empleado {id_empleado}")
-        if emp['puesto'] not in PUESTOS_CON_ACCESO:
-            raise ValueError(f"El empleado tiene puesto '{emp['puesto']}' y no puede tener acceso al sistema.")
-
-        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
-        cursor.execute("""
-            INSERT INTO usuarios_login (id_empleado, username, password_hash)
-            VALUES (%s, %s, %s)
-        """, (id_empleado, username, password_hash))
-        conexion.commit()
-        cursor.close()
-
 
 if __name__ == "__main__":
     alergenosReceta(2)

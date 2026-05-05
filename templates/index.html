@@ -27,14 +27,6 @@
                 <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px"
                     height="20px"> Ingredientes
             </a>
-            <a href="{{ url_for('menus') }}">
-                <img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px">
-                Menús
-            </a>
-            <a href="{{ url_for('alergenos') }}">
-                <img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px"
-                    height="20px"> Alérgenos
-            </a>
             <a href="{{ url_for('empleados') }}">
                 <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px"
                     height="20px"> Empleados
@@ -430,16 +422,6 @@
                                     <input type="number" name="sodio" step="0.01" min="0" placeholder="0">
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>Alérgenos</label>
-                                <select name="alergenos" multiple style="height:110px;">
-                                    {% for a in todos_alergenos %}
-                                    <option value="{{ a }}">{{ a }}</option>
-                                    {% endfor %}
-                                </select>
-                                <small style="color:#13315C; font-size:11px;">Mantén Ctrl (o Cmd en Mac) para
-                                    seleccionar varios</small>
-                            </div>
                             <div class="modal-actions">
                                 <button type="button" class="btn-secondary"
                                     onclick="cerrarModalIngrediente()">Cancelar</button>
@@ -448,80 +430,6 @@
                         </form>
                     </div>
                 </div>
-            </div>
-
-            <!-- ── MINI-CARD: ALÉRGENOS ── -->
-            <div class="card mini-card">
-                <h3>Alérgenos
-                    <a href="{{ url_for('alergenos') }}" style="text-decoration:none;">
-                        <button type="button">+</button>
-                    </a>
-                </h3>
-                <table class="mini-table">
-                    <thead>
-                        <tr>
-                            <th>Alérgeno</th>
-                            <th>Descripción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% set alergenos_ue = [
-                        ('Gluten', 'Cereales que contienen gluten'),
-                        ('Lácteos', 'Leche y derivados'),
-                        ('Huevo', 'Huevos y productos derivados'),
-                        ('Frutos de cáscara','Almendras, nueces, avellanas...'),
-                        ('Soja', 'Soja y productos a base de soja')
-                        ] %}
-                        {% for nombre, desc in alergenos_ue %}
-                        <tr>
-                            <td>{{ nombre }}</td>
-                            <td style="font-size:12px; color:#13315C;">{{ desc }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <a href="{{ url_for('alergenos') }}" class="see-all">Ver todos</a>
-            </div>
-
-            <!-- ── MINI-CARD: MENÚS ── -->
-            <div class="card mini-card">
-                <h3>Menús
-                    <a href="{{ url_for('menus') }}" style="text-decoration:none;">
-                        <button type="button">+</button>
-                    </a>
-                </h3>
-                <table class="mini-table">
-                    <thead>
-                        <tr>
-                            <th>Menú</th>
-                            <th>Tipo</th>
-                            <th>Recetas</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for menu in menus_recientes %}
-                        <tr>
-                            <td>
-                                <a href="{{ url_for('ver_menu', id_menu=menu[0]) }}"
-                                    style="color:#134074; text-decoration:none; font-weight:500;">
-                                    {{ menu[1] }}
-                                </a>
-                            </td>
-                            <td>
-                                <span class="badge badge-{{ menu[2] }}" style="font-size:10px;">
-                                    {{ menu[2]|capitalize }}
-                                </span>
-                            </td>
-                            <td>{{ menu[3] }}</td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="3" style="text-align:center; color:#13315C;">Sin menús activos.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <a href="{{ url_for('menus') }}" class="see-all">Ver todos</a>
             </div>
 
             <!-- ── MINI-CARD: EMPLEADOS ── -->

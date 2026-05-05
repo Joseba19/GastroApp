@@ -27,14 +27,6 @@
                 <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px"
                     height="20px"> Ingredientes
             </a>
-            <a href="{{ url_for('menus') }}">
-                <img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="" width="20px" height="20px">
-                Menús
-            </a>
-            <a href="{{ url_for('alergenos') }}">
-                <img src="{{ url_for('static', filename='img/icons/radiacion.png') }}" alt="" width="20px"
-                    height="20px"> Alérgenos
-            </a>
             <a href="{{ url_for('empleados') }}">
                 <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px"
                     height="20px"> Empleados
@@ -212,24 +204,6 @@
                             <td>{{ ingrediente_detalle[9] if ingrediente_detalle[9] else '—' }} mg</td>
                         </tr>
                     </table>
-
-                    {% if ingrediente_detalle[10] %}
-                    <h3 style="font-size:14px; font-weight:700; margin:14px 0 8px; border-bottom:1px solid #8DA9C4; padding-bottom:6px;">
-                        Alérgenos
-                    </h3>
-                    <div class="alergenos-list">
-                        {% for alergeno in alergenos_ingrediente %}
-                        <span class="alergeno-badge" style="display:inline-flex; align-items:center; gap:6px;">
-                            {{ alergeno[1] }}
-                            <form action="{{ url_for('eliminar_alergeno_ingrediente', id_ingrediente=ingrediente_detalle[0], id_alergeno=alergeno[0]) }}"
-                                  method="POST" style="margin:0; display:inline;"
-                                  onsubmit="return confirm('¿Eliminar alérgeno {{ alergeno[1] }}?')">
-                                <button type="submit" style="background:none; border:none; cursor:pointer; color:#991b1b; font-size:14px; line-height:1; padding:0;" title="Eliminar">✕</button>
-                            </form>
-                        </span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
 
                     <div class="modal-actions">
                         <button class="btn-secondary" onclick="cerrarModalDetalle()">Cerrar</button>
