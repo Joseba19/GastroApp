@@ -43,6 +43,19 @@ INSERT INTO `alergenos` VALUES (1,'Gluten','Cereales que contienen gluten: trigo
 UNLOCK TABLES;
 
 --
+-- Temporary view structure for view `calorias`
+--
+
+DROP TABLE IF EXISTS `calorias`;
+/*!50001 DROP VIEW IF EXISTS `calorias`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `calorias` AS SELECT 
+ 1 AS `Ingrediente`,
+ 1 AS `Calorias`*/;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Table structure for table `categorias_receta`
 --
 
