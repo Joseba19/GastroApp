@@ -10,8 +10,8 @@ CREATE USER 'lector1'@'%' IDENTIFIED BY '1234';
 CREATE USER 'lector2'@'%' IDENTIFIED BY '1234';
 CREATE USER 'admin'@'%' IDENTIFIED BY '1234';
 
-GRANT SELECT ON gastrolab.* TO 'lector1'@'%';
-GRANT SELECT ON gastrolab.* TO 'lector2'@'%';
-GRANT ALL PRIVILEGES ON gastrolab.* TO 'admin'@'%';
+GRANT 'rol_lectura' TO 'lector1'@'%';
+GRANT 'rol_lectura' TO 'lector2'@'%';
+GRANT 'rol_admin' TO 'admin'@'%';
 
 FLUSH PRIVILEGES;
