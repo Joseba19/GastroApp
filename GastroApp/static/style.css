@@ -1,6 +1,6 @@
 :root {
     --crema:       #DAD7CD;
-    --sage:        #A3B18A;
+    --salvia:      #A3B18A;
     --verde-medio: #588157;
     --verde-oscuro:#3A5A40;
     --verde-bosque:#344E41;
@@ -21,165 +21,276 @@ body {
 
 header {
     background-color: var(--verde-bosque);
-    padding: 0.75rem 1.5rem;
+    padding: 1rem 2rem;
 }
 
 .navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .logo {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--crema);
-    white-space: nowrap;
 }
 
-.buscador {
+#buscador {
     flex: 1;
-    max-width: 500px;
-    margin: 0 1.5rem;
-    padding: 0.5rem 1.25rem;
+    max-width: 400px;
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 999px;
+    border-radius: 20px;
     background-color: var(--crema);
     color: var(--verde-bosque);
     font-family: var(--fuente);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     outline: none;
 }
 
-.buscador::placeholder {
-    color: var(--sage);
+#buscador::placeholder {
+    color: var(--salvia);
 }
 
 .nav-links {
     display: flex;
-    gap: 1.5rem;
+    align-items: center;
+    gap: 1rem;
 }
 
 .nav-links a {
     color: var(--crema);
     text-decoration: none;
     font-size: 0.9rem;
-    cursor: pointer;
-    font-weight: bold;
 }
 
 .nav-links a:hover {
-    color: var(--sage);
+    color: var(--salvia);
+}
+
+.nav-links button {
+    background-color: var(--verde-medio);
+    color: white;
+    border: none;
+    padding: 0.4rem 1.2rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: var(--fuente);
+    font-size: 0.85rem;
+}
+
+.nav-links button:hover {
+    background-color: var(--salvia);
+    color: var(--verde-bosque);
 }
 
 .recetas {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 0.5rem;
-    padding: 0.75rem;
-    max-width: 1400px;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+    padding: 1.5rem;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
-.receta-card {
+.tarjeta-receta {
     background: white;
-    border-radius: 6px;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     cursor: pointer;
-    aspect-ratio: 1 / 1;
-    display: flex;
-    flex-direction: column;
 }
 
-.receta-card:hover {
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-.receta-img {
+.tarjeta-imagen {
     width: 100%;
-    height: 55%;
+    height: 120px;
     overflow: hidden;
 }
 
-.receta-img img {
+.tarjeta-imagen img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.receta-card h3 {
-    padding: 4px;
+.tarjeta-receta h3 {
+    padding: 0.5rem;
     margin: 0;
-    font-size: 10px;
+    font-size: 0.75rem;
     text-align: center;
+}
+
+.panel-login {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    width: 250px;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.panel-login.abierto {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    line-height: 1.2;
+}
+
+.panel-login h3 {
+    margin-bottom: 0.5rem;
+    color: var(--verde-bosque);
+}
+
+.panel-login input {
+    padding: 0.5rem;
+    border: 1px solid var(--salvia);
+    border-radius: 4px;
+    font-family: var(--fuente);
+}
+
+.panel-login button {
+    background-color: var(--verde-medio);
+    color: white;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--fuente);
+}
+
+#error-login {
+    color: red;
+    font-size: 0.8rem;
+    display: none;
 }
 
 .modal {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.6);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 999;
 }
 
-.modal-content {
+.modal-contenido {
     background: white;
     width: 90%;
-    max-width: 700px;
-    max-height: 90vh;
+    max-width: 600px;
+    max-height: 80vh;
     overflow-y: auto;
-    border-radius: 15px;
-    padding: 20px;
+    border-radius: 8px;
+    padding: 2rem;
     position: relative;
 }
 
-.modal-content img {
+.modal-contenido img {
     width: 100%;
-    border-radius: 10px;
-    margin-bottom: 10px;
+    border-radius: 4px;
+    margin-bottom: 1rem;
 }
 
-.close {
-    position: absolute;
-    right: 15px;
-    top: 10px;
-    font-size: 30px;
-    cursor: pointer;
-}
-
-#page-nosotros main {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-#page-nosotros h2 {
-    font-size: 2rem;
+.modal-contenido h2 {
     margin-bottom: 0.5rem;
 }
 
-#page-nosotros .subtitulo {
-    color: #666;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 0.75rem;
-    margin-bottom: 2rem;
+.modal-contenido h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
 }
 
-#page-nosotros h3 {
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-}
-
-#page-nosotros ul {
+.modal-contenido ul,
+.modal-contenido ol {
     margin-left: 1.5rem;
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
+}
+
+.cerrar {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+}
+
+@media (max-width: 1000px) {
+    .recetas {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 700px) {
+    .recetas {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .recetas {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.pagina-nosotros {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.pagina-nosotros h1 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.seccion {
+    margin-bottom: 2.5rem;
+}
+
+.seccion h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
+    color: var(--verde-oscuro);
+    border-bottom: 2px solid var(--salvia);
+    padding-bottom: 0.4rem;
+}
+
+.seccion p {
+    line-height: 1.7;
+    color: #444;
+}
+
+.tarjetas-servicios {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.servicio {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.servicio h3 {
+    margin-bottom: 0.5rem;
+    color: var(--verde-oscuro);
+}
+
+.servicio p {
+    font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+    .tarjetas-servicios {
+        grid-template-columns: 1fr;
+    }
 }

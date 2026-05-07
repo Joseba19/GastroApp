@@ -1,15 +1,29 @@
 from flask import Flask, render_template, request, jsonify
-import json
+import mysql.connector
+import random
 
 app = Flask(__name__)
 
 USER = "admin"
 PASS = "1234"
 
+def get_db():
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="7365",
+        database="gastrolab"
+    )
+    return conn
+
 @app.route("/")
 def inicio():
     return render_template("index.html")
 
+@app.route("/nosotros")
+def nosotros():
+    return render_template("nosotros.html")
+#Los metodos de login y los request json, usamos la ia ya que no conseguiamos que funcionase del todo
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
@@ -21,49 +35,61 @@ def login():
     else:
         return jsonify({"success": False, "error": "Usuario o contraseña incorrectos"})
 
-def cargar_json():
-    try:
-        with open("recetas.json", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        # Crear archivo vacío si no existe
-        with open("recetas.json", "w", encoding="utf-8") as f:
-            json.dump([], f, indent=2, ensure_ascii=False)
-        return []
-
-def guardar_json(data):
-    with open("recetas.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-
 @app.route("/recetas")
 def recetas():
-    data = cargar_json()
-    return jsonify(data)
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
 
-@app.route("/editar_receta/<id>", methods=["POST"])
-def editar_receta(id):
-    data = request.get_json()
-    recetas = cargar_json()
+    cursor.execute("""
+        SELECT r.id_receta, r.nombre, r.descripcion, r.tiempo_preparacion, r.dificultad
+        FROM recetas r
+    """)
+    recetas = cursor.fetchall()
 
+
+    resultado = []
     for r in recetas:
-        if str(r["id"]) == str(id):
-            r["nombre"] = data.get("nombre", r["nombre"])
-            r["descripcion"] = data.get("descripcion", r.get("descripcion", ""))
-            r["tiempo"] = data.get("tiempo", r.get("tiempo", ""))
-            r["dificultad"] = data.get("dificultad", r.get("dificultad", ""))
-            r["ingredientes"] = data.get("ingredientes", r.get("ingredientes", []))
-            r["pasos"] = data.get("pasos", r.get("pasos", []))
-            break
+        cursor.execute("""
+            SELECT i.nombre
+            FROM recetas_ingredientes ri
+            JOIN ingredientes i ON ri.id_ingrediente = i.id_ingrediente
+            WHERE ri.id_receta = %s
+        """, (r["id_receta"],))
+        ingredientes = cursor.fetchall()
 
-    guardar_json(recetas)
-    return jsonify({"success": True})
+        cursor.execute("""
+            SELECT descripcion
+            FROM pasos_receta
+            WHERE id_receta = %s
+            ORDER BY numero_paso
+        """, (r["id_receta"],))
+        pasos = cursor.fetchall()
 
-@app.route("/borrar_receta/<id>", methods=["POST"])
-def borrar_receta(id):
-    recetas = cargar_json()
-    recetas = [r for r in recetas if str(r["id"]) != str(id)]
-    guardar_json(recetas)
-    return jsonify({"success": True})
+        lista_ingredientes = []
+        for ing in ingredientes:
+            lista_ingredientes.append({"nombre": ing["nombre"]})
+
+        lista_pasos = []
+        for paso in pasos:
+            lista_pasos.append(paso["descripcion"])
+
+        
+
+        resultado.append({
+            "id": r["id_receta"],
+            "nombre": r["nombre"],
+            "descripcion": r["descripcion"] or "",
+            "tiempo": r["tiempo_preparacion"] or "",
+            "dificultad": r["dificultad"] or "",
+            #Hemos usado la ia para la ayuda del color random en tarjetas
+            "imagen":  "",
+            "ingredientes": lista_ingredientes,
+            "pasos": lista_pasos
+        })
+
+    cursor.close()
+    conn.close()
+    return jsonify(resultado)
 
 if __name__ == "__main__":
     app.run(debug=True)
