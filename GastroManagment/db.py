@@ -598,14 +598,13 @@ def obtenerEmpleadosFiltrados(page, per_page, puesto=None, activo=None):
 
 def obtenerEmpleado(id_empleado):
     """Devuelve todos los datos de un empleado por su id"""
-
     with conexionDB() as conexion:
         cursor = conexion.cursor()
+
         cursor.execute("""
-            SELECT e.id_empleado, e.nombre, e.apellidos, e.puesto,
-                   e.telefono, e.email, e.fecha_alta, e.activo,
-                   c.tipo_contrato, c.fecha_inicio, c.fecha_fin,
-                   c.horas_semanales, c.salario_bruto_anual, c.salario_neto, c.activo
+            SELECT e.id_empleado, e.nombre, e.apellidos, e.puesto, e.telefono, e.email, e.fecha_alta, e.activo,
+                   c.tipo_contrato, c.fecha_inicio, c.fecha_fin, c.horas_semanales, c.salario_bruto_anual, 
+                   c.salario_neto, c.activo, c.id_contrato
             FROM empleados e
             LEFT JOIN contratos c
                 ON c.id_empleado = e.id_empleado
@@ -615,101 +614,21 @@ def obtenerEmpleado(id_empleado):
                     ORDER BY activo DESC, fecha_inicio DESC
                     LIMIT 1
                 )
-            WHERE e.id_empleado = %s """, (id_empleado,))
-        
+            WHERE e.id_empleado = %s
+        """, (id_empleado,))
+
         empleado = cursor.fetchone()
         cursor.close()
         return empleado
 
-def obtenerResumenEmpleados():
-    """Devuelve (total, 3, empleados_cocina, empleados_sala).
-    CORRECCIÓN: los valores del ENUM de puesto son 'cocinero','docente','apoyo',
-                'alumno_cocina','alumno_dietetica'. Los valores anteriores
-                ('Chef', 'Sous Chef', etc.) no existen en el esquema.
-    """
-    puestos_cocina = ('cocinero', 'apoyo', 'alumno_cocina')
-    puestos_docencia = ('docente', 'alumno_dietetica')
 
+def guardarEmpleado(nombre, apellidos, puesto, telefono, email, fecha_alta,
+                    tipo_contrato, horas_semanales, salario_bruto_anual, salario_neto, activo):
+    """Inserta un nuevo empleado en la base de datos y su contrato asociado."""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
 
-        cursor.execute("SELECT COUNT(*) FROM empleados")
-        total = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM empleados WHERE activo = 1")
-        activos = cursor.fetchone()[0]
-
-        placeholders_cocina = ", ".join(["%s"] * len(puestos_cocina))
-        cursor.execute(
-            f"SELECT COUNT(*) FROM empleados WHERE puesto IN ({placeholders_cocina})",
-            puestos_cocina
-        )
-        cocina = cursor.fetchone()[0]
-
-        placeholders_docencia = ", ".join(["%s"] * len(puestos_docencia))
-        cursor.execute(
-            f"SELECT COUNT(*) FROM empleados WHERE puesto IN ({placeholders_docencia})",
-            puestos_docencia
-        )
-        docencia = cursor.fetchone()[0]
-
-        cursor.close()
-        return total, activos, cocina, docencia
-
-
-def obtenerResumenContratos():
-    """Devuelve estadísticas de contratos activos:
-    (contratos_activos, masa_salarial_bruta, horas_semanales_total, contratos_indefinidos)
-    """
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-
-        cursor.execute("SELECT COUNT(*) FROM contratos WHERE activo = 1")
-        contratos_activos = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COALESCE(SUM(salario_bruto_anual), 0) FROM contratos WHERE activo = 1")
-        masa_salarial = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COALESCE(SUM(horas_semanales), 0) FROM contratos WHERE activo = 1")
-        horas_total = cursor.fetchone()[0]
-
-        cursor.execute("""
-            SELECT COUNT(*) FROM contratos
-            WHERE activo = 1 AND tipo_contrato LIKE '%Indefinido%'
-        """)
-        indefinidos = cursor.fetchone()[0]
-
-        cursor.close()
-        return contratos_activos, float(masa_salarial), float(horas_total), indefinidos
-
-
-def obtenerContratosEmpleado(id_empleado):
-    """Devuelve todos los contratos de un empleado ordenados por fecha descendente.
-    Cada fila: (id_contrato, tipo_contrato, fecha_inicio, fecha_fin,
-                horas_semanales, salario_bruto_anual, salario_neto, activo)
-    """
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
-        cursor.execute("""
-            SELECT id_contrato, tipo_contrato, fecha_inicio, fecha_fin,
-                   horas_semanales, salario_bruto_anual, salario_neto, activo
-            FROM contratos
-            WHERE id_empleado = %s
-            ORDER BY activo DESC, fecha_inicio DESC
-        """, (id_empleado,))
-        contratos = cursor.fetchall()
-        cursor.close()
-        return contratos
-
-
-def guardarEmpleado(nombre, apellidos, puesto, telefono, email, fecha_alta, activo):
-    """Inserta un nuevo empleado en la base de datos.
-    CORRECCIÓN: eliminados parámetros turno, salario, notas que no existen
-                en la tabla. El ENUM acepta: cocinero, docente, apoyo,
-                alumno_cocina, alumno_dietetica.
-    """
-    with conexionDB() as conexion:
-        cursor = conexion.cursor()
+        # Insertar empleado
         cursor.execute("""
             INSERT INTO empleados
             (nombre, apellidos, puesto, telefono, email, fecha_alta, activo)
@@ -723,6 +642,23 @@ def guardarEmpleado(nombre, apellidos, puesto, telefono, email, fecha_alta, acti
             fecha_alta or None,
             activo
         ))
+
+        # Obtener el ID del empleado recién insertado
+        id_empleado = cursor.lastrowid
+
+        # Insertar contrato asociado
+        cursor.execute("""
+            INSERT INTO contratos
+            (id_empleado, tipo_contrato, fecha_inicio, horas_semanales, salario_bruto_anual, salario_neto, activo)
+            VALUES (%s, %s, CURDATE(), %s, %s, %s, 1)
+        """, (
+            id_empleado,
+            tipo_contrato,
+            horas_semanales,
+            salario_bruto_anual,
+            salario_neto
+        ))
+
         conexion.commit()
         cursor.close()
 
@@ -778,6 +714,7 @@ def crearContrato(id_empleado, tipo_contrato, fecha_inicio, fecha_fin,
     """Crea un nuevo contrato para un empleado.
     Marca como inactivos los contratos previos antes de insertar el nuevo.
     """
+    
     with conexionDB() as conexion:
         cursor = conexion.cursor()
         cursor.execute("""
@@ -802,16 +739,24 @@ def crearContrato(id_empleado, tipo_contrato, fecha_inicio, fecha_fin,
 
 
 def eliminarEmpleadoDB(id_empleado):
-    """Elimina un empleado de la base de datos."""
+    """Elimina un empleado y sus contratos asociados de la base de datos."""
     with conexionDB() as conexion:
         cursor = conexion.cursor()
+
+        # Primero eliminar los contratos asociados (FK lo exige)
+        cursor.execute(
+            "DELETE FROM contratos WHERE id_empleado = %s",
+            (id_empleado,)
+        )
+
+        # Luego eliminar el empleado
         cursor.execute(
             "DELETE FROM empleados WHERE id_empleado = %s",
             (id_empleado,)
         )
+
         conexion.commit()
         cursor.close()
-
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -833,7 +778,6 @@ def ingredientesRecientes(limite=5):
         fila = cursor.fetchall()
         cursor.close()
     return fila
-
 
 
 def empleadosRecientes(limite=5):

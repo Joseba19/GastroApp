@@ -65,22 +65,20 @@
 
                     <select name="puesto" onchange="this.form.submit()">
                         <option value="">Todos los puestos</option>
-                        <option value="cocinero"          {% if puesto_actual == 'cocinero' %}selected{% endif %}>Cocinero</option>
-                        <option value="docente"           {% if puesto_actual == 'docente' %}selected{% endif %}>Docente</option>
-                        <option value="apoyo"             {% if puesto_actual == 'apoyo' %}selected{% endif %}>Apoyo</option>
-                        <option value="alumno_cocina"     {% if puesto_actual == 'alumno_cocina' %}selected{% endif %}>Alumno Cocina</option>
-                        <option value="alumno_dietetica"  {% if puesto_actual == 'alumno_dietetica' %}selected{% endif %}>Alumno Dietética</option>
+                        <option value="cocinero" {% if puesto_actual=='cocinero' %}selected{% endif %}>Cocinero</option>
+                        <option value="docente" {% if puesto_actual=='docente' %}selected{% endif %}>Docente</option>
+                        <option value="apoyo" {% if puesto_actual=='apoyo' %}selected{% endif %}>Apoyo</option>
+                        <option value="alumno_cocina" {% if puesto_actual=='alumno_cocina' %}selected{% endif %}>Alumno
+                            Cocina</option>
+                        <option value="alumno_dietetica" {% if puesto_actual=='alumno_dietetica' %}selected{% endif %}>
+                            Alumno Dietética</option>
                     </select>
 
                     <select name="activo" onchange="this.form.submit()">
                         <option value="">Todos los estados</option>
-                        <option value="1" {% if activo_actual == '1' %}selected{% endif %}>Activos</option>
-                        <option value="0" {% if activo_actual == '0' %}selected{% endif %}>Inactivos</option>
+                        <option value="1" {% if activo_actual=='1' %}selected{% endif %}>Activos</option>
+                        <option value="0" {% if activo_actual=='0' %}selected{% endif %}>Inactivos</option>
                     </select>
-
-                    {% if puesto_actual or activo_actual %}
-                    <a href="{{ url_for('empleados') }}" class="btn-sm">Limpiar filtros</a>
-                    {% endif %}
                 </form>
             </div>
 
@@ -100,53 +98,57 @@
                     {% for emp in empleados %}
                     <tr>
                         <td>
-                            <div class="employee-row">
-                                <div>
-                                    <div>{{ emp[1] }} {{ emp[2] }}</div>
-                                </div>
-                            </div>
+                            <p>{{ emp[1] }} {{ emp[2] }}</p>
                         </td>
                         <td>
-                                {{ emp[3]|capitalize }}
-                        </td>
-                        <td class="td-sm">
-                            {% if emp[8] %}
-                                {{ emp[8] }}
+                            {% if emp[3] == "alumno_cocina" %}
+                            <p>Alumno Cocina</p>
+                            {% elif emp[3] == "alumno_dietetica" %}
+                            <p>Alumno Dietetica</p>
                             {% else %}
-                                <span class="text-muted">Sin contrato</span>
+                            <p>{{ emp[3]|capitalize }}</p>
                             {% endif %}
                         </td>
-                        <td class="td-sm td-center">
+                        <td>
+                            {% if emp[8] %}
+                            {{ emp[8] }}
+                            {% else %}
+                            <p>Sin contrato</p>
+                            {% endif %}
+                        </td>
+                        <td>
                             {% if emp[11] is not none %}
-                                <strong>{{ emp[11]|int }}</strong>h
+                            <strong>{{ emp[11]|int }}</strong>h
                             {% else %}—{% endif %}
                         </td>
-                        <td class="td-sm td-right">
+                        <td>
                             {% if emp[12] is not none %}
-                                <strong>{{ "{:,.0f}".format(emp[12]) }} €</strong>
+                            <strong>{{ "{:,.0f}".format(emp[12]) }} €</strong>
                             {% else %}—{% endif %}
                         </td>
-                        <td class="td-xs text-dark">
+                        <td>
                             {% if emp[9] %}
-                                <div>Desde: {{ emp[9] }}</div>
-                                {% if emp[10] %}
-                                    <div class="text-red">Hasta: {{ emp[10] }}</div>
-                                {% else %}
-                                    <div class="text-green">Indefinido</div>
-                                {% endif %}
+                            <p>Desde: {{ emp[9] }}</p>
+                            {% if emp[10] %}
+                            <p>Hasta: {{ emp[10] }}</p>
+                            {% else %}
+                            <p>Indefinido</p>
+                            {% endif %}
                             {% else %}—{% endif %}
                         </td>
                         <td>
                             <div class="actions">
                                 <form action="{{ url_for('editar_empleado', id_empleado=emp[0]) }}" method="GET">
                                     <button class="btn-sm btn-edit">
-                                        <img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt="" width="16" height="16">
+                                        <img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt=""
+                                            width="16" height="16">
                                     </button>
                                 </form>
                                 <form action="{{ url_for('eliminar_empleado', id_empleado=emp[0]) }}" method="POST"
                                     onsubmit="return confirm('¿Seguro que quieres eliminar este empleado?')">
                                     <button type="submit" class="btn-sm btn-del">
-                                        <img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="Eliminar" width="16" height="16">
+                                        <img src="{{ url_for('static', filename='img/icons/basura.png') }}"
+                                            alt="Eliminar" width="16" height="16">
                                     </button>
                                 </form>
                             </div>
@@ -164,20 +166,22 @@
                 <span>Página {{ page }} de {{ total_pages }}</span>
                 <div class="pages">
                     {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
+                    <a
+                        href="?page={{ page - 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
                         <button>‹</button>
                     </a>
                     {% endif %}
                     {% for p in range(1, total_pages + 1) %}
-                    <a href="?page={{ p }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
+                    <a
+                        href="?page={{ p }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
                         <button class="{% if p == page %}active{% endif %}">{{ p }}</button>
                     </a>
                     {% endfor %}
-                    {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
+                    {% if page < total_pages %} <a
+                        href="?page={{ page + 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
                         <button>›</button>
-                    </a>
-                    {% endif %}
+                        </a>
+                        {% endif %}
                 </div>
             </div>
         </div>
@@ -231,19 +235,142 @@
                             </div>
                         </div>
 
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="tipo_contrato">Tipo de Contrato</label>
+                                <input type="text" id="tipo_contrato" name="tipo_contrato" placeholder="Indefinido">
+                            </div>
+                            <div class="form-group">
+                                <label for="horas">Horas semanales</label>
+                                <input type="number" id="horas" name="horas" placeholder="40">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="salario_bruto">Salario bruto</label>
+                                <input type="num" id="salario_bruto" name="salario_bruto" placeholder="40000">
+                            </div>
+                            <div class="form-group">
+                                <label for="salario_neto">Salario neto</label>
+                                <input type="number" id="salario_neto" name="salario_neto" placeholder="32500">
+                            </div>
+                        </div>
+
                         <div class="checkbox-group">
                             <input type="checkbox" id="emp_activo" name="activo" value="1" checked>
                             <label for="emp_activo">Empleado activo</label>
                         </div>
 
                         <div class="modal-actions">
-                            <button type="button" class="btn-secondary" onclick="cerrarModalEmpleado()">Cancelar</button>
+                            <button type="button" class="btn-secondary"
+                                onclick="cerrarModalEmpleado()">Cancelar</button>
                             <button type="submit" class="btn-primary">Guardar Empleado</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+
+        {% if empleado_editar %}
+        <!-- MODAL EDITAR EMPLEADO -->
+        <div id="modal-editar-empleado" class="modal active">
+            <div class="modal-content modal-content--lg" style="max-width: 620px;">
+                <div class="modal-header">
+                    <h2>Editar Empleado</h2>
+                    <span class="modal-close" onclick="cerrarModalEditarEmpleado()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('editar_empleado', id_empleado=empleado_editar[0]) }}">
+
+                        <!-- ── Datos personales ── -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nombre *</label>
+                                <input type="text" name="nombre" value="{{ empleado_editar[1] }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Apellidos</label>
+                                <input type="text" name="apellidos" value="{{ empleado_editar[2] or '' }}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Puesto *</label>
+                                <select name="puesto" required>
+                                    <option value="">Selecciona un puesto</option>
+                                    <option value="cocinero" {% if empleado_editar[3]=='cocinero' %}selected{% endif %}>
+                                        Cocinero</option>
+                                    <option value="docente" {% if empleado_editar[3]=='docente' %}selected{% endif %}>
+                                        Docente</option>
+                                    <option value="apoyo" {% if empleado_editar[3]=='apoyo' %}selected{% endif %}>Apoyo
+                                    </option>
+                                    <option value="alumno_cocina" {% if empleado_editar[3]=='alumno_cocina' %}selected{%
+                                        endif %}>Alumno Cocina</option>
+                                    <option value="alumno_dietetica" {% if empleado_editar[3]=='alumno_dietetica'
+                                        %}selected{% endif %}>Alumno Dietética</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha de alta</label>
+                                <input type="date" name="fecha_alta" value="{{ empleado_editar[6] or '' }}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Teléfono</label>
+                                <input type="tel" name="telefono" value="{{ empleado_editar[4] or '' }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" name="email" value="{{ empleado_editar[5] or '' }}">
+                            </div>
+                        </div>
+
+                        <!-- ── Datos del contrato ── -->
+                        <input type="hidden" name="id_contrato" value="{{ empleado_editar[15] or '' }}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tipo de contrato</label>
+                                <input type="text" name="tipo_contrato" value="{{ empleado_editar[8] or '' }}"
+                                    placeholder="Indefinido">
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha inicio contrato</label>
+                                <input type="date" name="fecha_inicio" value="{{ empleado_editar[9] or '' }}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Horas semanales</label>
+                                <input type="number" name="horas_semanales" value="{{ empleado_editar[11] or '' }}"
+                                    placeholder="40">
+                            </div>
+                            <div class="form-group">
+                                <label>Salario bruto anual</label>
+                                <input type="number" name="salario_bruto_anual" value="{{ empleado_editar[12] or '' }}"
+                                    placeholder="40000">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Salario neto</label>
+                                <input type="number" name="salario_neto" value="{{ empleado_editar[13] or '' }}"
+                                    placeholder="32500">
+                            </div>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary"
+                                onclick="cerrarModalEditarEmpleado()">Cancelar</button>
+                            <button type="submit" class="btn-primary">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
     </div>
 
     <script>
@@ -263,7 +390,23 @@
         document.getElementById('modal-empleado').onclick = function (event) {
             if (event.target === this) cerrarModalEmpleado();
         }
+
+        function cerrarModalEditarEmpleado() {
+            var modal = document.getElementById('modal-editar-empleado');
+            if (modal) modal.classList.remove('active');
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.addEventListener('DOMContentLoaded', function () {
+            var modalEdit = document.getElementById('modal-editar-empleado');
+            if (modalEdit) {
+                modalEdit.onclick = function (event) {
+                    if (event.target === this) cerrarModalEditarEmpleado();
+                };
+            }
+        });
     </script>
 
 </body>
+
 </html>

@@ -273,17 +273,17 @@ def eliminar_ingrediente(id_ingrediente):
     db.eliminarIngredienteDB(id_ingrediente)
     return redirect(url_for("ingredientes"))
 
-# ── EMPLEADOS ─────────────────────────────────────────────────────────────────
 
 @app.route('/empleados', methods=["GET", "POST"])
 @login_required
 def empleados():
-    # Parámetros de paginación y filtros
+    # Parámetros de paginación y filtros, hecho con IA
     page          = request.args.get('page', 1, type=int)
     per_page      = 10
     puesto_actual = request.args.get('puesto')
     activo_actual = request.args.get('activo')
     emp_id        = request.args.get('emp_id', type=int)
+    editar_id     = request.args.get('editar', type=int)  # NUEVO: para el modal de edición
 
     # Guarda un nuevo empleado
     if request.method == "POST":
@@ -294,6 +294,10 @@ def empleados():
             request.form.get("telefono"),
             request.form.get("email"),
             request.form.get("fecha_alta"),
+            request.form.get("tipo_contrato"),
+            request.form.get("horas"),
+            request.form.get("salario_bruto"),
+            request.form.get("salario_neto"),
             1 if request.form.get("activo") else 0
         )
         return redirect(url_for("empleados"))
@@ -302,15 +306,8 @@ def empleados():
     empleados_list, total = db.obtenerEmpleadosFiltrados(page, per_page, puesto_actual, activo_actual)
     total_pages = (total + per_page - 1) // per_page
     
-    # Resumen general de empleados
-    total_empleados, empleados_activos, empleados_cocina, empleados_docencia = db.obtenerResumenEmpleados()
-    
-    # Resumen de contratos
-    contratos_activos, masa_salarial, horas_total, contratos_indefinidos = db.obtenerResumenContratos()
-
-    # Detalle de empleado seleccionado
-    empleado_detalle = db.obtenerEmpleado(emp_id) if emp_id else None
-    contratos_empleado = db.obtenerContratosEmpleado(emp_id) if emp_id else []
+    # Empleado para el modal de edición
+    empleado_editar = db.obtenerEmpleado(editar_id) if editar_id else None
 
     return render_template('empleados.html',
                            empleados=empleados_list,
@@ -318,16 +315,7 @@ def empleados():
                            total_pages=total_pages,
                            puesto_actual=puesto_actual,
                            activo_actual=activo_actual,
-                           total_empleados=total_empleados,
-                           empleados_activos=empleados_activos,
-                           empleados_cocina=empleados_cocina,
-                           empleados_sala=empleados_docencia,
-                           contratos_activos=contratos_activos,
-                           masa_salarial=masa_salarial,
-                           horas_total=horas_total,
-                           contratos_indefinidos=contratos_indefinidos,
-                           empleado_detalle=empleado_detalle,
-                           contratos_empleado=contratos_empleado)
+                           empleado_editar=empleado_editar) 
 
 
 @app.route('/ver-empleado/<int:id_empleado>', methods=["GET"])
@@ -375,11 +363,8 @@ def editar_empleado(id_empleado):
             )
         return redirect(url_for("empleados"))
 
-    empleado          = db.obtenerEmpleado(id_empleado)
-    contratos_empleado = db.obtenerContratosEmpleado(id_empleado)
-    return render_template('editarEmpleado.html',
-                           empleado=empleado,
-                           contratos_empleado=contratos_empleado)
+    # Redirige a la página de empleados con el parámetro editar
+    return redirect(url_for('empleados', editar=id_empleado))
 
 
 @app.route('/eliminar-empleado/<int:id_empleado>', methods=["POST"])
