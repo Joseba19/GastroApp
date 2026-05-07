@@ -45,8 +45,8 @@
             <div class="card">
                 <div class="section-header">
                     <div>
-                        <h2>Nueva Receta</h2>
-                        <p>Completa el formulario para crear una nueva receta</p> <br>
+                        <h2>Editar Receta</h2>
+                        <p>Cambia el formulario para editar la receta</p> <br>
                     </div>
                 </div>
 
@@ -54,15 +54,19 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nombre">Nombre de la receta *</label>
-                            <input type="text" id="nombre" name="nombre" required>
+                            <input type="text" id="nombre" name="nombre" value="{{receta[1]}}" required>
                         </div>
 
                         <div class="form-group">
                             <label for="categoria">Categoría *</label>
                             <select id="categoria" name="categoria" required>
-                                <option value="">Selecciona una categoría</option>
-                                {% for c in categorias %}
-                                <option value="{{ c[0] }}">{{ c[1] }}</option>
+                                {% for c in categorias%}
+                                    {% if receta[7] == c[0] %}
+                                    <option value="{{c[0]}}">{{c[1]}}</option>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for c in categorias%}
+                                    <option value="{{ c[0] }}">{{ c[1] }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -72,35 +76,45 @@
                         <div class="form-group">
                             <label for="dificultad">Dificultad *</label>
                             <select id="dificultad" name="dificultad" required>
-                                <option value="facil">Fácil</option>
-                                <option value="medio">Media</option>
-                                <option value="dificil">Difícil</option>
+                                {% if receta[6] == "facil"%}
+                                    <option value="facil">Fácil</option>
+                                    <option value="medio">Media</option>
+                                    <option value="dificil">Difícil</option>
+                                {% elif receta[6] == "medio" %}
+                                    <option value="medio">Media</option>
+                                    <option value="facil">Fácil</option>
+                                    <option value="dificil">Difícil</option>
+                                {% else %}
+                                    <option value="dificil">Difícil</option>
+                                    <option value="facil">Fácil</option>
+                                    <option value="medio">Media</option>
+                                {% endif %}
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label for="raciones">Raciones</label>
-                            <input type="number" id="raciones" name="raciones" min="1" required>
+                            <input type="number" id="raciones" name="raciones" value="{{receta[5]}}" min="1" required>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="tiempo_preparacion">Tiempo preparación (min)</label>
-                            <input type="number" id="tiempo_preparacion" name="tiempo_preparacion" min="0" required>
+                            <input type="number" id="tiempo_preparacion" name="tiempo_preparacion" value="{{receta[3]}}"
+                                min="0" required>
                         </div>
 
                         <div class="form-group">
                             <label for="tiempo_coccion">Tiempo cocción (min)</label>
-                            <input type="number" id="tiempo_coccion" name="tiempo_coccion" placeholder="0" min="0"
+                            <input type="number" id="tiempo_coccion" name="tiempo_coccion" value="{{receta[4]}}" min="0"
                                 required>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="descripcion">Descripción</label>
-                        <textarea id="descripcion" name="descripcion"
-                            placeholder="Breve descripción de la receta..."></textarea>
+                        <textarea id="descripcion" name="descripcion">{{receta[2]}}</textarea>
                     </div>
                 </div>
             </div>
@@ -116,7 +130,59 @@
                 <!-- Ingredientes -->
                 <h2>Ingredientes</h2> <br>
                 <div id="ingredientes-container">
-                    <!-- Los ingredientes se añaden aquí dinámicamente -->
+                    {% for i in ingredientes %}
+                    <div class="card-2">
+                        <div class="ingrediente-item">
+                            <h3>Ingrediente</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>‎</label>
+                                    <select class="ingrediente-select" name="ingredientes_ids[]" required>
+                                        <option value="{{ i[1] }}">{{ i[2] }}</option>
+                                        {% for l in loopIngredientes %}
+                                        <option value="{{ l[0] }}">{{ l[1] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex: 0 0 120px; min-width: 100px;">
+                                    <label>Cantidad</label>
+                                    <input type="number" class="cantidad-input" name="cantidades[]" value="{{i[3]}}"
+                                        min="1">
+                                </div>
+                                <div class="form-group" style="flex: 0 0 140px; min-width: 110px;">
+                                    <label>Unidad</label>
+                                    <select class="unidad-select" name="unidades[]">
+                                        <option value="{{i[4]}}">{{i[4]}}</option>
+                                        <option value="g">Gramos (g)</option>
+                                        <option value="kg">Kilogramos (kg)</option>
+                                        <option value="ml">Mililitros (ml)</option>
+                                        <option value="l">Litros (l)</option>
+                                        <option value="unidad">Unidad</option>
+                                        <option value="cucharada">Cucharada</option>
+                                        <option value="cucharadita">Cucharadita</option>
+                                        <option value="taza">Taza</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Notas</label>
+                                {% if i[5] == None %}
+                                <input type="text" class="notas-input" name="notas_ing[]" placeholder="No hay notas">
+                                {% else %}
+                                <input type="text" class="notas-input" name="notas_ing[]" value="{{i[5]}}">
+                                {% endif %}
+                            </div>
+                            <br>
+                            <div>
+                                <a class="btn-secondary" onclick="abrirModalIngrediente()">+ Añadir ingrediente
+                                    manualmente</a>
+                                <button type="button" class="btn-primary" onclick="eliminarIngrediente(this)">Eliminar
+                                    ingrediente</button>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    {% endfor %}
                 </div>
                 <button type="button" class="btn-primary" onclick="agregarIngrediente()">
                     + Añadir Ingrediente
@@ -125,7 +191,20 @@
                 <!-- Pasos -->
                 <h2>Pasos</h2> <br>
                 <div id="pasos-container">
-                    <!-- Los pasos se añaden aquí dinámicamente -->
+                    {% for p in pasos %}
+                    <div class="card-2">
+                        <div class="ingrediente-item">
+                            <h3>Paso {{p[0]}}</h3>
+                            <div class="form-group"> <br>
+                                <input type="text" class="notas-input" name="notas_pasos[]" value="{{p[1]}}">
+                            </div>
+                            <br>
+                            <button type="button" class="btn-secondary" onclick="eliminarPaso(this)">Eliminar
+                                paso</button>
+                        </div>
+                    </div>
+                    <br>
+                    {% endfor %}
                 </div><br>
                 <button type="button" class="btn-primary" onclick="agregarPaso()">
                     + Añadir Paso
@@ -133,7 +212,7 @@
 
                 <div class="form-actions">
                     <a href="{{ url_for('inicio') }}" class="btn-secondary">Cancelar</a>
-                    <button type="submit" class="btn-primary">Guardar receta</button>
+                    <button type="submit" class="btn-primary">Actualizar receta</button>
                 </div>
         </form>
     </div>
@@ -166,8 +245,7 @@
 
                     <div class="form-group">
                         <label for="ing_categoria">Categoría</label>
-                        <input type="text" id="ing_categoria" name="categoria"
-                            placeholder="Ej: verduras, carnes, lácteos...">
+                        <input type="text" id="ing_categoria" name="categoria" placeholder="Ej: verduras, carnes, lácteos...">
                     </div>
 
                     <h3 class="detail-text">Información Nutricional (por 100g/ml)</h3>
@@ -180,16 +258,14 @@
 
                         <div class="form-group">
                             <label for="ing_proteinas">Proteínas (g)</label>
-                            <input type="number" id="ing_proteinas" name="proteinas" step="0.01" min="0"
-                                placeholder="0">
+                            <input type="number" id="ing_proteinas" name="proteinas" step="0.01" min="0" placeholder="0">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="ing_carbohidratos">Carbohidratos (g)</label>
-                            <input type="number" id="ing_carbohidratos" name="carbohidratos" step="0.01" min="0"
-                                placeholder="0">
+                            <input type="number" id="ing_carbohidratos" name="carbohidratos" step="0.01" min="0" placeholder="0">
                         </div>
 
                         <div class="form-group">
@@ -357,7 +433,6 @@
             contadorPasos = pasos.length;
         }
     </script>
-
 </body>
 
 </html>
