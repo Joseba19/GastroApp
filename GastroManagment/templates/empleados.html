@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>Empleados - GastroLab</title>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt="">
+        </div>
+        <nav>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20" height="20">
+                Dashboard
+            </a>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20" height="20">
+                Recetas
+            </a>
+            <a href="{{ url_for('ingredientes') }}">
+                <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20" height="20">
+                Ingredientes
+            </a>
+            <a href="{{ url_for('empleados') }}" class="active">
+                <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20" height="20">
+                Empleados
+            </a>
+        </nav>
+        <div class="sidebar-user">
+            <div class="user-name">{{ session.get('usuario_nombre', 'Usuario') }}</div>
+            <div class="user-role">{{ session.get('usuario_puesto', '') }}</div>
+            <a href="{{ url_for('logout') }}">← Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- BREADCRUMB -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('inicio') }}">Dashboard</a> › Empleados
+        </div>
+
+        <!-- CARD 1: TABLA EMPLEADOS -->
+        <div class="card">
+            <div class="section-header">
+                <div>
+                    <h2>Listado de empleados</h2>
+                    <p>Personal con datos de contrato vigente</p>
+                </div>
+                <button class="btn-primary" onclick="abrirModalEmpleado()">+ Nuevo empleado</button>
+            </div>
+
+            <div class="filters">
+                <form method="GET" action="{{ url_for('empleados') }}">
+                    <input type="text" name="busqueda" placeholder="Buscar empleado...">
+
+                    <select name="puesto" onchange="this.form.submit()">
+                        <option value="">Todos los puestos</option>
+                        <option value="cocinero"          {% if puesto_actual == 'cocinero' %}selected{% endif %}>Cocinero</option>
+                        <option value="docente"           {% if puesto_actual == 'docente' %}selected{% endif %}>Docente</option>
+                        <option value="apoyo"             {% if puesto_actual == 'apoyo' %}selected{% endif %}>Apoyo</option>
+                        <option value="alumno_cocina"     {% if puesto_actual == 'alumno_cocina' %}selected{% endif %}>Alumno Cocina</option>
+                        <option value="alumno_dietetica"  {% if puesto_actual == 'alumno_dietetica' %}selected{% endif %}>Alumno Dietética</option>
+                    </select>
+
+                    <select name="activo" onchange="this.form.submit()">
+                        <option value="">Todos los estados</option>
+                        <option value="1" {% if activo_actual == '1' %}selected{% endif %}>Activos</option>
+                        <option value="0" {% if activo_actual == '0' %}selected{% endif %}>Inactivos</option>
+                    </select>
+
+                    {% if puesto_actual or activo_actual %}
+                    <a href="{{ url_for('empleados') }}" class="btn-sm">Limpiar filtros</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>Puesto</th>
+                        <th>Tipo contrato</th>
+                        <th>Horas/sem.</th>
+                        <th>Salario bruto anual</th>
+                        <th>Vigencia contrato</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in empleados %}
+                    <tr>
+                        <td>
+                            <div class="employee-row">
+                                <div>
+                                    <div>{{ emp[1] }} {{ emp[2] }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                                {{ emp[3]|capitalize }}
+                        </td>
+                        <td class="td-sm">
+                            {% if emp[8] %}
+                                {{ emp[8] }}
+                            {% else %}
+                                <span class="text-muted">Sin contrato</span>
+                            {% endif %}
+                        </td>
+                        <td class="td-sm td-center">
+                            {% if emp[11] is not none %}
+                                <strong>{{ emp[11]|int }}</strong>h
+                            {% else %}—{% endif %}
+                        </td>
+                        <td class="td-sm td-right">
+                            {% if emp[12] is not none %}
+                                <strong>{{ "{:,.0f}".format(emp[12]) }} €</strong>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td class="td-xs text-dark">
+                            {% if emp[9] %}
+                                <div>Desde: {{ emp[9] }}</div>
+                                {% if emp[10] %}
+                                    <div class="text-red">Hasta: {{ emp[10] }}</div>
+                                {% else %}
+                                    <div class="text-green">Indefinido</div>
+                                {% endif %}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <form action="{{ url_for('editar_empleado', id_empleado=emp[0]) }}" method="GET">
+                                    <button class="btn-sm btn-edit">
+                                        <img src="{{ url_for('static', filename='img/icons/lapiz.png') }}" alt="" width="16" height="16">
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('eliminar_empleado', id_empleado=emp[0]) }}" method="POST"
+                                    onsubmit="return confirm('¿Seguro que quieres eliminar este empleado?')">
+                                    <button type="submit" class="btn-sm btn-del">
+                                        <img src="{{ url_for('static', filename='img/icons/basura.png') }}" alt="Eliminar" width="16" height="16">
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="td-empty">No se encontraron empleados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <span>Página {{ page }} de {{ total_pages }}</span>
+                <div class="pages">
+                    {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
+                        <button>‹</button>
+                    </a>
+                    {% endif %}
+                    {% for p in range(1, total_pages + 1) %}
+                    <a href="?page={{ p }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
+                        <button class="{% if p == page %}active{% endif %}">{{ p }}</button>
+                    </a>
+                    {% endfor %}
+                    {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}{% if puesto_actual %}&puesto={{ puesto_actual }}{% endif %}{% if activo_actual %}&activo={{ activo_actual }}{% endif %}">
+                        <button>›</button>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL NUEVO EMPLEADO -->
+        <div id="modal-empleado" class="modal">
+            <div class="modal-content modal-content--lg">
+                <div class="modal-header">
+                    <h2>Nuevo Empleado</h2>
+                    <span class="modal-close" onclick="cerrarModalEmpleado()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('empleados') }}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emp_nombre">Nombre *</label>
+                                <input type="text" id="emp_nombre" name="nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="emp_apellidos">Apellidos</label>
+                                <input type="text" id="emp_apellidos" name="apellidos">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emp_puesto">Puesto *</label>
+                                <select id="emp_puesto" name="puesto" required>
+                                    <option value="">Selecciona un puesto</option>
+                                    <option value="cocinero">Cocinero</option>
+                                    <option value="docente">Docente</option>
+                                    <option value="apoyo">Apoyo</option>
+                                    <option value="alumno_cocina">Alumno Cocina</option>
+                                    <option value="alumno_dietetica">Alumno Dietética</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="emp_fecha_alta">Fecha de alta *</label>
+                                <input type="date" id="emp_fecha_alta" name="fecha_alta" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emp_telefono">Teléfono</label>
+                                <input type="tel" id="emp_telefono" name="telefono" placeholder="Ej: 612345678">
+                            </div>
+                            <div class="form-group">
+                                <label for="emp_email">Email</label>
+                                <input type="email" id="emp_email" name="email" placeholder="nombre@gastrolab.es">
+                            </div>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="emp_activo" name="activo" value="1" checked>
+                            <label for="emp_activo">Empleado activo</label>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="cerrarModalEmpleado()">Cancelar</button>
+                            <button type="submit" class="btn-primary">Guardar Empleado</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalEmpleado() {
+            document.getElementById('modal-empleado').classList.add('active');
+        }
+
+        function cerrarModalEmpleado() {
+            document.getElementById('modal-empleado').classList.remove('active');
+        }
+
+        function cerrarModalDetalle() {
+            const modal = document.getElementById('modal-detalle-emp');
+            if (modal) modal.classList.remove('active');
+        }
+
+        document.getElementById('modal-empleado').onclick = function (event) {
+            if (event.target === this) cerrarModalEmpleado();
+        }
+    </script>
+
+</body>
+</html>

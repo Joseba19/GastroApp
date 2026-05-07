@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <title>Editar Empleado - GastroLab</title></head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo"><img src="{{ url_for('static', filename='img/logoBlanco.png') }}" alt=""></div>
+        <nav>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/grafico.png') }}" alt="" width="20px" height="20px">
+                Dashboard
+            </a>
+            <a href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icons/receta.png') }}" alt="" width="20px" height="20px">
+                Recetas
+            </a>
+            <a href="{{ url_for('ingredientes') }}">
+                <img src="{{ url_for('static', filename='img/icons/ingredientes.png') }}" alt="" width="20px"
+                    height="20px"> Ingredientes
+            </a>
+            <a href="{{ url_for('empleados') }}" class="active">
+                <img src="{{ url_for('static', filename='img/icons/usercheck.png') }}" alt="" width="20px"
+                    height="20px"> Empleados
+            </a>
+        </nav>
+        <div class="sidebar-user">
+            <div class="user-name">{{ session.get('usuario_nombre', 'Usuario') }}</div>
+            <div class="user-role">{{ session.get('usuario_puesto', '') }}</div>
+            <a href="{{ url_for('logout') }}">← Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- BREADCRUMB -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('inicio') }}">Dashboard</a> ›
+            <a href="{{ url_for('empleados') }}">Empleados</a> ›
+            {{ empleado[1] }} {{ empleado[2] }}
+        </div>
+
+        {# empleado: (0=id, 1=nombre, 2=apellidos, 3=puesto, 4=telefono, 5=email,
+                     6=fecha_alta, 7=activo_emp, 8=tipo_contrato, 9=fecha_inicio,
+                     10=fecha_fin, 11=horas_semanales, 12=salario_bruto, 13=salario_neto,
+                     14=contrato_activo) #}
+
+        <!-- ── CARD 1: DATOS DEL EMPLEADO ── -->
+        <div class="card">
+            <div class="section-header">
+                <div class="empleado-header">
+                    <!-- Avatar con iniciales -->
+                    <div class="avatar-grande">
+                        {{ empleado[1][0] }}{{ empleado[2][0] if empleado[2] else '' }}
+                    </div>
+                    <div class="empleado-header-info">
+                        <h2>{{ empleado[1] }} {{ empleado[2] }}</h2>
+                        <p>
+                            <span class="badge badge-{{ empleado[3]|lower|replace('_', '-') }}">
+                                {{ empleado[3]|replace('_', ' ')|capitalize }}
+                            </span>
+                            &nbsp;·&nbsp; ID #{{ empleado[0] }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('editar_empleado', id_empleado=empleado[0]) }}">
+                <div class="form-container">
+
+                    <!-- Nombre y Apellidos -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombre">Nombre *</label>
+                            <input type="text" id="nombre" name="nombre"
+                                   value="{{ empleado[1] }}" required
+                                   placeholder="Nombre">
+                        </div>
+                        <div class="form-group">
+                            <label for="apellidos">Apellidos</label>
+                            <input type="text" id="apellidos" name="apellidos"
+                                   value="{{ empleado[2] if empleado[2] else '' }}"
+                                   placeholder="Apellidos">
+                        </div>
+                    </div>
+
+                    <!-- Puesto y Fecha de alta -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="puesto">Puesto *</label>
+                            <select id="puesto" name="puesto" required>
+                                <option value="cocinero"         {% if empleado[3] == 'cocinero' %}selected{% endif %}>Cocinero</option>
+                                <option value="docente"          {% if empleado[3] == 'docente' %}selected{% endif %}>Docente</option>
+                                <option value="apoyo"            {% if empleado[3] == 'apoyo' %}selected{% endif %}>Apoyo</option>
+                                <option value="alumno_cocina"    {% if empleado[3] == 'alumno_cocina' %}selected{% endif %}>Alumno Cocina</option>
+                                <option value="alumno_dietetica" {% if empleado[3] == 'alumno_dietetica' %}selected{% endif %}>Alumno Dietética</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha_alta">Fecha de alta</label>
+                            <input type="date" id="fecha_alta" name="fecha_alta"
+                                   value="{{ empleado[6].strftime('%Y-%m-%d') if empleado[6] else '' }}">
+                        </div>
+                    </div>
+
+                    <!-- Teléfono y Email -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telefono">Teléfono</label>
+                            <input type="tel" id="telefono" name="telefono"
+                                   value="{{ empleado[4] if empleado[4] else '' }}"
+                                   placeholder="Ej: 612345678">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email"
+                                   value="{{ empleado[5] if empleado[5] else '' }}"
+                                   placeholder="nombre@email.com">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Acciones del formulario -->
+                <div class="form-actions">
+                    <a href="{{ url_for('empleados') }}" class="btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn-primary">Guardar cambios</button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- ── CARD 2: CONTRATO VIGENTE ── -->
+        {# El contrato activo más reciente viene en empleado[8..14].
+           contratos_empleado contiene el historial completo. #}
+        {% set contrato_activo = contratos_empleado | selectattr(7) | first if contratos_empleado else none %}
+        {# Usamos el primer contrato del historial (ya ordenado activo DESC, fecha DESC) #}
+        {% set c = contratos_empleado[0] if contratos_empleado else none %}
+        {# c: (0=id_contrato, 1=tipo, 2=fecha_inicio, 3=fecha_fin,
+               4=horas_semanales, 5=salario_bruto, 6=salario_neto, 7=activo) #}
+
+        <div class="card" style="margin-top:20px;">
+            <form method="POST" action="{{ url_for('editar_empleado', id_empleado=empleado[0]) }}">
+                <!-- Campos del empleado ocultos para que el POST también los guarde -->
+                <input type="hidden" name="nombre"      value="{{ empleado[1] }}">
+                <input type="hidden" name="apellidos"   value="{{ empleado[2] if empleado[2] else '' }}">
+                <input type="hidden" name="puesto"      value="{{ empleado[3] }}">
+                <input type="hidden" name="telefono"    value="{{ empleado[4] if empleado[4] else '' }}">
+                <input type="hidden" name="email"       value="{{ empleado[5] if empleado[5] else '' }}">
+                <input type="hidden" name="fecha_alta"  value="{{ empleado[6].strftime('%Y-%m-%d') if empleado[6] else '' }}">
+                {% if c %}
+                <input type="hidden" name="id_contrato" value="{{ c[0] }}">
+                {% endif %}
+
+                <div class="section-header">
+                    <div>
+                        <h2>Contrato vigente</h2>
+                        <p>Datos laborales y económicos del contrato activo</p>
+                    </div>
+                    {% if c and c[7] %}
+                    <span class="badge" style="background:#d1fae5; color:#065f46;">Activo</span>
+                    {% elif c %}
+                    <span class="badge" style="background:#fee2e2; color:#991b1b;">Caducado</span>
+                    {% else %}
+                    <span class="badge" style="background:#f3f4f6; color:#6b7280;">Sin contrato</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-container">
+
+                    <!-- Tipo de contrato -->
+                    <div class="form-group">
+                        <label for="tipo_contrato">Tipo de contrato</label>
+                        <select id="tipo_contrato" name="tipo_contrato">
+                            <option value="">— Sin contrato —</option>
+                            {% set tipos = [
+                                'Indefinido a tiempo completo',
+                                'Indefinido a tiempo parcial',
+                                'Temporal a tiempo completo',
+                                'Temporal a tiempo parcial',
+                                'Convenio de prácticas',
+                                'Obra y servicio'
+                            ] %}
+                            {% for t in tipos %}
+                            <option value="{{ t }}" {% if c and c[1] == t %}selected{% endif %}>{{ t }}</option>
+                            {% endfor %}
+                            {# Si el tipo actual no está en la lista estándar, añadirlo #}
+                            {% if c and c[1] not in tipos %}
+                            <option value="{{ c[1] }}" selected>{{ c[1] }}</option>
+                            {% endif %}
+                        </select>
+                    </div> <br>
+
+                    <!-- Fechas -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fecha_inicio">Fecha de inicio</label>
+                            <input type="date" id="fecha_inicio" name="fecha_inicio"
+                                   value="{{ c[2].strftime('%Y-%m-%d') if c and c[2] else '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha_fin">
+                                Fecha de fin
+                                <span style="font-size:11px; color:#8DA9C4; font-weight:400;">— dejar vacío si es indefinido</span>
+                            </label>
+                            <input type="date" id="fecha_fin" name="fecha_fin"
+                                   value="{{ c[3].strftime('%Y-%m-%d') if c and c[3] else '' }}">
+                        </div>
+                    </div>
+
+                    <!-- Horas y salarios -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="horas_semanales">Horas semanales</label>
+                            <input type="number" id="horas_semanales" name="horas_semanales"
+                                   step="0.5" min="0" max="60"
+                                   value="{{ c[4] if c and c[4] is not none else '' }}"
+                                   placeholder="Ej: 37.5">
+                        </div>
+                        <div class="form-group">
+                            <!-- spacer -->
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="salario_bruto_anual">Salario bruto anual (€)</label>
+                            <input type="number" id="salario_bruto_anual" name="salario_bruto_anual"
+                                   step="0.01" min="0"
+                                   value="{{ c[5] if c and c[5] is not none else '' }}"
+                                   placeholder="Ej: 32000">
+                        </div>
+                        <div class="form-group">
+                            <label for="salario_neto">Salario neto anual (€)</label>
+                            <input type="number" id="salario_neto" name="salario_neto"
+                                   step="0.01" min="0"
+                                   value="{{ c[6] if c and c[6] is not none else '' }}"
+                                   placeholder="Ej: 23200">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Acciones -->
+                <div class="form-actions" style="margin-top:24px;">
+                    <a href="{{ url_for('empleados') }}" class="btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn-primary">
+                        {% if c %}Guardar contrato{% else %}Crear contrato{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
