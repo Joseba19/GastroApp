@@ -1,4 +1,4 @@
-# Importamos pipeline de transformers
+# Importamos pipeline de transformers.
 from transformers import pipeline
 # Cargamos el modelo de HuggingFace
 pipe = pipeline("text-generation", model="Qwen/Qwen2.5-7B-Instruct")
