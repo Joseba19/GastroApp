@@ -9,7 +9,7 @@ PASS = "1234"
 
 def get_db():
     conn = mysql.connector.connect(
-        host="localhost",
+        host="nas.latorreg.es",
         user="root",
         password="7365",
         database="gastrolab"
@@ -23,18 +23,30 @@ def inicio():
 @app.route("/nosotros")
 def nosotros():
     return render_template("nosotros.html")
-#Los metodos de login y los request json, usamos la ia ya que no conseguiamos que funcionase del todo
+
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
 
-    if username == USER and password == PASS:
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT nombre, password_hash
+        FROM usuarios
+        WHERE nombre = %s AND activo = 1
+    """, (username,))
+    
+    usuario = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if usuario and usuario["password_hash"] == password:
         return jsonify({"success": True})
     else:
         return jsonify({"success": False, "error": "Usuario o contraseña incorrectos"})
-
 @app.route("/recetas")
 def recetas():
     conn = get_db()
@@ -81,7 +93,7 @@ def recetas():
             "descripcion": r["descripcion"] or "",
             "tiempo": r["tiempo_preparacion"] or "",
             "dificultad": r["dificultad"] or "",
-            #Hemos usado la ia para la ayuda del color random en tarjetas
+            
             "imagen":  "",
             "ingredientes": lista_ingredientes,
             "pasos": lista_pasos
