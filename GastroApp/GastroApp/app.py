@@ -9,9 +9,9 @@ PASS = "1234"
 
 def get_db():
     conn = mysql.connector.connect(
-        host="localhost",
+        host="nas.latorreg.es",
         user="root",
-        password="Passw0rd",
+        password="7365",
         database="gastrolab"
     )
     return conn
@@ -46,7 +46,6 @@ def recetas():
     """)
     recetas = cursor.fetchall()
 
-    colores = ["FF6B6B", "4ECDC4", "45B7D1", "96CEB4", "FFEAA7", "DDA0DD", "98D8C8", "F8B500", "6C5B7B", "C06C84"]
 
     resultado = []
     for r in recetas:
@@ -74,7 +73,7 @@ def recetas():
         for paso in pasos:
             lista_pasos.append(paso["descripcion"])
 
-        color = random.choice(colores)
+        
 
         resultado.append({
             "id": r["id_receta"],
@@ -83,7 +82,7 @@ def recetas():
             "tiempo": r["tiempo_preparacion"] or "",
             "dificultad": r["dificultad"] or "",
             #Hemos usado la ia para la ayuda del color random en tarjetas
-            "imagen": "https://placehold.co/400x300/" + color + "/FFF?text=" + r["nombre"].replace(" ", "+"),
+            "imagen":  "",
             "ingredientes": lista_ingredientes,
             "pasos": lista_pasos
         })
