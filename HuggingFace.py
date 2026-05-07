@@ -42,5 +42,4 @@ def recomendar_receta():
     # Generamos respuesta con la IA
     respuesta = pipe(prompt, max_new_tokens=200)
     # Mostramos la respuesta
-    print("\nRecomendación:\n")
     print(respuesta[0]["generated_text"])
