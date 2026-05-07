@@ -9,7 +9,7 @@ PASS = "1234"
 
 def get_db():
     conn = mysql.connector.connect(
-        host="nas.latorreg.es",
+        host="localhost",
         user="root",
         password="7365",
         database="gastrolab"

@@ -99,7 +99,7 @@ function mostrar(lista) {
 
         var tarjeta = document.createElement("div");
         tarjeta.className = "tarjeta-receta";
-tarjeta.innerHTML = '<div class="tarjeta-imagen"><img src="/static/img/receta' + r.id + '.png" alt=""></div>';        tarjeta.innerHTML += '<h3>' + r.nombre + '</h3>';
+        tarjeta.innerHTML = '<div class="tarjeta-imagen"><img src="/static/img/recetas/receta' + r.id + '.jpg" alt=""></div>';        tarjeta.innerHTML += '<h3>' + r.nombre + '</h3>';
         tarjeta.onclick = (function(receta) {
             return function() { abrirModal(receta); };
         })(r);
@@ -121,7 +121,7 @@ function filtrar() {
 
 function abrirModal(r) {
     document.getElementById("modal-receta").style.display = "flex";
-    document.getElementById("img-receta").src = r.imagen;
+    document.getElementById("img-receta").src = '/static/img/recetas/receta' + r.id + '.jpg';
     document.getElementById("titulo-receta").innerText = r.nombre;
     document.getElementById("desc-receta").innerText = r.descripcion || "";
     document.getElementById("tiempo-receta").innerText = r.tiempo || "?";
