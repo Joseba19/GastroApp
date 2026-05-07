@@ -4,7 +4,7 @@ from transformers import pipeline
 pipe = pipeline("text-generation", model="Qwen/Qwen2.5-7B-Instruct")
 
 
-# FUNCIÓN: recomendar receta
+# Función: recomendar receta
 
 def recomendar_receta(): 
     # Pedimos al usuario las condiciones
@@ -24,7 +24,7 @@ def recomendar_receta():
     print(respuesta[0]["generated_text"])
 
 
-# FUNCIÓN: obtener ingredientes
+# Función: obtener ingredientes
 def obtener_ingredientes():
     print("\n--- INGREDIENTES DE UNA RECETA ---")
     
@@ -43,7 +43,7 @@ def obtener_ingredientes():
     print("\nIngredientes:\n")
     print(respuesta[0]["generated_text"])
 
-# FUNCIÓN: menú principal
+# Función: menú principal
 def menu():
     while True:
         print("1. Recomendar receta")
