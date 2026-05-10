@@ -54,20 +54,20 @@ La base de datos, denominada **Gastrolab**, unifica el recetario, la informació
 GastroApp/
 ├── GastroApp/                    # Aplicación web pública
 │   ├── static/
-│   │   ├── img/                  # (Mikel V.)
-│   │   └── style.css             # (Jon M.)
+│   │   ├── img/                  # Mikel V.
+│   │   └── style.css             # Jon M.
 │   ├── templates/
-│   │   ├── index.html            # (Jon M.)
-│   │   └── nosotros.html         # (Mikel V.)
-│   ├── app.py                    # (Jon M.)
-│   ├── test.py                   # (Jon M.)
+│   │   ├── index.html            # Jon M.
+│   │   └── nosotros.html         # Mikel V.
+│   ├── app.py                    # Jon M.
+│   ├── test.py                   # Jon M.
 |
 ├── GastroManagment/              # Panel de administración
-│   ├── static/                   # (Aaron B.)
-│   ├── templates/                # (Joseba L.)
-│   ├── app.py                    # (Aaron B.)
-│   ├── db.py                     # (Joseba L.)
-│   ├── README.md                 # 
+│   ├── static/                   # Aaron B.
+│   ├── templates/                # Joseba L.
+│   ├── app.py                    # Aaron B.
+│   ├── db.py                     # Joseba L.
+│   ├── README.md                 
 |
 ├── gastrolab.sql                 
 └── RolesUsuarios.sql             
