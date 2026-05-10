@@ -75,6 +75,21 @@ GastroApp/
 
 ---
 
+## 🤖 Uso de IA
+
+Durante el desarrollo de GastroApp se ha hecho un uso responsable de herramientas de inteligencia artificial, siempre como apoyo al trabajo del equipo y nunca como sustituto del mismo.
+
+El uso de la IA se ha concentrado principalmente en estas áreas:
+
+- **Resolución de errores:** en situaciones donde un bug resultaba difícil de localizar, se recurrió a la IA para obtener una segunda opinión o acelerar el diagnóstico, complementando el proceso habitual de depuración.
+- **Estilo visual de GastroManagment:** se utilizo para hacer el primero diseño del panel de administración, a partir de ahi, los colores, iconos y el resto de elecciones estan hechas a mano.
+- **Funciones necesarias:** se ha usado para hacer tanto la paginacion del panel de administracion, puesto que sin eso, era inviable hacer el panel, y para el
+hashear las contraseñas del login.
+
+Es importante destacar que **la IA no ha generado más del 20% del código total del proyecto**. La lógica de negocio, la arquitectura de la aplicación, las consultas a la base de datos y la mayoria de funciones estan hechas a mano.
+
+---
+
 ## ⚙️ Instalación y configuración
 
 ### 1. Clonar el repositorio
